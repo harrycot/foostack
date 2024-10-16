@@ -1,0 +1,90 @@
+:root {
+    --header-height: 40px;
+    --footer-height: 24px;
+    --asides-width: 200px;
+}
+
+body {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    background: tomato;
+
+    & header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-height);
+        background: firebrick;
+    
+        & aside.left-header { left: 0; }
+        & aside.right-header { right: 0; }
+        & aside.left-header, & aside.right-header {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.2);
+            top: 0;
+            height: var(--header-height);
+            width: var(--asides-width);
+        }
+        & section.main-header {
+            position: absolute;
+            top: 0 ;
+            left: var(--asides-width);
+            right: var(--asides-width);
+            height: var(--header-height);
+            background: rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    & section.main-body {
+        position: absolute;
+        top: var(--header-height);
+        bottom: var(--footer-height);
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    & aside.left-panel { left: 0; }
+    & aside.right-panel { right: 0; }
+    & aside.left-panel, & aside.right-panel {
+        display: none;
+        position: absolute;
+        background: rgba(0, 0, 0, 0.2);
+        top: var(--header-height);
+        bottom: var(--footer-height);
+        width: var(--asides-width);
+    }
+
+    & footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: var(--footer-height);
+        background: firebrick;
+    }
+
+
+    /* DYNAMIC SPECIFICS */
+    &.left-panel-open {
+        & aside.left-panel {
+            display: block;
+        }
+        & section.main-body {
+            left: var(--asides-width);
+        }
+    }
+    &.right-panel-open {
+        & aside.right-panel {
+            display: block;
+        }
+        & section.main-body {
+            right: var(--asides-width);
+        }
+    }
+}
