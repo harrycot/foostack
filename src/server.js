@@ -32,7 +32,7 @@ exports.app = require('express')();
 exports.http = require('http').Server(this.app);
 exports.io = require('socket.io')(this.http);
 
-exports.ioc = this.is_production ? [{ server: 'localhost:8080' }, { server: 'localhost:8081' }, { server: 'localhost:8082' }] : [];
+exports.ioc = this.is_production ? [] : [{ server: 'localhost:8080' }, { server: 'localhost:8081' }, { server: 'localhost:8082' }];
 exports.ios = [];
 
 if (!this.db.s2s.has('peers').value()) {
