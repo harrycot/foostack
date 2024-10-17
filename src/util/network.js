@@ -44,13 +44,45 @@ exports.deserialize_handshake_s2s = (data) => {
 }
 
 exports.get_external_ipv4 = () => {
-    const os = require('os');
-    const ifaces = os.networkInterfaces();
+    const ifaces = require('os').networkInterfaces();
+    console.log(ifaces);
+    let address;
     for (const dev in ifaces) {
         const iface = ifaces[dev].filter((details) => {
             return details.family === 'IPv4' && details.internal === false;
         });
         if (iface.length > 0) address = iface[0].address;
         return address;
+    }
+}
+
+exports.dns_lookup = (domain) => {
+    require('dns').lookup(domain, (err, address, family) => {
+        //if (this.package_details.is_production) { console.log('address: %j family: IPv%s', address, family) };
+        //this.ioc.push({ server: address });
+    });
+}
+
+exports.is_port_available = (port, callback) => {
+    const server = require('net').createServer();
+    server.listen(port).on('error', (err) => {
+        if (err.code === 'EADDRINUSE') { callback(false) }
+    }).on('listening', () => { server.close(); callback(true) });
+}
+
+
+exports.get_port_to_use = (callback) => {
+    const { allowed_port_range } = require('../server').package_details;
+    for (let port = allowed_port_range.start; port <= allowed_port_range.end; port++) {
+        if (!require('../server').package_details.is_production){
+            require('../server').ioc.push({ server: `localhost:${port}` })
+        }
+        this.is_port_available(port, (_isavailable) => {
+            // IMPORTANT
+            // find something to really break the loop when: a port is available && require('../server').package_details.is_production
+            if (_isavailable) {
+                callback(port);
+            }
+        });
     }
 }
