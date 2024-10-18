@@ -8,9 +8,9 @@ exports.init_ios = () => {
         console.log("server: new connection s2s");
         const sns = get_ios_index(socket);
 
-        ios[sns].socket.on('handshake', (data) => {
+        ios[sns].socket.on('handshake', (serialized_data) => {
             console.log('server: handshake received');
-            on_hanshake_common(sns, data, true);
+            on_hanshake_common(sns, serialized_data, true);
         });
 
         ios[sns].socket.on('disconnect', () => {
@@ -48,7 +48,7 @@ const get_ios_index = (socket) => {
 }
 
 const init_ioc = (num) => {
-    const { serialize_handshake_s2s } = require('../server').util.network;
+    const { serialize_s2s } = require('../server').util.network;
     ioc[num].socket = require('socket.io-client')('http://' + ioc[num].server + '/s2s');
 
 
@@ -56,12 +56,12 @@ const init_ioc = (num) => {
         ioc[num].socket.s2s_server = ioc[num].server;
         console.log('client: connected s2s');
 
-        ioc[num].socket.emit("handshake", serialize_handshake_s2s());
+        ioc[num].socket.emit("handshake", serialize_s2s());
     });
 
-    ioc[num].socket.on('handshake ack', function (data) {
+    ioc[num].socket.on('handshake ack', function (serialized_data) {
         console.log('client: handshake ack received');
-        on_hanshake_common(num, data, false);
+        on_hanshake_common(num, serialized_data, false);
     });
 
     ioc[num].socket.on('disconnect', function () {
@@ -69,30 +69,32 @@ const init_ioc = (num) => {
     });
 }
 
-const on_hanshake_common = (num, data, send_ack) => {
+const on_hanshake_common = (num, serialized_data, send_ack) => {
 
-    const { serialize_handshake_s2s, deserialize_handshake_s2s } = require('../server').util.network;
+    const { serialize_s2s, deserialize_s2s } = require('../server').util.network;
 
-    const deserialized_hanshake_s2s = deserialize_handshake_s2s(data);
+    const deserialized_s2s = deserialize_s2s(serialized_data);
 
-    if (!Object.keys(deserialized_hanshake_s2s.err).length) {
+    if (!Object.keys(deserialized_s2s.err).length) {
 
-        update_db_peers_common(deserialized_hanshake_s2s);
+        update_db_peers_common(deserialized_s2s);
 
         if (send_ack) {
-            ios[num].socket.emit("handshake ack", serialize_handshake_s2s());
+            // ioS
+            ios[num].socket.emit("handshake ack", serialize_s2s());
 
-            ios[num].socket.s2s_uuid = deserialized_hanshake_s2s.uuid;
-            ios[num].socket.s2s_ecdh = deserialized_hanshake_s2s.ecdh;
-            ios[num].socket.s2s_ecdsa = deserialized_hanshake_s2s.ecdsa;
+            ios[num].socket.s2s_uuid = deserialized_s2s.uuid;
+            ios[num].socket.s2s_ecdh = deserialized_s2s.ecdh;
+            ios[num].socket.s2s_ecdsa = deserialized_s2s.ecdsa;
         } else {
-            ioc[num].socket.s2s_uuid = deserialized_hanshake_s2s.uuid;
-            ioc[num].socket.s2s_ecdh = deserialized_hanshake_s2s.ecdh;
-            ioc[num].socket.s2s_ecdsa = deserialized_hanshake_s2s.ecdsa;
+            // ioC
+            ioc[num].socket.s2s_uuid = deserialized_s2s.uuid;
+            ioc[num].socket.s2s_ecdh = deserialized_s2s.ecdh;
+            ioc[num].socket.s2s_ecdsa = deserialized_s2s.ecdsa;
         }
     } else {
-        // HMAC
-        console.log(deserialized_hanshake_s2s.err);
+        // HMAC ECDSA
+        console.log(deserialized_s2s.err);
         console.log('WARNING do something..');
     }
 }
