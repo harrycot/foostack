@@ -10,6 +10,13 @@ exports.package_details = {
     }
 }
 
+process.stdin.setEncoding('utf8');
+process.stdin.on("data", (data) => {
+    data = data.toString();
+    console.log(data);
+    // start working on db sync across nodes here
+})
+
 const path = require('path');
 const fs = require('fs');
 const DBFileSync = require('lowdb/adapters/FileSync');

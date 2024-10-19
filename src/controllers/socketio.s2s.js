@@ -5,24 +5,33 @@ const { io, ioc, ios } = require('../server');
  */
 exports.init_ios = () => {
     io.of('s2s').on('connection', async (socket) => {
-        console.log("server: new connection s2s");
         const sns = get_ios_index(socket);
+        console.log(`ioserver id ${ios[sns].socket.client.conn.id}: new connection s2s`);
 
-        ios[sns].socket.on('handshake', (serialized_data) => {
-            console.log('server: handshake received');
-            on_hanshake_common(sns, serialized_data, true);
+        for (sc of ioc) {
+            //console.log(ios[sns].socket.handshake.headers.host); console.log(sc.server);
+            if ((ios[sns].socket.handshake.headers.host).includes(sc.server)){ // !!host check can fail attention
+                if (sc.socket.io.engine.id === ios[sns].socket.client.conn.id) {
+                    // disconnect client
+                    console.log(`ioserver id ${ios[sns].socket.client.conn.id}: self connection detected`);
+                    ios[sns].socket.disconnect();
+                }
+            }
+        }
+
+        ios[sns].socket.on('data', (serialized_data) => {
+            console.log(`ioserver id ${ios[sns].socket.client.conn.id}: data received`);
+            on_data_common(sns, serialized_data, true);
         });
 
         ios[sns].socket.on('disconnect', () => {
-            console.log('server: client disconnected');
+            console.log(`ioserver id ${ios[sns].socket.client.conn.id}: client disconnected`);
         });
     });
 
+    // init connections as client for each server in require('../server).ioc
     for (const snc in ioc) {
-        const { app } = require('../server');
-        if (!ioc[snc].server.includes(app.get('port'))) {
-            init_ioc(snc);
-        }
+        init_ioc(snc);
     }
 }
 
@@ -50,51 +59,67 @@ const get_ios_index = (socket) => {
 const init_ioc = (num) => {
     const { serialize_s2s } = require('../server').util.network;
     ioc[num].socket = require('socket.io-client')('http://' + ioc[num].server + '/s2s');
-
+    
 
     ioc[num].socket.on('connect', function () {
         ioc[num].socket.s2s_server = ioc[num].server;
-        console.log('client: connected s2s');
+        console.log(`ioclient id ${ioc[num].socket.io.engine.id}: connected s2s`);
 
-        ioc[num].socket.emit("handshake", serialize_s2s());
+        ioc[num].socket.emit("data", serialize_s2s()); // calling serialize_s2s() without giving data == it's an handshake
     });
 
-    ioc[num].socket.on('handshake ack', function (serialized_data) {
-        console.log('client: handshake ack received');
-        on_hanshake_common(num, serialized_data, false);
+    ioc[num].socket.on('data ack', function (serialized_data) {
+        console.log(`ioclient id ${ioc[num].socket.io.engine.id}: data ack received`);
+        on_data_common(num, serialized_data, false);
     });
 
     ioc[num].socket.on('disconnect', function () {
-        console.log('client: server disconnected');
+        console.log(`ioclient id ${ioc[num].socket.io.engine.id}: server disconnected`);
     });
 }
 
-const on_hanshake_common = (num, serialized_data, send_ack) => {
-
+const on_data_common = (num, serialized_data, send_ack) => {
+    // send_ack value: client is false ; server is true
     const { serialize_s2s, deserialize_s2s } = require('../server').util.network;
 
-    const deserialized_s2s = deserialize_s2s(serialized_data);
+    const _deserialized_s2s = deserialize_s2s(serialized_data);
 
-    if (!Object.keys(deserialized_s2s.err).length) {
-
-        update_db_peers_common(deserialized_s2s);
-
-        if (send_ack) {
-            // ioS
-            ios[num].socket.emit("handshake ack", serialize_s2s());
-
-            ios[num].socket.s2s_uuid = deserialized_s2s.uuid;
-            ios[num].socket.s2s_ecdh = deserialized_s2s.ecdh;
-            ios[num].socket.s2s_ecdsa = deserialized_s2s.ecdsa;
-        } else {
-            // ioC
-            ioc[num].socket.s2s_uuid = deserialized_s2s.uuid;
-            ioc[num].socket.s2s_ecdh = deserialized_s2s.ecdh;
-            ioc[num].socket.s2s_ecdsa = deserialized_s2s.ecdsa;
+    if (!Object.keys(_deserialized_s2s.err).length) { // if no error
+        if (!_deserialized_s2s.data){ // handshake
+            console.log(`${send_ack ? `ioserver id ${ios[num].socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was an handshake`);
+            update_db_peers_common(_deserialized_s2s);
+            if (send_ack) {
+                // ioS
+                ios[num].socket.emit("data ack", serialize_s2s());
+                ios[num].socket.s2s_uuid = _deserialized_s2s.uuid;
+                ios[num].socket.s2s_ecdh = _deserialized_s2s.ecdh;
+                ios[num].socket.s2s_ecdsa = _deserialized_s2s.ecdsa;
+            } else {
+                // ioC
+                ioc[num].socket.s2s_uuid = _deserialized_s2s.uuid;
+                ioc[num].socket.s2s_ecdh = _deserialized_s2s.ecdh;
+                ioc[num].socket.s2s_ecdsa = _deserialized_s2s.ecdsa;
+            }
+        } else { // data
+            console.log(`${send_ack ? `ioserver id ${ios[num].socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was data`);
+            //update_db_peers_common(_deserialized_s2s);
+            if (send_ack) {
+                // ioS
+                ios[num].socket.emit("data ack", serialize_s2s(_deserialized_s2s.data));
+                //ios[num].socket.s2s_uuid = _deserialized_s2s.uuid;
+                //ios[num].socket.s2s_ecdh = _deserialized_s2s.ecdh;
+                //ios[num].socket.s2s_ecdsa = _deserialized_s2s.ecdsa;
+            } else {
+                // ioC
+                //ioc[num].socket.s2s_uuid = _deserialized_s2s.uuid;
+                //ioc[num].socket.s2s_ecdh = _deserialized_s2s.ecdh;
+                //ioc[num].socket.s2s_ecdsa = _deserialized_s2s.ecdsa;
+            }
         }
+        
     } else {
         // HMAC ECDSA
-        console.log(deserialized_s2s.err);
+        console.log(_deserialized_s2s.err);
         console.log('WARNING do something..');
     }
 }
