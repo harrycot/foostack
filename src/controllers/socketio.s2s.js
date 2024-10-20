@@ -5,27 +5,27 @@ const { io, ioc, ios } = require('../server');
  */
 exports.init_ios = () => {
     io.of('s2s').on('connection', async (socket) => {
-        const sns = get_ios_index(socket);
-        console.log(`ioserver id ${ios[sns].socket.client.conn.id}: new connection s2s`);
+        const _num = get_ios_index(socket);
+        console.log(`ioserver id ${ios[_num].socket.client.conn.id}: new connection s2s`);
 
         for (sc of ioc) {
-            //console.log(ios[sns].socket.handshake.headers.host); console.log(sc.server);
-            if ((ios[sns].socket.handshake.headers.host).includes(sc.server)){ // !!host check can fail attention
-                if (sc.socket.io.engine.id === ios[sns].socket.client.conn.id) {
+            //console.log(ios[_num].socket.handshake.headers.host); console.log(sc.server);
+            if ((ios[_num].socket.handshake.headers.host).includes(sc.server)){ // !!host check can fail attention
+                if (sc.socket.io.engine.id === ios[_num].socket.client.conn.id) {
                     // disconnect client
-                    console.log(`ioserver id ${ios[sns].socket.client.conn.id}: self connection detected`);
-                    ios[sns].socket.disconnect();
+                    console.log(`ioserver id ${ios[_num].socket.client.conn.id}: self connection detected`);
+                    ios[_num].socket.disconnect();
                 }
             }
         }
 
-        ios[sns].socket.on('data', (serialized_data) => {
-            console.log(`ioserver id ${ios[sns].socket.client.conn.id}: data received`);
-            on_data_common(sns, serialized_data, true);
+        ios[_num].socket.on('data', (serialized_data) => {
+            console.log(`ioserver id ${ios[_num].socket.client.conn.id}: data received`);
+            on_data_common(_num, serialized_data, true);
         });
 
-        ios[sns].socket.on('disconnect', () => {
-            console.log(`ioserver id ${ios[sns].socket.client.conn.id}: client disconnected`);
+        ios[_num].socket.on('disconnect', () => {
+            console.log(`ioserver id ${ios[_num].socket.client.conn.id}: client disconnected`);
         });
     });
 
@@ -36,24 +36,26 @@ exports.init_ios = () => {
 }
 
 const get_ios_index = (socket) => {
-    let sns;
-    let is_new_client = true;
+    let _index;
+    let _is_new_client = true;
 
+    // console.log(socket.handshake);
+    // TODO: check if socket.handshake.address return the good client address
     for (const num in ios) {
         if (ios[num].client === socket.handshake.address) {
             ios[num].socket = socket;
-            is_new_client = false;
-            sns = num;
+            _is_new_client = false;
+            _index = num;
         }
     }
-    if (is_new_client) {
-        sns = ios.length;
+    if (_is_new_client) {
+        _index = ios.length;
         ios[ios.length] = {
             client: socket.handshake.address,
             socket: socket
         }
     }
-    return sns;
+    return _index;
 }
 
 const init_ioc = (num) => {

@@ -39,24 +39,29 @@ exports.deserialize_s2s = (serialized_data) => {
         uuid_signature: Buffer.from(_table[3], 'base64').toString(),
         hmac: _table[4], err: {}
     };
+    //console.log(_json_data);
 
     // perform hmac and ecdsa check
     if (hmac.get.base64(_hmac_to_compute) !== _json_data.hmac) {
         _json_data.err.hmac = "hmac does not match";
     }
     if (_json_data.data) {
-        if (ecdsa.verify(_table[0], ecdsa.build.public(_json_data.ecdsa), _json_data.data_signature)) {
+        const { s2s: db } = require('../server').db;
+        const _ecdsa = db.get('peers').find({ uuid: _json_data.uuid }).value().ecdsa;
+
+        if (ecdsa.verify(_json_data.data, ecdsa.build.public(_ecdsa), _json_data.data_signature)) {
             _json_data.err.ecdsa_data = "data ecdsa signature error";
         }
-        if (ecdsa.verify(_table[2], ecdsa.build.public(_json_data.ecdsa), _json_data.uuid_signature)) {
+        if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_ecdsa), _json_data.uuid_signature)) {
             _json_data.err.ecdsa_uuid = "uuid ecdsa signature error";
         }
+        console.log(`DATA received: ${_json_data.data}`);
     } else {
-        if (ecdsa.verify(_table[0], ecdsa.build.public(_json_data.ecdsa), _json_data.uuid_signature)) {
+        if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_json_data.ecdsa), _json_data.uuid_signature)) {
             _json_data.err.ecdsa_uuid = "uuid ecdsa signature error";
         }
     }
-
+    
     return _json_data;
 }
 

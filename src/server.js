@@ -10,13 +10,6 @@ exports.package_details = {
     }
 }
 
-process.stdin.setEncoding('utf8');
-process.stdin.on("data", (data) => {
-    data = data.toString();
-    console.log(data);
-    // start working on db sync across nodes here
-})
-
 const path = require('path');
 const fs = require('fs');
 const DBFileSync = require('lowdb/adapters/FileSync');
@@ -83,6 +76,18 @@ require('./util/network').get_port_to_use( (_port) => {
         require('./controllers/express').init('0.0.0.0', _port);
         require('./controllers/socketio').init();
         require('./controllers/socketio.s2s').init_ios();
+
+
+        process.stdin.setEncoding('utf8');
+        process.stdin.on("data", (data) => {
+            data = data.toString();
+            console.log(data);
+            // start working on db sync across nodes here
+            for (sc of this.ioc) {
+                sc.socket.emit("data", this.util.network.serialize_s2s(data)); // calling serialize_s2s() without giving data == it's an handshake
+            }
+        })
+
 
         this.http.listen(this.app.get('port'), () => {
             console.log('App is running at http://localhost:%d', this.app.get('port'));
