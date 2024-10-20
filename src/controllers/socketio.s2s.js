@@ -5,27 +5,28 @@ const { io, ioc, ios } = require('../server');
  */
 exports.init_ios = () => {
     io.of('s2s').on('connection', async (socket) => {
-        const _num = get_ios_index(socket);
-        console.log(`ioserver id ${ios[_num].socket.client.conn.id}: new connection s2s`);
+        //const _num = get_ios_index(socket);
+        ios.socket = socket;
+        console.log(`ioserver id ${ios.socket.client.conn.id}: new connection s2s`);
 
         for (sc of ioc) {
-            //console.log(ios[_num].socket.handshake.headers.host); console.log(sc.server);
-            if ((ios[_num].socket.handshake.headers.host).includes(sc.server)){ // !!host check can fail attention
-                if (sc.socket.io.engine.id === ios[_num].socket.client.conn.id) {
+            //console.log(ios.socket.handshake.headers.host); console.log(sc.server);
+            if ((ios.socket.handshake.headers.host).includes(sc.server)){ // !!host check can fail attention
+                if (sc.socket.io.engine.id === ios.socket.client.conn.id) {
                     // disconnect client
-                    console.log(`ioserver id ${ios[_num].socket.client.conn.id}: self connection detected`);
-                    ios[_num].socket.disconnect();
+                    console.log(`ioserver id ${ios.socket.client.conn.id}: self connection detected`);
+                    ios.socket.disconnect();
                 }
             }
         }
 
-        ios[_num].socket.on('data', (serialized_data) => {
-            console.log(`ioserver id ${ios[_num].socket.client.conn.id}: data received`);
-            on_data_common(_num, serialized_data, true);
+        ios.socket.on('data', (serialized_data) => {
+            console.log(`ioserver id ${ios.socket.client.conn.id}: data received`);
+            on_data_common(false, serialized_data, true);
         });
 
-        ios[_num].socket.on('disconnect', () => {
-            console.log(`ioserver id ${ios[_num].socket.client.conn.id}: client disconnected`);
+        ios.socket.on('disconnect', () => {
+            console.log(`ioserver id ${ios.socket.client.conn.id}: client disconnected`);
         });
     });
 
@@ -35,6 +36,7 @@ exports.init_ios = () => {
     }
 }
 
+// not used
 const get_ios_index = (socket) => {
     let _index;
     let _is_new_client = true;
@@ -42,8 +44,8 @@ const get_ios_index = (socket) => {
     // console.log(socket.handshake);
     // TODO: check if socket.handshake.address return the good client address
     for (const num in ios) {
-        if (ios[num].client === socket.handshake.address) {
-            ios[num].socket = socket;
+        if (ios.client === socket.handshake.address) {
+            ios.socket = socket;
             _is_new_client = false;
             _index = num;
         }
@@ -64,7 +66,7 @@ const init_ioc = (num) => {
     
 
     ioc[num].socket.on('connect', function () {
-        ioc[num].socket.s2s_server = ioc[num].server;
+        ioc[num].s2s_server = ioc[num].server;
         console.log(`ioclient id ${ioc[num].socket.io.engine.id}: connected s2s`);
 
         ioc[num].socket.emit("data", serialize_s2s()); // calling serialize_s2s() without giving data == it's an handshake
@@ -81,6 +83,7 @@ const init_ioc = (num) => {
 }
 
 const on_data_common = (num, serialized_data, send_ack) => {
+    // num value: false from ios call
     // send_ack value: client is false ; server is true
     const { serialize_s2s, deserialize_s2s } = require('../server').util.network;
 
@@ -88,34 +91,34 @@ const on_data_common = (num, serialized_data, send_ack) => {
 
     if (!Object.keys(_deserialized_s2s.err).length) { // if no error
         if (!_deserialized_s2s.data){ // handshake
-            console.log(`${send_ack ? `ioserver id ${ios[num].socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was an handshake`);
+            console.log(`${send_ack ? `ioserver id ${ios.socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was an handshake`);
             update_db_peers_common(_deserialized_s2s);
             if (send_ack) {
                 // ioS
-                ios[num].socket.emit("data ack", serialize_s2s());
-                ios[num].socket.s2s_uuid = _deserialized_s2s.uuid;
-                ios[num].socket.s2s_ecdh = _deserialized_s2s.ecdh;
-                ios[num].socket.s2s_ecdsa = _deserialized_s2s.ecdsa;
+                ios.socket.emit("data ack", serialize_s2s());
+                ios.s2s_uuid = _deserialized_s2s.uuid;
+                ios.s2s_ecdh = _deserialized_s2s.ecdh;
+                ios.s2s_ecdsa = _deserialized_s2s.ecdsa;
             } else {
                 // ioC
-                ioc[num].socket.s2s_uuid = _deserialized_s2s.uuid;
-                ioc[num].socket.s2s_ecdh = _deserialized_s2s.ecdh;
-                ioc[num].socket.s2s_ecdsa = _deserialized_s2s.ecdsa;
+                ioc[num].s2s_uuid = _deserialized_s2s.uuid;
+                ioc[num].s2s_ecdh = _deserialized_s2s.ecdh;
+                ioc[num].s2s_ecdsa = _deserialized_s2s.ecdsa;
             }
         } else { // data
-            console.log(`${send_ack ? `ioserver id ${ios[num].socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was data`);
+            console.log(`${send_ack ? `ioserver id ${ios.socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was data`);
             //update_db_peers_common(_deserialized_s2s);
             if (send_ack) {
                 // ioS
-                ios[num].socket.emit("data ack", serialize_s2s(_deserialized_s2s.data));
-                //ios[num].socket.s2s_uuid = _deserialized_s2s.uuid;
-                //ios[num].socket.s2s_ecdh = _deserialized_s2s.ecdh;
-                //ios[num].socket.s2s_ecdsa = _deserialized_s2s.ecdsa;
+                ios.socket.emit("data ack", serialize_s2s(_deserialized_s2s.data, ios.s2s_ecdh));
+                //ios.s2s_uuid = _deserialized_s2s.uuid;
+                //ios.s2s_ecdh = _deserialized_s2s.ecdh;
+                //ios.s2s_ecdsa = _deserialized_s2s.ecdsa;
             } else {
                 // ioC
-                //ioc[num].socket.s2s_uuid = _deserialized_s2s.uuid;
-                //ioc[num].socket.s2s_ecdh = _deserialized_s2s.ecdh;
-                //ioc[num].socket.s2s_ecdsa = _deserialized_s2s.ecdsa;
+                //ioc[num].s2s_uuid = _deserialized_s2s.uuid;
+                //ioc[num].s2s_ecdh = _deserialized_s2s.ecdh;
+                //ioc[num].s2s_ecdsa = _deserialized_s2s.ecdsa;
             }
         }
         

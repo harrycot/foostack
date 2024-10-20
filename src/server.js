@@ -27,8 +27,8 @@ exports.app = require('express')();
 exports.http = require('http').Server(this.app);
 exports.io = require('socket.io')(this.http);
 
+exports.ios = { client: '', socket: '', s2s_uuid: '', s2s_ecdh: '', s2s_ecdsa: '' };
 exports.ioc = this.package_details.is_production ? [{ server: 'iplist for prod'} ] : [];
-exports.ios = [];
 
 require('./util/network').get_port_to_use( (_port) => {
     if (!this.package_details.network_details.port) {
@@ -81,10 +81,12 @@ require('./util/network').get_port_to_use( (_port) => {
         process.stdin.setEncoding('utf8');
         process.stdin.on("data", (data) => {
             data = data.toString();
-            console.log(data);
+            console.log(`SENDING: ${data}`);
             // start working on db sync across nodes here
             for (sc of this.ioc) {
-                sc.socket.emit("data", this.util.network.serialize_s2s(data)); // calling serialize_s2s() without giving data == it's an handshake
+                if (sc.s2s_ecdh) {
+                    sc.socket.emit("data", this.util.network.serialize_s2s(data, sc.s2s_ecdh)); // calling serialize_s2s() without giving data == it's an handshake
+                }
             }
         })
 

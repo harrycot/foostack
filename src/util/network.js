@@ -1,17 +1,18 @@
 
-exports.serialize_s2s = (data) => {
+exports.serialize_s2s = (data, pub) => {
+    // pub is the ecdh pub of the destination
     const { uuid, ecdsa, ecdh, hmac } = require('../server').util.crypto;
+    
+    const _ecdsa_local_pub = ecdsa.local.get.public.string();
+    const _ecdh_local_pub = ecdh.local.get.public.string();
 
-    const _data = data ? Buffer.from(data).toString('base64') : '';
+    const _data = data ? Buffer.from(ecdh.encrypt(data, pub)).toString('base64') : '';
     const _data_signature = Buffer.from(ecdsa.sign(_data)).toString('base64');
     const _uuid = Buffer.from(uuid.get()).toString('base64');
     const _uuid_signature = Buffer.from(ecdsa.sign(_uuid)).toString('base64');
 
-    const _ecdsa = ecdsa.local.get.public.string();
-    const _ecdh = ecdh.local.get.public.string();
-
     // _prefinal is different if it's for handshake or data
-    const _prefinal = data ? [_data, _data_signature, _uuid, _uuid_signature].join(':') : [_uuid, _uuid_signature, _ecdsa, _ecdh].join(':');
+    const _prefinal = data ? [_data, _data_signature, _uuid, _uuid_signature].join(':') : [_uuid, _uuid_signature, _ecdsa_local_pub, _ecdh_local_pub].join(':');
     const _hmac = hmac.get.base64(_prefinal);
 
     const _final = [_prefinal, _hmac].join(':');
@@ -20,7 +21,7 @@ exports.serialize_s2s = (data) => {
 }
 
 exports.deserialize_s2s = (serialized_data) => {
-    const { hmac, ecdsa } = require('../server').util.crypto;
+    const { hmac, ecdsa, ecdh } = require('../server').util.crypto;
 
     const _table = Buffer.from(serialized_data, 'base64').toString().split(':');
     const _hmac_to_compute = [_table[0], _table[1], _table[2], _table[3]].join(':');
@@ -47,12 +48,15 @@ exports.deserialize_s2s = (serialized_data) => {
     }
     if (_json_data.data) {
         const { s2s: db } = require('../server').db;
-        const _ecdsa = db.get('peers').find({ uuid: _json_data.uuid }).value().ecdsa;
+        const _ecdsa_pub = db.get('peers').find({ uuid: _json_data.uuid }).value().ecdsa;
+        const _ecdh_pub = db.get('peers').find({ uuid: _json_data.uuid }).value().ecdh;
 
-        if (ecdsa.verify(_json_data.data, ecdsa.build.public(_ecdsa), _json_data.data_signature)) {
+        if (ecdsa.verify(_json_data.data, ecdsa.build.public(_ecdsa_pub), _json_data.data_signature)) {
             _json_data.err.ecdsa_data = "data ecdsa signature error";
+        } else {
+            _json_data.data = ecdh.decrypt(_json_data.data, _ecdh_pub);
         }
-        if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_ecdsa), _json_data.uuid_signature)) {
+        if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_ecdsa_pub), _json_data.uuid_signature)) {
             _json_data.err.ecdsa_uuid = "uuid ecdsa signature error";
         }
         console.log(`DATA received: ${_json_data.data}`);
