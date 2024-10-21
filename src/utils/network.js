@@ -47,9 +47,15 @@ exports.deserialize_s2s = (serialized_data) => {
         _json_data.err.hmac = "hmac does not match";
     }
     if (_json_data.data) {
+        let  _peer;
         const { s2s: db } = require('../server').db;
-        const _ecdsa_pub = db.get('peers').find({ uuid: _json_data.uuid }).value().ecdsa;
-        const _ecdh_pub = db.get('peers').find({ uuid: _json_data.uuid }).value().ecdh;
+        for (peer of require('../memory').server_data.peers) {
+            if (peer.uuid == _json_data.uuid) {
+                _peer = peer;
+            }
+        }
+        const _ecdsa_pub = _peer.ecdsa;
+        const _ecdh_pub = _peer.ecdh;
 
         if (ecdsa.verify(_json_data.data, ecdsa.build.public(_ecdsa_pub), _json_data.data_signature)) {
             _json_data.err.ecdsa_data = "data ecdsa signature error";

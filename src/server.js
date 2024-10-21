@@ -24,21 +24,17 @@ require('./utils/network').get_port_to_use( (_port) => {
         if (!fs.existsSync(path.join(cwd, `db/${_port}`))) { fs.mkdirSync(path.join(cwd, `db/${_port}`)) }
         this.db = {
             session: require('lowdb')(new DBFileSync(path.join(cwd, `db/${_port}/sessions.json`), { defaultValue: [] })),
-            local: require('lowdb')(new DBFileSync(path.join(cwd, `db/${_port}/local.json`))),
             s2s: require('lowdb')(new DBFileSync(path.join(cwd, `db/${_port}/s2s.json`)))
         }
         // db init
-        if (!this.db.s2s.has('peers').value()) {
-            this.db.s2s.set('peers', []).write();
+        if (!memory.server_data.uuid) {
+            memory.server_data.uuid = require('./utils/crypto').uuid.generate();
         }
-        if (!this.db.local.has('uuid').value()) {
-            this.db.local.set('uuid', require('./utils/crypto').uuid.generate()).write();
+        if (!memory.server_data.keys.ecdsa) {
+            memory.server_data.keys.ecdsa = require('./utils/crypto').ecdsa.generate();
         }
-        if (!this.db.local.has('keys.ecdsa').value()) {
-            require('./utils/crypto').ecdsa.generate();
-        }
-        if (!this.db.local.has('keys.ecdh').value()) {
-            require('./utils/crypto').ecdh.generate();
+        if (!memory.server_data.keys.ecdh) {
+            memory.server_data.keys.ecdh = require('./utils/crypto').ecdh.generate();
         }
         // END OF db init
 

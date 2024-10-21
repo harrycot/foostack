@@ -36,30 +36,6 @@ exports.init_ios = () => {
     }
 }
 
-// not used
-const get_ios_index = (socket) => {
-    let _index;
-    let _is_new_client = true;
-
-    // console.log(socket.handshake);
-    // TODO: check if socket.handshake.address return the good client address
-    for (const num in ios) {
-        if (ios.client === socket.handshake.address) {
-            ios.socket = socket;
-            _is_new_client = false;
-            _index = num;
-        }
-    }
-    if (_is_new_client) {
-        _index = ios.length;
-        ios[ios.length] = {
-            client: socket.handshake.address,
-            socket: socket
-        }
-    }
-    return _index;
-}
-
 const init_ioc = (num) => {
     const { serialize_s2s } = require('../utils/network');
     ioc[num].socket = require('socket.io-client')('http://' + ioc[num].server + '/s2s');
@@ -92,7 +68,13 @@ const on_data_common = (num, serialized_data, send_ack) => {
     if (!Object.keys(_deserialized_s2s.err).length) { // if no error
         if (!_deserialized_s2s.data){ // handshake
             console.log(`${send_ack ? `ioserver id ${ios.socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was an handshake`);
-            update_db_peers_common(_deserialized_s2s);
+            
+            // add peer to require('../memory').server_data.peers
+            if ( (require('../memory').server_data.peers.filter(function(peer) { return peer.uuid === _deserialized_s2s.uuid })).length == 0 ) {
+                require('../memory').server_data.peers.push( { uuid: _deserialized_s2s.uuid,
+                    ecdh: _deserialized_s2s.ecdh, ecdsa: _deserialized_s2s.ecdsa, seen: Date.now() } );
+            }
+
             if (send_ack) {
                 // ioS
                 ios.socket.emit("data ack", serialize_s2s());
@@ -107,54 +89,13 @@ const on_data_common = (num, serialized_data, send_ack) => {
             }
         } else { // data
             console.log(`${send_ack ? `ioserver id ${ios.socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was data`);
-            //update_db_peers_common(_deserialized_s2s);
             if (send_ack) {
-                // ioS
                 ios.socket.emit("data ack", serialize_s2s(_deserialized_s2s.data, ios.s2s_ecdh));
-                //ios.s2s_uuid = _deserialized_s2s.uuid;
-                //ios.s2s_ecdh = _deserialized_s2s.ecdh;
-                //ios.s2s_ecdsa = _deserialized_s2s.ecdsa;
-            } else {
-                // ioC
-                //ioc[num].s2s_uuid = _deserialized_s2s.uuid;
-                //ioc[num].s2s_ecdh = _deserialized_s2s.ecdh;
-                //ioc[num].s2s_ecdsa = _deserialized_s2s.ecdsa;
             }
         }
-        
     } else {
         // HMAC ECDSA
         console.log(_deserialized_s2s.err);
         console.log('WARNING do something..');
     }
-}
-
-const update_db_peers_common = (data) => {
-    const { s2s: db } = require('../server').db;
-
-    if (!db.get('peers').find({ uuid: data.uuid }).value()) {
-        db.get('peers')
-            .push({ uuid: data.uuid })
-            .write();
-
-        if (!db.get('peers').find({ uuid: data.uuid }).value().ecdh) {
-            db.get('peers')
-                .find({ uuid: data.uuid })
-                .assign({ ecdh: data.ecdh })
-                .write();
-        }
-
-        if (!db.get('peers').find({ uuid: data.uuid }).value().ecdsa) {
-            db.get('peers')
-                .find({ uuid: data.uuid })
-                .assign({ ecdsa: data.ecdsa })
-                .write();
-        }
-    }
-
-    db.get('peers')
-        .find({ uuid: data.uuid })
-        .assign({ seen: Date.now() })
-        .write()
-
 }

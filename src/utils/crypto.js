@@ -20,20 +20,16 @@ exports.uuid = {
         return regex.test(uuid);
     },
     get: () => {
-        const { local: db } = require('../server').db;
-        return db.get('uuid').value();
+        return require('../memory').server_data.uuid;
     }
 }
 exports.ecdh = {
     // store b64
     generate: () => {
-        const { local: db } = require('../server').db;
         const ecdh = crypto.createECDH(CONST_ECDH_ALGORITHM);
         const pub = ecdh.generateKeys('base64');
         const priv = ecdh.getPrivateKey('base64');
-        db.set('keys.ecdh.priv', priv)
-            .set('keys.ecdh.pub', pub)
-            .write();
+        return { priv: priv, pub: pub }
     },
     encrypt: (data, pub64) => {
         const secret = this.ecdh.secret(pub64);
@@ -52,13 +48,11 @@ exports.ecdh = {
         get: {
             public: {
                 string: () => {
-                    const { local: db } = require('../server').db;
-                    return db.get('keys.ecdh.pub').value();
+                    return require('../memory').server_data.keys.ecdh.pub;
                 }
             },
             private: () => {
-                const { local: db } = require('../server').db;
-                return db.get('keys.ecdh.priv').value();
+                return require('../memory').server_data.keys.ecdh.priv;
             }
         }
     }
@@ -67,7 +61,6 @@ exports.ecdh = {
 
 exports.ecdsa = {
     generate: () => {
-        const { local: db } = require('../server').db;
         const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', {
             namedCurve: CONST_ECDSA_ALGORITHM,
             publicKeyEncoding: {
@@ -81,9 +74,7 @@ exports.ecdsa = {
                 passphrase: process.env.CRYPTO_SECRET
             }
         });
-        db.set('keys.ecdsa.priv', Buffer.from(privateKey).toString('base64'))
-            .set('keys.ecdsa.pub', Buffer.from(publicKey).toString('base64'))
-            .write();
+        return { priv: Buffer.from(privateKey).toString('base64'), pub: Buffer.from(publicKey).toString('base64') }
     },
     sign: (data) => {
         const sign = crypto.createSign(CONST_HASH);
@@ -111,9 +102,8 @@ exports.ecdsa = {
         get: {
             private: {
                 object: () => {
-                    const { local: db } = require('../server').db;
                     const privateKey = crypto.createPrivateKey({
-                        key: Buffer.from(db.get('keys.ecdsa.priv').value(), 'base64'),
+                        key: Buffer.from(require('../memory').server_data.keys.ecdsa.priv, 'base64'),
                         type: 'pkcs8',
                         format: 'der',
                         passphrase: process.env.CRYPTO_SECRET
@@ -126,8 +116,7 @@ exports.ecdsa = {
                     return this.ecdsa.build.public(this.ecdsa.get.public.string());
                 },
                 string: () => {
-                    const { local: db } = require('../server').db;
-                    return db.get('keys.ecdsa.pub').value();
+                    return require('../memory').server_data.keys.ecdsa.pub;
                 }
             }
         }
