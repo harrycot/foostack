@@ -61,7 +61,7 @@ const get_ios_index = (socket) => {
 }
 
 const init_ioc = (num) => {
-    const { serialize_s2s } = require('../server').util.network;
+    const { serialize_s2s } = require('../utils/network');
     ioc[num].socket = require('socket.io-client')('http://' + ioc[num].server + '/s2s');
     
 
@@ -85,7 +85,7 @@ const init_ioc = (num) => {
 const on_data_common = (num, serialized_data, send_ack) => {
     // num value: false from ios call
     // send_ack value: client is false ; server is true
-    const { serialize_s2s, deserialize_s2s } = require('../server').util.network;
+    const { serialize_s2s, deserialize_s2s } = require('../utils/network');
 
     const _deserialized_s2s = deserialize_s2s(serialized_data);
 

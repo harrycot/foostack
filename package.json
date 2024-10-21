@@ -26,8 +26,7 @@
         "lowdb-session-store": "^1.1.1",
         "pug": "^3.0.2",
         "socket.io": "^4.7.2",
-        "socket.io-client": "^4.7.2",
-        "uuid": "^9.0.1"
+        "socket.io-client": "^4.7.2"
     },
     "devDependencies": {
         "bufferutil": "^4.0.8",

@@ -1,7 +1,7 @@
 
 exports.serialize_s2s = (data, pub) => {
     // pub is the ecdh pub of the destination
-    const { uuid, ecdsa, ecdh, hmac } = require('../server').util.crypto;
+    const { uuid, ecdsa, ecdh, hmac } = require('../utils/crypto');
     
     const _ecdsa_local_pub = ecdsa.local.get.public.string();
     const _ecdh_local_pub = ecdh.local.get.public.string();
@@ -21,13 +21,13 @@ exports.serialize_s2s = (data, pub) => {
 }
 
 exports.deserialize_s2s = (serialized_data) => {
-    const { hmac, ecdsa, ecdh } = require('../server').util.crypto;
+    const { uuid, hmac, ecdsa, ecdh } = require('../utils/crypto');
 
     const _table = Buffer.from(serialized_data, 'base64').toString().split(':');
     const _hmac_to_compute = [_table[0], _table[1], _table[2], _table[3]].join(':');
 
     // if it's an uuid at _table[0] => it's an handshake ; else it's data without ecdsa & ecdh
-    const _json_data = require('uuid').validate(Buffer.from(_table[0], 'base64').toString()) ? {
+    const _json_data = uuid.validate(Buffer.from(_table[0], 'base64').toString()) ? {
         uuid: Buffer.from(_table[0], 'base64').toString(),
         uuid_signature: Buffer.from(_table[1], 'base64').toString(),
         ecdsa: _table[2],
@@ -84,7 +84,7 @@ exports.get_external_ipv4 = () => {
 
 exports.dns_lookup = (domain) => {
     require('dns').lookup(domain, (err, address, family) => {
-        //if (this.package_details.is_production) { console.log('address: %j family: IPv%s', address, family) };
+        //if (memory.is_production) { console.log('address: %j family: IPv%s', address, family) };
         //this.ioc.push({ server: address });
     });
 }
@@ -98,14 +98,14 @@ exports.is_port_available = (port, callback) => {
 
 
 exports.get_port_to_use = (callback) => {
-    const { allowed_port_range } = require('../server').package_details;
+    const { is_production, allowed_port_range } = require('../memory');
     for (let port = allowed_port_range.start; port <= allowed_port_range.end; port++) {
-        if (!require('../server').package_details.is_production){
+        if (!is_production){
             require('../server').ioc.push({ server: `localhost:${port}` })
         }
         this.is_port_available(port, (_isavailable) => {
             // IMPORTANT
-            // find something to really break the loop when: a port is available && require('../server').package_details.is_production
+            // find something to really break the loop when: a port is available && require('../memory').is_production
             if (_isavailable) {
                 callback(port);
             }

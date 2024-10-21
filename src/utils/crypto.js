@@ -11,6 +11,19 @@ const CONST_ECDSA_ALGORITHM = 'sect239k1';
 const CONST_ECDH_ALGORITHM = 'secp521r1';
 
 
+exports.uuid = {
+    generate: () => {
+        return crypto.randomUUID();
+    },
+    validate: (uuid) => {
+        const regex = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+        return regex.test(uuid);
+    },
+    get: () => {
+        const { local: db } = require('../server').db;
+        return db.get('uuid').value();
+    }
+}
 exports.ecdh = {
     // store b64
     generate: () => {
@@ -121,12 +134,6 @@ exports.ecdsa = {
     }
 }
 
-exports.uuid = {
-    get: () => {
-        const { local: db } = require('../server').db;
-        return db.get('uuid').value();
-    }
-}
 
 exports.hmac = {
     get: {

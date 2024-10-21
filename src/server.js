@@ -1,40 +1,25 @@
-
-// add trusted domains here
-exports.trust = [];
-
-exports.package_details = {
-    is_production: process.pkg ? true : false,
-    allowed_port_range: process.pkg ? { start: 443, end: 443} : { start: 8001, end: 8010 },
-    network_details: {
-        port: false
-    }
-}
-
 const path = require('path');
 const fs = require('fs');
 const DBFileSync = require('lowdb/adapters/FileSync');
 const session = require('express-session');
 const LowdbStore = require('lowdb-session-store')(session);
 
+const memory = require('./memory');
 
 exports.db = {} // set db path when we know which port to use
-exports.util = {
-    crypto: require('./util/crypto'),
-    network: require('./util/network'),
-    socketio: require('./util/socketio')
-}
+
 exports.app = require('express')();
 exports.http = require('http').Server(this.app);
 exports.io = require('socket.io')(this.http);
 
 exports.ios = { client: '', socket: '', s2s_uuid: '', s2s_ecdh: '', s2s_ecdsa: '' };
-exports.ioc = this.package_details.is_production ? [{ server: 'iplist for prod'} ] : [];
+exports.ioc = memory.is_production ? [{ server: 'iplist for prod'} ] : [];
 
-require('./util/network').get_port_to_use( (_port) => {
-    if (!this.package_details.network_details.port) {
-        this.package_details.network_details.port = _port;
+require('./utils/network').get_port_to_use( (_port) => {
+    if (!memory.network_details.port) {
+        memory.network_details.port = _port;
         
-        const cwd = this.package_details.is_production ? process.cwd() : __dirname;
+        const cwd = memory.is_production ? process.cwd() : __dirname;
         if (!fs.existsSync(path.join(cwd, 'db'))) { fs.mkdirSync(path.join(cwd, 'db')) }
         if (!fs.existsSync(path.join(cwd, `db/${_port}`))) { fs.mkdirSync(path.join(cwd, `db/${_port}`)) }
         this.db = {
@@ -47,13 +32,13 @@ require('./util/network').get_port_to_use( (_port) => {
             this.db.s2s.set('peers', []).write();
         }
         if (!this.db.local.has('uuid').value()) {
-            this.db.local.set('uuid', require('uuid').v4()).write();
+            this.db.local.set('uuid', require('./utils/crypto').uuid.generate()).write();
         }
         if (!this.db.local.has('keys.ecdsa').value()) {
-            this.util.crypto.ecdsa.generate();
+            require('./utils/crypto').ecdsa.generate();
         }
         if (!this.db.local.has('keys.ecdh').value()) {
-            this.util.crypto.ecdh.generate();
+            require('./utils/crypto').ecdh.generate();
         }
         // END OF db init
 
@@ -85,7 +70,7 @@ require('./util/network').get_port_to_use( (_port) => {
             // start working on db sync across nodes here
             for (sc of this.ioc) {
                 if (sc.s2s_ecdh) {
-                    sc.socket.emit("data", this.util.network.serialize_s2s(data, sc.s2s_ecdh)); // calling serialize_s2s() without giving data == it's an handshake
+                    sc.socket.emit("data", require('./utils/network').serialize_s2s(data, sc.s2s_ecdh)); // calling serialize_s2s() without giving data == it's an handshake
                 }
             }
         })
