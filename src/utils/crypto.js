@@ -1,7 +1,5 @@
 
 const crypto = require('crypto');
-const fs = require('fs');
-const { pipeline } = require('stream');
 
 const CONST_ALGORITHM = 'aes-256-cbc';
 const CONST_ALGORITHM_LENGTH = 32; // 256 bits == 32 bytes/characters (32*8) 

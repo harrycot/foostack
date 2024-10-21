@@ -1,15 +1,29 @@
 const path = require('path');
 const fs = require('fs');
 const DBFileSync = require('lowdb/adapters/FileSync');
-const session = require('express-session');
-const LowdbStore = require('lowdb-session-store')(session);
+//const LowdbStore = require('lowdb-session-store')(session);
 
 const memory = require('./memory');
 
 exports.db = {} // set db path when we know which port to use
 
-exports.app = require('express')();
-exports.http = require('http').Server(this.app);
+exports.http = require('http').createServer(function(req, res){
+    console.log(req.url);
+    switch (req.url) {
+        case '/styles.css':
+            fs.readFile(path.resolve(__dirname, './view/styles.css'), function(err, data) {
+                if (err) { console.log(err) }
+                res.writeHead(200, {'Content-Type': 'text/css'}); res.write(data); res.end();
+            }); break;
+    
+        default:
+            fs.readFile(path.resolve(__dirname, './view/index.html'), function(err, data) {
+                if (err) { console.log(err) }
+                res.writeHead(200, {'Content-Type': 'text/html'}); res.write(data); res.end();
+            }); break;
+    }
+});
+
 exports.io = require('socket.io')(this.http);
 
 exports.ios = { client: '', socket: '', s2s_uuid: '', s2s_ecdh: '', s2s_ecdsa: '' };
@@ -24,7 +38,6 @@ require('./utils/network').get_port_to_use( (_port) => {
         if (!fs.existsSync(path.join(cwd, `db/${_port}`))) { fs.mkdirSync(path.join(cwd, `db/${_port}`)) }
         this.db = {
             session: require('lowdb')(new DBFileSync(path.join(cwd, `db/${_port}/sessions.json`), { defaultValue: [] })),
-            s2s: require('lowdb')(new DBFileSync(path.join(cwd, `db/${_port}/s2s.json`)))
         }
         // db init
         if (!memory.server_data.uuid) {
@@ -36,26 +49,8 @@ require('./utils/network').get_port_to_use( (_port) => {
         if (!memory.server_data.keys.ecdh) {
             memory.server_data.keys.ecdh = require('./utils/crypto').ecdh.generate();
         }
-        // END OF db init
 
-        // SESSION EXPRESS share with SOCKETIO
-        const express_session = session({
-            secret: process.env.SESSION_SECRET,
-            resave: false,
-            saveUninitialized: false,
-            cookie: { secure: true, maxAge: 1209600000 }, // two weeks in milliseconds
-            store: new LowdbStore(this.db.session, {
-                ttl: 86400
-            })
-        });
-        this.io.use(function (socket, next) {
-            express_session(socket.request, socket.request.res, next);
-        });
-        this.app.use(express_session);
-
-        // Init Express and Socketio controller
-        require('./controllers/express').init('0.0.0.0', _port);
-        require('./controllers/socketio').init();
+        //require('./controllers/socketio').init();
         require('./controllers/socketio.s2s').init_ios();
 
 
@@ -71,9 +66,8 @@ require('./utils/network').get_port_to_use( (_port) => {
             }
         })
 
-
-        this.http.listen(this.app.get('port'), () => {
-            console.log('App is running at http://localhost:%d', this.app.get('port'));
+        this.http.listen(_port, function() {
+            console.log("server listening on port: " + _port);
         });
     }
 });

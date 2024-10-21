@@ -1,4 +1,5 @@
 const { io, ioc, ios } = require('../server');
+//const { io: ios } = require('../memory').server_data;
 
 /**
  * Socket IO s2s init
@@ -70,10 +71,14 @@ const on_data_common = (num, serialized_data, send_ack) => {
             console.log(`${send_ack ? `ioserver id ${ios.socket.client.conn.id}` : `ioclient id ${ioc[num].socket.io.engine.id}`}: was an handshake`);
             
             // add peer to require('../memory').server_data.peers
-            if ( (require('../memory').server_data.peers.filter(function(peer) { return peer.uuid === _deserialized_s2s.uuid })).length == 0 ) {
+            if ( !require('../memory').is_peer_exist_by_uuid(_deserialized_s2s.uuid) ) {
                 require('../memory').server_data.peers.push( { uuid: _deserialized_s2s.uuid,
                     ecdh: _deserialized_s2s.ecdh, ecdsa: _deserialized_s2s.ecdsa, seen: Date.now() } );
             }
+
+            console.log(require('../memory').server_data);
+            console.log(ios);
+            // find a way to remove old peer if a node reboot
 
             if (send_ack) {
                 // ioS

@@ -48,8 +48,7 @@ exports.deserialize_s2s = (serialized_data) => {
     }
     if (_json_data.data) {
         let  _peer;
-        const { s2s: db } = require('../server').db;
-        for (peer of require('../memory').server_data.peers) {
+        for (let peer of require('../memory').server_data.peers) {
             if (peer.uuid == _json_data.uuid) {
                 _peer = peer;
             }

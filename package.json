@@ -6,45 +6,27 @@
     "author": "Florian Blanc",
     "private": true,
     "scripts": {
-        "electron:dev": "cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret electron ./src/electron/",
         "dev": "cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret node ./src/server.js",
         "pkg": "cross-env NODE_ENV=production pkg ./src/server.js --out-path ./dist",
         "bundle": "cross-env NODE_ENV=production webpack",
         "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/bundle.js --out-path ./dist",
         "exec:pkg": "cd dist && cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret server-win.exe",
         "exec:bundle": "cd dist && cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret node bundle.js",
-        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret bundle-win.exe",
-        "clean:dev": "rimraf ./src/db",
-        "clean:dist": "rimraf ./dist",
-        "clean:all": "rimraf ./dist && rimraf ./src/db",
-        "clean:modules": "rimraf ./node_modules || true"
+        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret bundle-win.exe"
     },
     "dependencies": {
-        "express": "^4.18.2",
-        "express-session": "^1.17.3",
         "lowdb": "^1.0.0",
         "lowdb-session-store": "^1.1.1",
-        "pug": "^3.0.2",
         "socket.io": "^4.7.2",
         "socket.io-client": "^4.7.2"
     },
     "devDependencies": {
-        "bufferutil": "^4.0.8",
         "cross-env": "^7.0.3",
-        "electron": "^27.1.0",
         "javascript-obfuscator": "^4.1.0",
         "pkg": "^5.8.1",
-        "rimraf": "^5.0.5",
         "terser-webpack-plugin": "^5.3.9",
-        "utf-8-validate": "^6.0.3",
         "webpack": "^5.89.0",
         "webpack-cli": "^5.1.4",
-        "webpack-obfuscator": "^3.5.1",
-        "ws": "^8.14.2"
-    },
-    "info-devDependencies-for-webpack-warnings": {
-        "bufferutil": "^4.0.2",
-        "utf-8-validate": "^5.0.3",
-        "ws": "^7.4.1"
+        "webpack-obfuscator": "^3.5.1"
     }
 }
