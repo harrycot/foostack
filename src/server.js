@@ -7,19 +7,21 @@ const memory = require('./memory');
 
 exports.db = {} // set db path when we know which port to use
 
+
+
 exports.http = require('http').createServer(function(req, res){
     console.log(req.url);
     switch (req.url) {
         case '/styles.css':
             fs.readFile(path.resolve(__dirname, './view/styles.css'), function(err, data) {
                 if (err) { console.log(err) }
-                res.writeHead(200, {'Content-Type': 'text/css'}); res.write(data); res.end();
+                res.writeHead(200, require('./utils/network').get_http_headers('text/css')); res.write(data); res.end();
             }); break;
     
         default:
             fs.readFile(path.resolve(__dirname, './view/index.html'), function(err, data) {
                 if (err) { console.log(err) }
-                res.writeHead(200, {'Content-Type': 'text/html'}); res.write(data); res.end();
+                res.writeHead(200, require('./utils/network').get_http_headers('text/html')); res.write(data); res.end();
             }); break;
     }
 });
