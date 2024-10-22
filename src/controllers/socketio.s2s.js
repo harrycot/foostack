@@ -76,8 +76,8 @@ const on_data_common = (num, serialized_data, send_ack) => {
                     ecdh: _deserialized_s2s.ecdh, ecdsa: _deserialized_s2s.ecdsa, seen: Date.now() } );
             }
 
-            console.log(require('../memory').server_data);
-            console.log(ios);
+            //console.log(require('../memory').server_data);
+            //console.log(ios);
             // find a way to remove old peer if a node reboot
 
             if (send_ack) {

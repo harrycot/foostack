@@ -117,26 +117,29 @@ exports.dns_lookup = (domain) => {
     });
 }
 
-exports.is_port_available = (port, callback) => {
-    const server = require('net').createServer();
-    server.listen(port).on('error', (err) => {
-        if (err.code === 'EADDRINUSE') { callback(false) }
-    }).on('listening', () => { server.close(); callback(true) });
+
+exports.is_port_available = (port) => {
+    return new Promise((resolve, reject) => {
+        const server = require('net').createServer();
+        server.on('error', reject);
+        server.listen(port, () => {
+            server.off('error', reject);
+            server.close();
+            resolve(true);
+        });
+    });
 }
 
 
-exports.get_port_to_use = (callback) => {
-    const { is_production, allowed_port_range } = require('../memory');
-    for (let port = allowed_port_range.start; port <= allowed_port_range.end; port++) {
-        if (!is_production){
-            require('../server').ioc.push({ server: `localhost:${port}` })
+exports.get_port_to_use = async (callback) => {
+    const { allowed_port_range, network_details } = require('../memory');
+    let port = allowed_port_range.start;
+    while (!network_details.port && port <= allowed_port_range.end) {
+        try {
+            await this.is_port_available(port);
+            callback(port);
+        } catch (ex) {
+            port++;
         }
-        this.is_port_available(port, (_isavailable) => {
-            // IMPORTANT
-            // find something to really break the loop when: a port is available && require('../memory').is_production
-            if (_isavailable) {
-                callback(port);
-            }
-        });
     }
 }
