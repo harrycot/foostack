@@ -28,17 +28,13 @@ exports.http = require('http').createServer(function(req, res){
 exports.io = require('socket.io')(this.http);
 
 //  move this to memory.server_data.peers
-exports.ioc = [];
 if (!memory.is_production) {
     for (let port = memory.allowed_port_range.start; port <= memory.allowed_port_range.end; port++) {
-        this.ioc.push({ server: `localhost:${port}`});
+        memory.server_data.peers.push({ server: `localhost:${port}`});
     }
 } else {
     // push server list for prod
 }
-
-// move this to memory.server_data
-exports.ios = { client: '', socket: '', s2s_uuid: '', s2s_ecdh: '', s2s_ecdsa: '' };
 
 require('./utils/network').get_port_to_use( (_port) => {
     memory.network_details.port = _port;
@@ -60,18 +56,16 @@ require('./utils/network').get_port_to_use( (_port) => {
     }
 
     //require('./controllers/socketio').init();
-    require('./controllers/socketio.s2s').init_ios();
+    require('./controllers/socketio.s2s').init_ioserver();
 
 
     process.stdin.setEncoding('utf8');
     process.stdin.on("data", (data) => {
         data = data.toString();
         console.log(`SENDING: ${data}`);
-        // start working on db sync across nodes here
-        for (sc of this.ioc) {
-            if (sc.s2s_ecdh) {
-                sc.socket.emit("data", require('./utils/network').serialize_s2s(data, sc.s2s_ecdh)); // calling serialize_s2s() without giving data == it's an handshake
-                console.log(this.ios);
+        for (peer of memory.server_data.peers) {
+            if (peer.socket.connected) {
+                peer.socket.emit("data", require('./utils/network').serialize_s2s(data, peer.ecdh)); // calling serialize_s2s() without giving data == it's an handshake
             }
         }
     })
