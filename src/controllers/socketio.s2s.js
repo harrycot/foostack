@@ -1,5 +1,5 @@
 const { io } = require('../server');
-const { server_data } = require('../memory');
+const { server_data, get_peer_index_by_uuid } = require('../memory');
 
 /**
  * Socket IO s2s init
@@ -47,7 +47,6 @@ const init_ioclient = (num) => {
 
     server_data.peers[num].socket.on('data ack', function (serialized_data) {
         console.log(`ioclient id ${server_data.peers[num].socket.io.engine.id}: data ack received`);
-        console.log('got data ack');
         on_data_common(num, serialized_data, false);
     });
 
@@ -83,11 +82,7 @@ const on_data_common = (num, serialized_data, send_ack) => {
         } else { // data
             console.log(`${send_ack ? `ioserver id ${server_data.socket.client.conn.id}` : `ioclient id ${server_data.peers[num].socket.io.engine.id}`}: was data`);
             if (send_ack) {
-                for (peer of server_data.peers) {
-                    if (peer.socket.connected) {
-                        peer.socket.emit("data ack", serialize_s2s(_deserialized_s2s.data, peer.ecdh)); // calling serialize_s2s() without giving data == it's an handshake
-                    }
-                }
+                server_data.socket.emit("data ack", serialize_s2s(_deserialized_s2s.data, server_data.peers[get_peer_index_by_uuid(_deserialized_s2s.uuid)].ecdh)); // calling serialize_s2s() without giving data == it's an handshake
             }
         }
     } else {

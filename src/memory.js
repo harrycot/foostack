@@ -10,7 +10,7 @@ exports.is_peer_exist_by_uuid = (uuid) => {
     return this.server_data.peers.filter(function(peer) { return peer.uuid === uuid }).length == 0 ? false : true;
 }
 exports.get_peer_index_by_uuid = (uuid) => {
-    for (index in peers) {
+    for (index in this.server_data.peers) {
         if (this.server_data.peers[index].uuid == uuid) { return index }
     }
 }
