@@ -47,6 +47,7 @@ const init_ioclient = (num) => {
 
     server_data.peers[num].socket.on('data ack', function (serialized_data) {
         console.log(`ioclient id ${server_data.peers[num].socket.io.engine.id}: data ack received`);
+        console.log('got data ack');
         on_data_common(num, serialized_data, false);
     });
 
@@ -84,7 +85,7 @@ const on_data_common = (num, serialized_data, send_ack) => {
             if (send_ack) {
                 for (peer of server_data.peers) {
                     if (peer.socket.connected) {
-                        server_data.socket.emit("data ack", serialize_s2s(_deserialized_s2s.data, peer.ecdh)); // calling serialize_s2s() without giving data == it's an handshake
+                        peer.socket.emit("data ack", serialize_s2s(_deserialized_s2s.data, peer.ecdh)); // calling serialize_s2s() without giving data == it's an handshake
                     }
                 }
             }
