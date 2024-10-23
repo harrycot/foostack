@@ -1,52 +1,91 @@
 
 
-exports.is_production = process.pkg ? true : false;
-exports.allowed_port_range = process.pkg ? { start: 443, end: 443} : { start: 8001, end: 8010 };
-exports.network_details = { ip4: false, ip6: false, port: false };
-
-exports.server_data = { uuid: false, keys: { ecdsa: false, ecdh: false }, peers: [], socket: false };
-
-exports.is_peer_exist_by_uuid = (uuid) => {
-    return this.server_data.peers.filter(function(peer) { return peer.uuid === uuid }).length == 0 ? false : true;
+exports.config = {
+    is_production: process.pkg ? true : false,
+    port_range: process.pkg ? { start: 443, end: 443} : { start: 8001, end: 8010 },
+    network: { ip4: false, ip6: false, port: false }
 }
-exports.get_peer_index_by_uuid = (uuid) => {
-    for (index in this.server_data.peers) {
-        if (this.server_data.peers[index].uuid == uuid) { return index }
+
+exports.db = {
+    server: { uuid: false, keys: { ecdsa: false, ecdh: false }, socket: false },
+    peers: [],
+    get: {
+        peer: {
+            index: (uuid) => {
+                for (index in this.db.peers) {
+                    if (this.db.peers[index].uuid == uuid) { return index }
+                }
+            },
+            exist: (uuid) => {
+                return this.db.peers.filter(function(peer) { return peer.uuid === uuid }).length == 0 ? false : true;
+            }
+        }
+    },
+    set: {
+        peer: (index, deserialized_handshake) => {
+            if ( !this.db.get.peer.exist(deserialized_handshake.uuid) && index ) {
+                this.db.peers[index].uuid = deserialized_handshake.uuid;
+                this.db.peers[index].ecdh = deserialized_handshake.ecdh;
+                this.db.peers[index].ecdsa = deserialized_handshake.ecdsa;
+                this.db.peers[index].seen = Date.now();
+            } else if ( this.db.get.peer.exist(deserialized_handshake.uuid) ) {
+                this.db.peers[this.db.get.peer.index(deserialized_handshake.uuid)].seen = Date.now();
+            }
+            //console.log(this.db.get.peer.exist(deserialized_handshake.uuid));
+            //console.log(index);
+        }
     }
 }
 
-// server_data:
+
+// this.db looks like this
 // {
-//     uuid: '0763ccd2-61fb-4754-b5f1-f768e91005ea',
-//     keys: {
-//       ecdsa: {
-//         priv: 'MIHsMFcGCSqGSIb3DQEFDTBKMCkGCSqGSIb3DQEFDDAcBAjekstWhFY7pAICCAAwDAYIKoZIhvcNAgkFADAdBglghkgBZQMEASoEEB9ftBdT5UXOsDT8313Em2UEgZDKFgPKkyFmb374qLoNU161lumB3p3iIbzo/UrN5VVbngxfMipf7oOy2kWOpWj5/sKJ/Ovfr2KAb1IavwU4l3z7G8TW0duAOGTXDukfTrA87cwlTVhvAlDwICsEdn1FcnAohn2GmSQ7I6qhMI9p840nYsRz/ao0WEMjJk+2EBewrOky1qGncpegkdxQ6ACoRxs=',
-//         pub: 'MFIwEAYHKoZIzj0CAQYFK4EEAAMDPgAEHKzan8BstlkdB0vZrUuvK5LdJ602d3JbKc8dBtPreko2CAHIkSvSXoj9JRJn4n42fRmrD69vWfI6HJBa'
-//       },
-//       ecdh: {
-//         priv: 'mv7ishODM2jSBTCj4WvCKyQO5IrPVUXNklt7FMoHOEt/BQbcrrJIaZMaiL0yqqsGrYouEA2IL0o3Sal7KgfUWpk=',
-//         pub: 'BAFtzbEw6Jx37XYF3T0BvyVeG5H8aQ/Pkh1XBgfF/Oh/ry0U0koc+Xk1nnjJePOgnOAtXL0nkSmlPgOqvbNHPAMo6gEHooLJdxgCpzLji81fQ7SbTgoFVQ5BS4/pSeZEYxykvkQKCEAnunpNYrYw3iuH+rjOTFTYlSfAGNmPDLwJj1EWlw=='
-//       }
+//     server: {
+//         uuid: '53844d47-bf96-493f-9733-eca66867d4f5',
+//         keys: { ecdsa: [Object], ecdh: [Object] },
+//         socket: [Socket]
 //     },
 //     peers: [
-//       { server: 'localhost:8001', socket: [Socket] },
-//       {
+//         {
+//         server: 'localhost:8001',
+//         socket: [Socket],
+//         uuid: '19f61cf3-6342-4c7c-9363-4f103bf4d654',
+//         ecdh: 'BAHTg/QzcAhotqnGA07ldLODiW96c0vzVDLVTqNHQg/Z9Uir8cvW/Hi6MUsz+ee9VfbdBlwc5Lu91XMxmuv64nhTbwAKqSLoPCabR8Pn4mT7XuyKvquTFOTf/9GdVVJnJZMlihXVCdtPqxTWnsGmtPlGHG3q/xRtEP47RE+kEYJlXUIu5Q==',
+//         ecdsa: 'MFIwEAYHKoZIzj0CAQYFK4EEAAMDPgAEJE8pR84jLbeo9uV1Rzj75rh0hZIW89kh1aTjshn2Ej1EnSTYkNcJB0k4DPmTRhw9ovwB5sS8Wf4Ujgam',
+//         seen: 1729687751796
+//         },
+//         {
 //         server: 'localhost:8002',
 //         socket: [Socket],
-//         uuid: 'e9a5a4d8-81ee-4e45-aa9a-10fdb794f34c',
-//         ecdh: 'BAENAbmB+K7l6fx7ID7ft+z1aoAgSamXqmjhPyt2gjSxeiEDnb80PedyJJEDvpfeA9fe4ulI5Ht3x38u5O9zWr/kKQDukSK7Y9XaHsu2KBf6vwB0cJkFSC8pU9f+cKYI3Wz66rhYuOsfNpvaeYVGK+OUHWq7AS8u1n2ejdkkfKFw7qwZIA==',
-//         ecdsa: 'MFIwEAYHKoZIzj0CAQYFK4EEAAMDPgAEb2SbP3CytBoqLIqsPwWHRmMxON4cj9Cu1ODmTvUwcXW7QKC4voz1r33MdbMSftRjO/54Q3oemcT3+Npb',
-//         seen: 1729612842365
-//       },
-//       { server: 'localhost:8003', socket: [Socket] },
-//       { server: 'localhost:8004', socket: [Socket] },
-//       { server: 'localhost:8005', socket: [Socket] },
-//       { server: 'localhost:8006', socket: [Socket] },
-//       { server: 'localhost:8007', socket: [Socket] },
-//       { server: 'localhost:8008', socket: [Socket] },
-//       { server: 'localhost:8009', socket: [Socket] },
-//       { server: 'localhost:8010', socket: [Socket] }
+//         uuid: 'e1f8efe2-625b-4bc7-b2ba-d9c87d601a8c',
+//         ecdh: 'BACdbUU8g3YfS7+pCdfWQ5P8YuE5tAzTQoMT5Dspk9vpxSPzuhBKIxuCzt2OSRXaGAAIZ8yiHGY04jwGj1LFtiOl6wCKULRTcGHMV9g6q69RcYYAPfV5mtdsLxFQ1nnORXuh233sVwNgEMeD0ZiQ3iK0ZV+JK9ZRIEaelO8rTnizBmUZQQ==',
+//         ecdsa: 'MFIwEAYHKoZIzj0CAQYFK4EEAAMDPgAEMo4vyV6r7jopmILm+/vSbjb4+6HHbN2uvi0H6mfuF6pAWPWRDJeE96QssuP454tzKVWh1pzOp3HOveDv',
+//         seen: 1729687750591
+//         },
+//         {
+//         server: 'localhost:8003',
+//         socket: [Socket],
+//         uuid: 'c4ba08b7-ea9b-4919-9451-fcaddb1bec4d',
+//         ecdh: 'BACZUbrZxO+4S+3Rmq4xiP5zkSmqSZoESiivjJGohKgb1XLcAiRjv1QGBB/BywplDNbZheltzMjO6vTRggls9NdCdQDg7bh4666EI0zhsWyEC3pUv/kzIzSOPee1FdKzMQng7YH7YqZgciWGgz10iYcSh5trclR+vW0pjSvIUD0vwRfEFQ==',
+//         ecdsa: 'MFIwEAYHKoZIzj0CAQYFK4EEAAMDPgAEEET2pJm6MJzoILyk3ig2fif0aNO/+kJ4BG3cm2DNb7TcLuN5oO/fIUgY5K/nt4XhFZy972ld/1qJ/3GK',
+//         seen: 1729687751404
+//         },
+//         {
+//         server: 'localhost:8004',
+//         socket: [Socket],
+//         uuid: '524b9058-8f2e-4b8e-8e09-fc438acd4b36',
+//         ecdh: 'BACfiDw9aaOrh+t/bY+pezzrdaETqoAniYM1kcB+hpoacfKmsyLTK+eaoNHraAOxlvTBKAdsxHRSq07t4XSqQe2uwQDJr5peNJTH65mm8uq600RoAT2kga3task6fxDzCTAYnliVs6rtfVRQtKkPyrLwu6ngYvBumQcR63YKGB+CNGCBow==',
+//         ecdsa: 'MFIwEAYHKoZIzj0CAQYFK4EEAAMDPgAEDfm7pEvLLbllg0VtigdaHsk4usa7WNfTemO9MLu3IBa/NbARbu/UtqCqW5/xVJzWdYzxPF5O8yHS5zrF',
+//         seen: 1729687748885
+//         },
+//         { server: 'localhost:8005', socket: [Socket] },
+//         { server: 'localhost:8006', socket: [Socket] },
+//         { server: 'localhost:8007', socket: [Socket] },
+//         { server: 'localhost:8008', socket: [Socket] },
+//         { server: 'localhost:8009', socket: [Socket] },
+//         { server: 'localhost:8010', socket: [Socket] }
 //     ],
-//     socket: [Socket]
+//     get: { peer: { index: [Function: index], exist: [Function: exist] } },
+//     set: { peer: [Function: peer] }
 // }
   

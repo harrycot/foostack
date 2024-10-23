@@ -3,8 +3,7 @@ const fs = require('fs');
 const DBFileSync = require('lowdb/adapters/FileSync');
 //const LowdbStore = require('lowdb-session-store')(session);
 
-const memory = require('./memory');
-const cwd = memory.is_production ? process.cwd() : __dirname;
+const cwd = require('./memory').config.is_production ? process.cwd() : __dirname;
 
 exports.db = {} // set db path when we know which port to use
 
@@ -27,17 +26,16 @@ exports.http = require('http').createServer(function(req, res){
 
 exports.io = require('socket.io')(this.http);
 
-//  move this to memory.server_data.peers
-if (!memory.is_production) {
-    for (let port = memory.allowed_port_range.start; port <= memory.allowed_port_range.end; port++) {
-        memory.server_data.peers.push({ server: `localhost:${port}`});
+if (!require('./memory').config.is_production) {
+    for (let port = require('./memory').config.port_range.start; port <= require('./memory').config.port_range.end; port++) {
+        require('./memory').db.peers.push({ server: `localhost:${port}`});
     }
 } else {
     // push server list for prod
 }
 
 require('./utils/network').get_port_to_use( (_port) => {
-    memory.network_details.port = _port;
+    require('./memory').config.network.port = _port;
     
     if (!fs.existsSync(path.join(cwd, 'db'))) { fs.mkdirSync(path.join(cwd, 'db')) }
     if (!fs.existsSync(path.join(cwd, `db/${_port}`))) { fs.mkdirSync(path.join(cwd, `db/${_port}`)) }
@@ -45,14 +43,14 @@ require('./utils/network').get_port_to_use( (_port) => {
         session: require('lowdb')(new DBFileSync(path.join(cwd, `db/${_port}/sessions.json`), { defaultValue: [] })),
     }
     // db init
-    if (!memory.server_data.uuid) {
-        memory.server_data.uuid = require('./utils/crypto').uuid.generate();
+    if (!require('./memory').db.server.uuid) {
+        require('./memory').db.server.uuid = require('./utils/crypto').uuid.generate();
     }
-    if (!memory.server_data.keys.ecdsa) {
-        memory.server_data.keys.ecdsa = require('./utils/crypto').ecdsa.generate();
+    if (!require('./memory').db.server.keys.ecdsa) {
+        require('./memory').db.server.keys.ecdsa = require('./utils/crypto').ecdsa.generate();
     }
-    if (!memory.server_data.keys.ecdh) {
-        memory.server_data.keys.ecdh = require('./utils/crypto').ecdh.generate();
+    if (!require('./memory').db.server.keys.ecdh) {
+        require('./memory').db.server.keys.ecdh = require('./utils/crypto').ecdh.generate();
     }
 
     //require('./controllers/socketio').init();
@@ -63,9 +61,10 @@ require('./utils/network').get_port_to_use( (_port) => {
     process.stdin.on("data", (data) => {
         data = data.toString();
         console.log(`SENDING: ${data}`);
-        for (peer of memory.server_data.peers) {
+        for (peer of require('./memory').db.peers) {
             if (peer.socket.connected) {
-                peer.socket.emit("data", require('./utils/network').serialize_s2s(data, peer.ecdh)); // calling serialize_s2s() without giving data == it's an handshake
+                //console.log(peer);
+                peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.ecdh)); // calling serialize_s2s() without giving data == it's an handshake
             }
         }
     })

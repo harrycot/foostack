@@ -47,12 +47,9 @@ exports.deserialize_s2s = (serialized_data) => {
         _json_data.err.hmac = "hmac does not match";
     }
     if (_json_data.data) {
-        let  _peer;
-        for (let peer of require('../memory').server_data.peers) {
-            if (peer.uuid == _json_data.uuid) {
-                _peer = peer;
-            }
-        }
+        const { db: memdb } = require('../memory');
+        const _peer = memdb.peers[memdb.get.peer.index(_json_data.uuid)];
+
         const _ecdsa_pub = _peer.ecdsa;
         const _ecdh_pub = _peer.ecdh;
 
@@ -132,9 +129,9 @@ exports.is_port_available = (port) => {
 
 
 exports.get_port_to_use = async (callback) => {
-    const { allowed_port_range, network_details } = require('../memory');
-    let port = allowed_port_range.start;
-    while (!network_details.port && port <= allowed_port_range.end) {
+    const { port_range, network } = require('../memory').config;
+    let port = port_range.start;
+    while (!network.port && port <= port_range.end) {
         try {
             await this.is_port_available(port);
             callback(port);

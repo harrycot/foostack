@@ -8,7 +8,6 @@ const CONST_HASH = 'SHA256';
 const CONST_ECDSA_ALGORITHM = 'sect239k1';
 const CONST_ECDH_ALGORITHM = 'secp521r1';
 
-
 exports.uuid = {
     generate: () => {
         return crypto.randomUUID();
@@ -18,7 +17,7 @@ exports.uuid = {
         return regex.test(uuid);
     },
     get: () => {
-        return require('../memory').server_data.uuid;
+        return require('../memory').db.server.uuid;
     }
 }
 exports.ecdh = {
@@ -46,11 +45,11 @@ exports.ecdh = {
         get: {
             public: {
                 string: () => {
-                    return require('../memory').server_data.keys.ecdh.pub;
+                    return require('../memory').db.server.keys.ecdh.pub;
                 }
             },
             private: () => {
-                return require('../memory').server_data.keys.ecdh.priv;
+                return require('../memory').db.server.keys.ecdh.priv;
             }
         }
     }
@@ -101,7 +100,7 @@ exports.ecdsa = {
             private: {
                 object: () => {
                     const privateKey = crypto.createPrivateKey({
-                        key: Buffer.from(require('../memory').server_data.keys.ecdsa.priv, 'base64'),
+                        key: Buffer.from(require('../memory').db.server.keys.ecdsa.priv, 'base64'),
                         type: 'pkcs8',
                         format: 'der',
                         passphrase: process.env.CRYPTO_SECRET
@@ -114,7 +113,7 @@ exports.ecdsa = {
                     return this.ecdsa.build.public(this.ecdsa.get.public.string());
                 },
                 string: () => {
-                    return require('../memory').server_data.keys.ecdsa.pub;
+                    return require('../memory').db.server.keys.ecdsa.pub;
                 }
             }
         }
