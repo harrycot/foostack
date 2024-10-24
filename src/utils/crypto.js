@@ -121,6 +121,7 @@ exports.ecdsa = {
     }
 }
 
+// check https://nodejs.org/docs/latest-v20.x/api/crypto.html#class-diffiehellman
 exports.hmac = {
     get: {
         base64: (data) => {
