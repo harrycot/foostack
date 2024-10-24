@@ -58,6 +58,7 @@ exports.ecdh = {
 
 exports.ecdsa = {
     generate: () => {
+        const secret = crypto.randomBytes(256).toString('base64');
         const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', {
             namedCurve: CONST_ECDSA_ALGORITHM,
             publicKeyEncoding: {
@@ -68,10 +69,10 @@ exports.ecdsa = {
                 type: 'pkcs8',
                 format: 'der',
                 cipher: CONST_ALGORITHM,
-                passphrase: process.env.CRYPTO_SECRET
+                passphrase: secret
             }
         });
-        return { priv: Buffer.from(privateKey).toString('base64'), pub: Buffer.from(publicKey).toString('base64') }
+        return { secret: secret, priv: Buffer.from(privateKey).toString('base64'), pub: Buffer.from(publicKey).toString('base64') }
     },
     sign: (data) => {
         const sign = crypto.createSign(CONST_HASH);
@@ -103,7 +104,7 @@ exports.ecdsa = {
                         key: Buffer.from(require('../memory').db.server.keys.ecdsa.priv, 'base64'),
                         type: 'pkcs8',
                         format: 'der',
-                        passphrase: process.env.CRYPTO_SECRET
+                        passphrase: require('../memory').db.server.keys.ecdsa.secret
                     });
                     return privateKey;
                 }
