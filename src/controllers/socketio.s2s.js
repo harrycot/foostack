@@ -1,6 +1,3 @@
-/**
- * Socket IO s2s init
- */
 exports.init_ioserver = () => {
     require('../server').io.of('s2s').on('connection', async (socket) => {
         require('../memory').db.server.socket = socket;
@@ -9,7 +6,6 @@ exports.init_ioserver = () => {
         for (peer of require('../memory').db.peers) {
             if ((require('../memory').db.server.socket.handshake.headers.host).includes(peer.server)){ // !!host check can fail attention
                 if (peer.socket.io.engine.id === require('../memory').db.server.socket.client.conn.id) {
-                    // disconnect client
                     console.log(`ioserver id ${require('../memory').db.server.socket.client.conn.id}: self connection detected`);
                     require('../memory').db.server.socket.disconnect();
                 }
@@ -17,8 +13,11 @@ exports.init_ioserver = () => {
         }
 
         require('../memory').db.server.socket.on('data', (serialized_data) => {
-            console.log(`ioserver id ${require('../memory').db.server.socket.client.conn.id}: data received`);
-            on_data_common(false, serialized_data, true);
+            on_data_common(index = false, serialized_data, send_ack = true);
+        });
+
+        require('../memory').db.server.socket.on('data ack', (serialized_data) => {
+            on_data_common(index = false, serialized_data, send_ack = false);
         });
 
         require('../memory').db.server.socket.on('disconnect', () => {
@@ -38,12 +37,12 @@ const init_ioclient = (index) => {
     
     require('../memory').db.peers[index].socket.on('connect', function () {
         console.log(`ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}: connected s2s`);
-        require('../memory').db.peers[index].socket.emit('data', serialize_s2s()); // calling serialize_s2s() without giving data == it's an handshake
+        require('../memory').db.peers[index].socket.emit('data', serialize_s2s()); // handshake init - handshake init - handshake init - handshake init
     });
 
-    require('../memory').db.peers[index].socket.on('data ack', function (serialized_data) {
-        console.log(`ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}: data ack received`);
-        on_data_common(index, serialized_data, false);
+    //acting as an index helper
+    require('../memory').db.peers[index].socket.on('indexing', function (serialized_data) {
+        on_data_common(index, serialized_data, send_ack = false);
     });
 
     require('../memory').db.peers[index].socket.on('disconnect', function () {
@@ -53,38 +52,37 @@ const init_ioclient = (index) => {
 
 const on_data_common = (index, serialized_data, send_ack) => {
     // index value: false on 'data' handled by server socket
-    // send_ack value: client is false ; server is true
     const { serialize_s2s, deserialize_s2s } = require('../utils/network');
 
     const _deserialized_s2s = deserialize_s2s(serialized_data);
 
-    if (!Object.keys(_deserialized_s2s.err).length) { // if no error
-        if (!_deserialized_s2s.data){ // handshake
-            console.log(`${send_ack ? `ioserver id ${require('../memory').db.server.socket.client.conn.id}` : `ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}`}: was an handshake`);
-            
+    if (!Object.keys(_deserialized_s2s.err).length) {
+        if ( (!deserialize_s2s.data && !send_ack) || _deserialized_s2s.data ) { // if it's everything else handshake init
             // ADD UPDATE PEER to array
+            // an index is necessary to know which uuid become with wich host
             require('../memory').db.set.peer(index, _deserialized_s2s);
+        }
 
-            // if (index) {
-            //     console.log(`GOT DATA ACK iam ${require('../memory').db.peers[index].uuid}`);
-            // }
+        if (!_deserialized_s2s.data){ // handshake
             // find a way to remove old peer if a node reboot
-            //console.log(require('../memory').db.peers);
-
             if (send_ack) {
-                require('../memory').db.server.socket.emit('data ack', serialize_s2s());
+                // 'data' (as handshake init)
+                console.log(`\n  => HANDSHAKE as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid}\n`);
+                require('../memory').db.server.socket.emit('indexing', serialize_s2s()); // index helper
+            } else {
+                // 'indexing' (part of the handshake) require('../memory').db.set.peer(index, _deserialized_s2s)
             }
         } else { // data
-            console.log(`${send_ack ? `ioserver id ${require('../memory').db.server.socket.client.conn.id}` : `ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}`}: was data`);
             if (send_ack) {
-                //console.log(`SEND DATA ACK iam ${require('../memory').db.server.uuid}`);
-                //const _ecdh = require('../memory').db.peers[require('../memory').db.get.peer.index(_deserialized_s2s.uuid)].ecdh;
-                //console.log(_ecdh);
-                //require('../memory').db.server.socket.emit('data ack', serialize_s2s(_deserialized_s2s.data, _ecdh)); // calling serialize_s2s() without giving data == it's an handshake
+                // 'data'
+                console.log(`\n  => DATA as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
+                const _index = require('../memory').db.get.peer.index(_deserialized_s2s.uuid)
+                const _ecdh = require('../memory').db.peers[_index].ecdh;
+                require('../memory').db.peers[_index].socket.emit('data ack', serialize_s2s(_deserialized_s2s.data, _ecdh));
+            } else {
+                // 'data ack'
+                console.log(`\n  => DATA ACK as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
             }
-
-            console.log(require('../memory').config);console.log(require('../memory').db);
-
         }
     } else {
         // HMAC ECDSA

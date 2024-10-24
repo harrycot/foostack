@@ -1,4 +1,3 @@
-
 exports.serialize_s2s = (data, pub) => {
     // pub is the ecdh pub of the destination
     const { uuid, ecdsa, ecdh, hmac } = require('../utils/crypto');
@@ -40,28 +39,22 @@ exports.deserialize_s2s = (serialized_data) => {
         uuid_signature: Buffer.from(_table[3], 'base64').toString(),
         hmac: _table[4], err: {}
     };
-    //console.log(_json_data);
 
     // perform hmac and ecdsa check
     if (hmac.get.base64(_hmac_to_compute) !== _json_data.hmac) {
         _json_data.err.hmac = "hmac does not match";
     }
     if (_json_data.data) {
-        const { db: memdb } = require('../memory');
-        const _peer = memdb.peers[memdb.get.peer.index(_json_data.uuid)];
+        const _peer = require('../memory').db.peers[require('../memory').db.get.peer.index(_json_data.uuid)];
 
-        const _ecdsa_pub = _peer.ecdsa;
-        const _ecdh_pub = _peer.ecdh;
-
-        if (ecdsa.verify(_json_data.data, ecdsa.build.public(_ecdsa_pub), _json_data.data_signature)) {
+        if (ecdsa.verify(_json_data.data, ecdsa.build.public(_peer.ecdsa), _json_data.data_signature)) {
             _json_data.err.ecdsa_data = "data ecdsa signature error";
         } else {
-            _json_data.data = ecdh.decrypt(_json_data.data, _ecdh_pub);
+            _json_data.data = ecdh.decrypt(_json_data.data, _peer.ecdh);
         }
-        if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_ecdsa_pub), _json_data.uuid_signature)) {
+        if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_peer.ecdsa), _json_data.uuid_signature)) {
             _json_data.err.ecdsa_uuid = "uuid ecdsa signature error";
         }
-        console.log(`DATA received: ${_json_data.data}`);
     } else {
         if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_json_data.ecdsa), _json_data.uuid_signature)) {
             _json_data.err.ecdsa_uuid = "uuid ecdsa signature error";
@@ -90,8 +83,34 @@ exports.get_http_headers = (content_type) => {
     }
 }
 
+exports.is_port_available = (port) => {
+    return new Promise((resolve, reject) => {
+        const server = require('net').createServer();
+        server.on('error', reject);
+        server.listen(port, () => {
+            server.off('error', reject);
+            server.close();
+            resolve(true);
+        });
+    });
+}
+
+exports.get_port_to_use = async (callback) => {
+    const { port_range, network } = require('../memory').config;
+    let port = port_range.start;
+    while (!network.port && port <= port_range.end) {
+        try {
+            await this.is_port_available(port);
+            callback(port);
+        } catch (ex) {
+            port++;
+        }
+    }
+}
 
 
+
+//////////////////////////
 
 
 exports.get_external_ipv4 = () => {
@@ -115,28 +134,3 @@ exports.dns_lookup = (domain) => {
 }
 
 
-exports.is_port_available = (port) => {
-    return new Promise((resolve, reject) => {
-        const server = require('net').createServer();
-        server.on('error', reject);
-        server.listen(port, () => {
-            server.off('error', reject);
-            server.close();
-            resolve(true);
-        });
-    });
-}
-
-
-exports.get_port_to_use = async (callback) => {
-    const { port_range, network } = require('../memory').config;
-    let port = port_range.start;
-    while (!network.port && port <= port_range.end) {
-        try {
-            await this.is_port_available(port);
-            callback(port);
-        } catch (ex) {
-            port++;
-        }
-    }
-}

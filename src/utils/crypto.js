@@ -1,4 +1,3 @@
-
 const crypto = require('crypto');
 
 const CONST_ALGORITHM = 'aes-256-cbc';
@@ -20,6 +19,7 @@ exports.uuid = {
         return require('../memory').db.server.uuid;
     }
 }
+
 exports.ecdh = {
     // store b64
     generate: () => {
@@ -119,7 +119,6 @@ exports.ecdsa = {
         }
     }
 }
-
 
 exports.hmac = {
     get: {

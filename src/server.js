@@ -63,7 +63,6 @@ require('./utils/network').get_port_to_use( (_port) => {
         console.log(`SENDING: ${data}`);
         for (peer of require('./memory').db.peers) {
             if (peer.socket.connected) {
-                //console.log(peer);
                 peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.ecdh)); // calling serialize_s2s() without giving data == it's an handshake
             }
         }

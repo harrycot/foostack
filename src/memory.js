@@ -1,5 +1,3 @@
-
-
 exports.config = {
     is_production: process.pkg ? true : false,
     port_range: process.pkg ? { start: 443, end: 443} : { start: 8001, end: 8010 },
@@ -31,8 +29,6 @@ exports.db = {
             } else if ( this.db.get.peer.exist(deserialized_handshake.uuid) ) {
                 this.db.peers[this.db.get.peer.index(deserialized_handshake.uuid)].seen = Date.now();
             }
-            //console.log(this.db.get.peer.exist(deserialized_handshake.uuid));
-            //console.log(index);
         }
     }
 }
