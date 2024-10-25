@@ -1,12 +1,10 @@
 ```
 When you start multiple instances of this project   $ npm run dev    you can see each server making an "handshake" (exchange of uuid, ecdsa(pub) and ecdh(pub)).
 
-Currently, when you type a string in the stdin of an instance, you can see the replication across others sending acknowlegment to the emitter (the data is verified on both side);
+Currently, when you type a string in the stdin of an instance, you can see the replication across others sending acknowlegment to the emitter (the data is verified on both sides);
 
-The key exchange contain: uuid, signature(uuid), ecdsa(pub), ecdh(pub) with a computed hmac at the end.
-The exchanged data contain : data, signature(data), uuid, signature(uuid) with a computed hmac at the end.
-
-TODO: find a way to remove usage of "secret" set from system environment variable and used by crypto hmac. (exploring https://nodejs.org/docs/latest-v20.x/api/crypto.html#class-diffiehellman)
+The key exchange contain: uuid, signature(uuid), ecdsa(pub), ecdh(pub).
+The exchanged data contain : data, signature(data), uuid, signature(uuid).
 ```
 
 

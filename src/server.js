@@ -68,6 +68,7 @@ require('./utils/network').get_port_to_use( (_port) => {
         }
     })
 
+    
     this.http.listen(_port, function() {
         console.log("server listening on port: " + _port);
     });

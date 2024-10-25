@@ -1,18 +1,18 @@
 {
     "name": "s2s",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "description": "",
     "main": "src/server.js",
     "author": "Florian Blanc",
     "private": true,
     "scripts": {
-        "dev": "cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret node ./src/server.js",
+        "dev": "cross-env NODE_ENV=development node ./src/server.js",
         "pkg": "cross-env NODE_ENV=production pkg ./src/server.js --out-path ./dist",
         "bundle": "cross-env NODE_ENV=production webpack",
         "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/bundle.js --out-path ./dist",
-        "exec:pkg": "cd dist && cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret server-win.exe",
-        "exec:bundle": "cd dist && cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret node bundle.js",
-        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development CRYPTO_SECRET=crypto_secret SESSION_SECRET=session_secret bundle-win.exe"
+        "exec:pkg": "cd dist && cross-env NODE_ENV=development server-win.exe",
+        "exec:bundle": "cd dist && cross-env NODE_ENV=development node bundle.js",
+        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development bundle-win.exe"
     },
     "dependencies": {
         "lowdb": "^1.0.0",

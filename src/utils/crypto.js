@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const CONST_ALGORITHM = 'aes-256-cbc';
 const CONST_ALGORITHM_LENGTH = 32; // 256 bits == 32 bytes/characters (32*8) 
 const CONST_IV_LENGTH = 16; // IV => For AES, the size is always 16 (buffer) || 32 (hex) || 128 bits (16*8)
-const CONST_HASH = 'SHA256';
+const CONST_HASH = 'sha256';
 const CONST_ECDSA_ALGORITHM = 'sect239k1';
 const CONST_ECDH_ALGORITHM = 'secp521r1';
 
@@ -58,43 +58,25 @@ exports.ecdh = {
 
 exports.ecdsa = {
     generate: () => {
-        const secret = crypto.randomBytes(256).toString('base64');
-        const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', {
-            namedCurve: CONST_ECDSA_ALGORITHM,
-            publicKeyEncoding: {
-                type: 'spki',
-                format: 'der'
-            },
-            privateKeyEncoding: {
-                type: 'pkcs8',
-                format: 'der',
-                cipher: CONST_ALGORITHM,
-                passphrase: secret
-            }
-        });
-        return { secret: secret, priv: Buffer.from(privateKey).toString('base64'), pub: Buffer.from(publicKey).toString('base64') }
+        const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: CONST_ECDSA_ALGORITHM });
+        return {
+            priv: Buffer.from(privateKey.export({ type: 'pkcs8', format: 'der' })).toString('base64'),
+            pub: Buffer.from(publicKey.export({ type: 'spki', format: 'der' })).toString('base64')
+        }
     },
     sign: (data) => {
+        const privateKey = this.ecdsa.local.get.private.object()
         const sign = crypto.createSign(CONST_HASH);
         sign.update(data);
         sign.end();
-        return sign.sign(this.ecdsa.local.get.private.object());
+        return sign.sign(privateKey, 'base64');
     },
-    verify: (data, pub, signature) => {
+    verify: (data, signature, pub64) => {
+        const publicKey = this.ecdsa.local.get.public.object(pub64);
         const verify = crypto.createVerify(CONST_HASH);
         verify.update(data);
         verify.end();
-        return verify.verify(pub, signature);
-    },
-    build: {
-        public: (pub) => {
-            const publicKey = crypto.createPublicKey({
-                key: Buffer.from(pub, 'base64'),
-                type: 'spki',
-                format: 'der'
-            });
-            return publicKey;
-        }
+        return verify.verify(publicKey, signature, 'base64');
     },
     local: {
         get: {
@@ -103,15 +85,19 @@ exports.ecdsa = {
                     const privateKey = crypto.createPrivateKey({
                         key: Buffer.from(require('../memory').db.server.keys.ecdsa.priv, 'base64'),
                         type: 'pkcs8',
-                        format: 'der',
-                        passphrase: require('../memory').db.server.keys.ecdsa.secret
+                        format: 'der'
                     });
                     return privateKey;
                 }
             },
             public: {
-                object: () => {
-                    return this.ecdsa.build.public(this.ecdsa.get.public.string());
+                object: (pub) => {
+                    const publicKey = crypto.createPublicKey({
+                        key: Buffer.from(pub, 'base64'),
+                        type: 'spki',
+                        format: 'der'
+                    });
+                    return publicKey;
                 },
                 string: () => {
                     return require('../memory').db.server.keys.ecdsa.pub;
@@ -121,7 +107,6 @@ exports.ecdsa = {
     }
 }
 
-// check https://nodejs.org/docs/latest-v20.x/api/crypto.html#class-diffiehellman
 exports.hmac = {
     get: {
         base64: (data) => {

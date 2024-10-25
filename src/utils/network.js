@@ -1,20 +1,17 @@
 exports.serialize_s2s = (data, pub) => {
     // pub is the ecdh pub of the destination
-    const { uuid, ecdsa, ecdh, hmac } = require('../utils/crypto');
+    const { uuid, ecdsa, ecdh } = require('../utils/crypto');
     
     const _ecdsa_local_pub = ecdsa.local.get.public.string();
     const _ecdh_local_pub = ecdh.local.get.public.string();
 
     const _data = data ? Buffer.from(ecdh.encrypt(data, pub)).toString('base64') : '';
-    const _data_signature = Buffer.from(ecdsa.sign(_data)).toString('base64');
+    const _data_signature = ecdsa.sign(_data);
     const _uuid = Buffer.from(uuid.get()).toString('base64');
-    const _uuid_signature = Buffer.from(ecdsa.sign(_uuid)).toString('base64');
+    const _uuid_signature = ecdsa.sign(_uuid);
 
-    // _prefinal is different if it's for handshake or data
-    const _prefinal = data ? [_data, _data_signature, _uuid, _uuid_signature].join(':') : [_uuid, _uuid_signature, _ecdsa_local_pub, _ecdh_local_pub].join(':');
-    const _hmac = hmac.get.base64(_prefinal);
-
-    const _final = [_prefinal, _hmac].join(':');
+    // _final is different if it's for handshake or data
+    const _final = data ? [_data, _data_signature, _uuid, _uuid_signature].join(':') : [_uuid, _uuid_signature, _ecdsa_local_pub, _ecdh_local_pub].join(':');
 
     return Buffer.from(_final).toString('base64');
 }
@@ -23,42 +20,33 @@ exports.deserialize_s2s = (serialized_data) => {
     const { uuid, hmac, ecdsa, ecdh } = require('../utils/crypto');
 
     const _table = Buffer.from(serialized_data, 'base64').toString().split(':');
-    const _hmac_to_compute = [_table[0], _table[1], _table[2], _table[3]].join(':');
 
     // if it's an uuid at _table[0] => it's an handshake ; else it's data without ecdsa & ecdh
     const _json_data = uuid.validate(Buffer.from(_table[0], 'base64').toString()) ? {
         uuid: Buffer.from(_table[0], 'base64').toString(),
-        uuid_signature: Buffer.from(_table[1], 'base64').toString(),
+        uuid_signature: _table[1],
         ecdsa: _table[2],
         ecdh: _table[3],
-        hmac: _table[4], err: {}
+        err: {}
     } : {
         data: Buffer.from(_table[0], 'base64').toString(),
-        data_signature: Buffer.from(_table[1], 'base64').toString(),
+        data_signature: _table[1],
         uuid: Buffer.from(_table[2], 'base64').toString(),
-        uuid_signature: Buffer.from(_table[3], 'base64').toString(),
-        hmac: _table[4], err: {}
+        uuid_signature: _table[3],
+        err: {}
     };
 
-    // perform hmac and ecdsa check
-    if (hmac.get.base64(_hmac_to_compute) !== _json_data.hmac) {
-        _json_data.err.hmac = "hmac does not match";
-    }
+    // decrypt only if ecdsa check is valid
     if (_json_data.data) {
         const _peer = require('../memory').db.peers[require('../memory').db.get.peer.index(_json_data.uuid)];
-
-        if (ecdsa.verify(_json_data.data, ecdsa.build.public(_peer.ecdsa), _json_data.data_signature)) {
-            _json_data.err.ecdsa_data = "data ecdsa signature error";
-        } else {
-            _json_data.data = ecdh.decrypt(_json_data.data, _peer.ecdh);
-        }
-        if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_peer.ecdsa), _json_data.uuid_signature)) {
-            _json_data.err.ecdsa_uuid = "uuid ecdsa signature error";
-        }
+        const is_verified_data = ecdsa.verify(_table[0], _json_data.data_signature, _peer.ecdsa);
+        const is_verified_uuid = ecdsa.verify(_table[2], _json_data.uuid_signature, _peer.ecdsa);
+        if (!is_verified_data) { _json_data.err.ecdsa_data = "data ecdsa signature error" }
+        if (!is_verified_uuid) { _json_data.err.ecdsa_uuid = "uuid ecdsa signature error" }
+        if (is_verified_data && is_verified_uuid) { _json_data.data = ecdh.decrypt(_json_data.data, _peer.ecdh) }
     } else {
-        if (ecdsa.verify(_json_data.uuid, ecdsa.build.public(_json_data.ecdsa), _json_data.uuid_signature)) {
-            _json_data.err.ecdsa_uuid = "uuid ecdsa signature error";
-        }
+        const is_verified_uuid = ecdsa.verify(_table[0], _json_data.uuid_signature, _json_data.ecdsa);
+        if (!is_verified_uuid) { _json_data.err.ecdsa_uuid = "uuid ecdsa signature error" }
     }
     
     return _json_data;
