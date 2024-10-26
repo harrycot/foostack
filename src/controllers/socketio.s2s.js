@@ -1,12 +1,12 @@
 exports.init_ioserver = () => {
     require('../server').io.of('s2s').on('connection', async (socket) => {
         require('../memory').db.server.socket = socket;
-        console.log(`ioserver id ${require('../memory').db.server.socket.client.conn.id}: new connection s2s`);
+        console.log(`as ioserver got client id ${require('../memory').db.server.socket.client.conn.id}: connected`);
 
         // check if client ip is present in peers (ALLOWED) else disconnect and do something
         if (require('../memory').config.is_production) {
             const client_ip = require('../utils/socketio').parse_client_ip(require('../memory').db.server.socket);
-            const is_client_allowed = this.db.peers.filter(function(peer) { return peer.server.includes(client_ip.ipv4) }).length == 0 ? false : true;
+            const is_client_allowed = this.db.peers.filter(function(peer) { return peer.server.includes(client_ip.v4) }).length == 0 ? false : true;
             if (!is_client_allowed) {
                 console.log('CLIENT NOT ALLOWED, DO SOMETHING');
                 require('../memory').db.server.socket.disconnect();
@@ -17,7 +17,7 @@ exports.init_ioserver = () => {
         for (peer of require('../memory').db.peers) {
             if ((require('../memory').db.server.socket.handshake.headers.host).includes(peer.server)){ // !!host check can fail attention
                 if (peer.socket.io.engine.id === require('../memory').db.server.socket.client.conn.id) {
-                    console.log(`ioserver id ${require('../memory').db.server.socket.client.conn.id}: self connection detected`);
+                    console.log(`as ioserver got client id ${require('../memory').db.server.socket.client.conn.id}: self connection detected`);
                     const client_ip = require('../utils/socketio').parse_client_ip(require('../memory').db.server.socket);
                     require('../memory').config.network.ip = client_ip; // help to add ip to server config
                     require('../memory').db.server.socket.disconnect();
@@ -26,6 +26,8 @@ exports.init_ioserver = () => {
         }
 
         require('../memory').db.server.socket.on('data', (serialized_data) => {
+            //console.log('\n\nServer Socket');
+            //console.log(require('../memory').db.server.socket.server.engine.clients);
             on_data_common(index = false, serialized_data, send_ack = true);
         });
 
@@ -34,7 +36,7 @@ exports.init_ioserver = () => {
         });
 
         require('../memory').db.server.socket.on('disconnect', () => {
-            console.log(`ioserver id ${require('../memory').db.server.socket.client.conn.id}: client disconnected`);
+            console.log(`as ioserver got client id ${require('../memory').db.server.socket.client.conn.id}: disconnected`);
         });
     });
 
@@ -49,7 +51,7 @@ const init_ioclient = (index) => {
     require('../memory').db.peers[index].socket = require('socket.io-client')('http://' + require('../memory').db.peers[index].server + '/s2s');
     
     require('../memory').db.peers[index].socket.on('connect', function () {
-        console.log(`ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}: connected s2s`);
+        console.log(`as ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}: connected`);
         require('../memory').db.peers[index].socket.emit('data', serialize_s2s()); // handshake init - handshake init - handshake init - handshake init
     });
 
@@ -59,7 +61,7 @@ const init_ioclient = (index) => {
     });
 
     require('../memory').db.peers[index].socket.on('disconnect', function () {
-        console.log(`ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}: server disconnected`);
+        console.log(`as ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}: disconnected`);
     });
 }
 

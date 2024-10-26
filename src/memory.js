@@ -1,7 +1,7 @@
 exports.config = {
     is_production: process.pkg ? true : false,
     port_range: process.pkg ? { start: 443, end: 443} : { start: 8001, end: 8010 },
-    network: { ip: { ipv4: false, ipv6: false }, port: false }
+    network: { ip: { v4: false, v6: false }, port: false }
 }
 
 exports.db = {
