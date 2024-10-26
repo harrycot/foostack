@@ -1,17 +1,16 @@
-
 // socket Obect SERVER SIDE !
 exports.parse_client_ip = (socket) => {
-    let s2s_client = { ipv4: false, ipv6: false};
     const sha_last_index_colon = socket.handshake.address.lastIndexOf(':');
     if (sha_last_index_colon > -1) {
         if (socket.handshake.address.lastIndexOf('.') > -1) {
-            s2s_client.ipv4 = socket.handshake.address.slice(sha_last_index_colon + 1);
-            s2s_client.ipv6 = socket.handshake.address.slice(0, sha_last_index_colon);
+            return {
+                ipv4: socket.handshake.address.slice(sha_last_index_colon + 1),
+                ipv6: socket.handshake.address.slice(0, sha_last_index_colon)
+            }
         } else {
-            s2s_client.ipv6 = socket.handshake.address;
+            return { ipv4: false, ipv6: socket.handshake.address }
         }
     } else {
-        s2s_client.ipv4 = socket.handshake.address;
+        return { ipv4: socket.handshake.address, ipv6: false }
     }
-    return s2s_client;
 }

@@ -1,13 +1,12 @@
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 const DBFileSync = require('lowdb/adapters/FileSync');
-//const LowdbStore = require('lowdb-session-store')(session);
 
 const cwd = require('./memory').config.is_production ? process.cwd() : __dirname;
 
 exports.db = {} // set db path when we know which port to use
 
-exports.http = require('http').createServer(function(req, res){
+exports.http = require('node:http').createServer(function(req, res){
     console.log(req.url);
     switch (req.url) {
         case '/styles.css':
@@ -63,7 +62,7 @@ require('./utils/network').get_port_to_use( (_port) => {
         console.log(`SENDING: ${data}`);
         for (peer of require('./memory').db.peers) {
             if (peer.socket.connected) {
-                peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.ecdh)); // calling serialize_s2s() without giving data == it's an handshake
+                peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.ecdh));
             }
         }
     })

@@ -17,7 +17,7 @@ exports.serialize_s2s = (data, pub) => {
 }
 
 exports.deserialize_s2s = (serialized_data) => {
-    const { uuid, hmac, ecdsa, ecdh } = require('../utils/crypto');
+    const { uuid, ecdsa, ecdh } = require('../utils/crypto');
 
     const _table = Buffer.from(serialized_data, 'base64').toString().split(':');
 
@@ -73,7 +73,7 @@ exports.get_http_headers = (content_type) => {
 
 exports.is_port_available = (port) => {
     return new Promise((resolve, reject) => {
-        const server = require('net').createServer();
+        const server = require('node:net').createServer();
         server.on('error', reject);
         server.listen(port, () => {
             server.off('error', reject);
@@ -95,38 +95,3 @@ exports.get_port_to_use = async (callback) => {
         }
     }
 }
-
-exports.is_public_ipv4 = (ipv4) => {
-    // https://stackoverflow.com/questions/33453057/regex-to-only-match-public-ipv4-address/46399203#46399203
-    const regex = /(^0\.)|(^10\.)|(^100\.6[4-9]\.)|(^100\.[7-9]\d\.)|(^100\.1[0-1]\d\.)|(^100\.12[0-7]\.)|(^127\.)|(^169\.254\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.0\.0\.)|(^192\.0\.2\.)|(^192\.88\.99\.)|(^192\.168\.)|(^198\.1[8-9]\.)|(^198\.51\.100\.)|(^203.0\.113\.)|(^22[4-9]\.)|(^23[0-9]\.)|(^24[0-9]\.)|(^25[0-5]\.)/;
-    return regex.test(ipv4);
-}
-exports.is_public_ipv6 = (ipv6) => {
-    //
-}
-
-
-//////////////////////////
-
-
-exports.get_external_ipv4 = () => {
-    const ifaces = require('os').networkInterfaces();
-    console.log(ifaces);
-    let address;
-    for (const dev in ifaces) {
-        const iface = ifaces[dev].filter((details) => {
-            return details.family === 'IPv4' && details.internal === false;
-        });
-        if (iface.length > 0) address = iface[0].address;
-        return address;
-    }
-}
-
-exports.dns_lookup = (domain) => {
-    require('dns').lookup(domain, (err, address, family) => {
-        //if (memory.is_production) { console.log('address: %j family: IPv%s', address, family) };
-        //this.ioc.push({ server: address });
-    });
-}
-
-

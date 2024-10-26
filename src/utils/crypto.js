@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const crypto = require('node:crypto');
 
 const CONST_ALGORITHM = 'aes-256-cbc';
 const CONST_ALGORITHM_LENGTH = 32; // 256 bits == 32 bytes/characters (32*8) 
@@ -6,6 +6,8 @@ const CONST_IV_LENGTH = 16; // IV => For AES, the size is always 16 (buffer) || 
 const CONST_HASH = 'sha256';
 const CONST_ECDSA_ALGORITHM = 'sect239k1';
 const CONST_ECDH_ALGORITHM = 'secp521r1';
+const CONST_ECDSA_PRIV_KEY_TYPE = 'pkcs8';
+const CONST_ECDSA_PUB_KEY_TYPE = 'spki';
 
 exports.uuid = {
     generate: () => {
@@ -20,6 +22,7 @@ exports.uuid = {
     }
 }
 
+// pub: encrypt ; priv: decrypt
 exports.ecdh = {
     // store b64
     generate: () => {
@@ -56,12 +59,13 @@ exports.ecdh = {
 
 }
 
+// pub: verify ; priv: sign
 exports.ecdsa = {
     generate: () => {
         const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: CONST_ECDSA_ALGORITHM });
         return {
-            priv: Buffer.from(privateKey.export({ type: 'pkcs8', format: 'der' })).toString('base64'),
-            pub: Buffer.from(publicKey.export({ type: 'spki', format: 'der' })).toString('base64')
+            priv: Buffer.from(privateKey.export({ type: CONST_ECDSA_PRIV_KEY_TYPE, format: 'der' })).toString('base64'),
+            pub: Buffer.from(publicKey.export({ type: CONST_ECDSA_PUB_KEY_TYPE, format: 'der' })).toString('base64')
         }
     },
     sign: (data) => {
@@ -84,8 +88,7 @@ exports.ecdsa = {
                 object: () => {
                     const privateKey = crypto.createPrivateKey({
                         key: Buffer.from(require('../memory').db.server.keys.ecdsa.priv, 'base64'),
-                        type: 'pkcs8',
-                        format: 'der'
+                        type: CONST_ECDSA_PRIV_KEY_TYPE, format: 'der'
                     });
                     return privateKey;
                 }
@@ -94,8 +97,7 @@ exports.ecdsa = {
                 object: (pub) => {
                     const publicKey = crypto.createPublicKey({
                         key: Buffer.from(pub, 'base64'),
-                        type: 'spki',
-                        format: 'der'
+                        type: CONST_ECDSA_PUB_KEY_TYPE, format: 'der'
                     });
                     return publicKey;
                 },
@@ -104,21 +106,6 @@ exports.ecdsa = {
                 }
             }
         }
-    }
-}
-
-exports.hmac = {
-    get: {
-        base64: (data) => {
-            const hmac = crypto.createHmac(CONST_HASH, process.env.CRYPTO_SECRET);
-            hmac.update(data);
-            return hmac.digest('base64');
-        },
-        hex: (data) => {
-            const hmac = crypto.createHmac(CONST_HASH, process.env.CRYPTO_SECRET);
-            hmac.update(data);
-            return hmac.digest('hex');
-        },
     }
 }
 

@@ -3,7 +3,7 @@ exports.init_ioserver = () => {
         require('../memory').db.server.socket = socket;
         console.log(`ioserver id ${require('../memory').db.server.socket.client.conn.id}: new connection s2s`);
 
-        // check if client ip is present in peers else disconnect and do something
+        // check if client ip is present in peers (ALLOWED) else disconnect and do something
         if (require('../memory').config.is_production) {
             const client_ip = require('../utils/socketio').parse_client_ip(require('../memory').db.server.socket);
             const is_client_allowed = this.db.peers.filter(function(peer) { return peer.server.includes(client_ip.ipv4) }).length == 0 ? false : true;
@@ -13,10 +13,13 @@ exports.init_ioserver = () => {
             }
         }
 
+        // if it's a self connection
         for (peer of require('../memory').db.peers) {
             if ((require('../memory').db.server.socket.handshake.headers.host).includes(peer.server)){ // !!host check can fail attention
                 if (peer.socket.io.engine.id === require('../memory').db.server.socket.client.conn.id) {
                     console.log(`ioserver id ${require('../memory').db.server.socket.client.conn.id}: self connection detected`);
+                    const client_ip = require('../utils/socketio').parse_client_ip(require('../memory').db.server.socket);
+                    require('../memory').config.network.ip = client_ip; // help to add ip to server config
                     require('../memory').db.server.socket.disconnect();
                 }
             }
