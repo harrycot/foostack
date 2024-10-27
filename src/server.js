@@ -8,19 +8,25 @@ exports.db = {} // set db path when we know which port to use
 
 exports.http = require('node:http').createServer(function(req, res){
     console.log(req.url);
-    switch (req.url) {
-        case '/styles.css':
-            fs.readFile(path.join(cwd, 'view/styles.css'), function(err, data) {
+    const _files = require('./memory').config.is_production
+        ? []
+        : [
+            { req: '/styles.css', path: 'view/styles.css', type: 'text/css' },
+            { req: '/body.js', path: 'view/body.js', type: 'text/javascript' },
+            { req: '/socketio.js', path: '../node_modules/socket.io-client/dist/socket.io.js', type: 'text/javascript' }
+        ];
+    for (file of _files) {
+        if (req.url == file.req) {
+            fs.readFile(path.join(cwd, file.path), function(err, data) {
                 if (err) { console.log(err) }
-                res.writeHead(200, require('./utils/network').get_http_headers('text/css')); res.write(data); res.end();
-            }); break;
-    
-        default:
-            fs.readFile(path.join(cwd, 'view/index.html'), function(err, data) {
-                if (err) { console.log(err) }
-                res.writeHead(200, require('./utils/network').get_http_headers('text/html')); res.write(data); res.end();
-            }); break;
+                res.writeHead(200, require('./utils/network').get_http_headers(file.type)); res.write(data); res.end();
+            }); return;
+        }
     }
+    fs.readFile(path.join(cwd, 'view/index.html'), function(err, data) {
+        if (err) { console.log(err) }
+        res.writeHead(200, require('./utils/network').get_http_headers('text/html')); res.write(data); res.end();
+    });
 });
 
 exports.io = require('socket.io')(this.http);
@@ -52,8 +58,8 @@ require('./utils/network').get_port_to_use( (_port) => {
         require('./memory').db.server.keys.ecdh = require('./utils/crypto').ecdh.generate();
     }
 
-    //require('./controllers/socketio').init();
     require('./controllers/socketio.s2s').init_ioserver();
+    require('./controllers/socketio').init();
 
 
     process.stdin.setEncoding('utf8');

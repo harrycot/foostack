@@ -1,14 +1,11 @@
-// const server = require('../server');
 
-// /**
-//  * App Express init
-//  */
-// exports.init = () => {
-//     server.io.on('connection', async (socket) => {
-//         console.log("New connection to default namespace");
+exports.init = () => {
+    require('../server').io.of('web').on('connection', async (socket) => {
+        require('../memory').db.server.socket = socket;
+        console.log(`web: as ioserver got client id ${require('../memory').db.server.socket.client.conn.id}: connected`);
 
-//         socket.on('disconnect', () => {
-//             console.log('Socket disconnected');
-//         });
-//     });
-// }
+        require('../memory').db.server.socket.on('disconnect', () => {
+            console.log(`web: as ioserver got client id ${require('../memory').db.server.socket.client.conn.id}: disconnected`);
+        });
+    });
+}
