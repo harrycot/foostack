@@ -5,6 +5,8 @@ Currently, when you type a string in the stdin of an instance, you can see the r
 
 The key exchange contain: uuid, signature(uuid), ecdsa(pub), ecdh(pub).
 The exchanged data contain : data, signature(data), uuid, signature(uuid).
+
+https://github.com/indutny/elliptic will be used for web client side.
 ```
 
 
