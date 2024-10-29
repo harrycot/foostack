@@ -26,14 +26,9 @@ exports.uuid = {
 exports.ecdh = {
     // store b64
     generate: () => {
-        //console.log(crypto.getHashes());
-        //console.log(crypto.getCurves());
-        //console.log(crypto.getCiphers());
         const ecdh = crypto.createECDH(CONST_ECDH_ALGORITHM);
         const pub = ecdh.generateKeys('base64');
         const priv = ecdh.getPrivateKey('base64');
-        console.log(ecdh.getPublicKey().length); // 129 Buffer length
-        console.log(ecdh.getPrivateKey().length); // 64 Buffer length
         return { priv: priv, pub: pub }
     },
     encrypt: (data, pub64) => {
@@ -68,9 +63,6 @@ exports.ecdh = {
 exports.ecdsa = {
     generate: () => {
         const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: CONST_ECDSA_ALGORITHM });
-        //console.log(privateKey.export({ type: CONST_ECDSA_PRIV_KEY_TYPE, format: 'der' }).length); // 189 Buffer length
-        //console.log(publicKey.export({ type: CONST_ECDSA_PUB_KEY_TYPE, format: 'der' }).length); // 124 Buffer length
-
         return {
             priv: Buffer.from(privateKey.export({ type: CONST_ECDSA_PRIV_KEY_TYPE, format: 'der' })).toString('base64'),
             pub: Buffer.from(publicKey.export({ type: CONST_ECDSA_PUB_KEY_TYPE, format: 'der' })).toString('base64')

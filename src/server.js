@@ -40,7 +40,7 @@ if (!require('./memory').config.is_production) {
     // push server list for prod
 }
 
-require('./utils/network').get_port_to_use( (_port) => {
+require('./utils/network').get_port_to_use( async (_port) => {
     require('./memory').config.network.port = _port;
     
     if (!fs.existsSync(path.join(cwd, 'db'))) { fs.mkdirSync(path.join(cwd, 'db')) }
@@ -58,6 +58,28 @@ require('./utils/network').get_port_to_use( (_port) => {
     if (!require('./memory').db.server.keys.ecdh) {
         require('./memory').db.server.keys.ecdh = require('./utils/crypto').ecdh.generate();
     }
+
+    const openpgp = require('openpgp');
+    const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
+        type: 'ecc', // Type of the key, defaults to ECC
+        curve: 'brainpoolP512r1', // ECC curve name, defaults to curve25519
+        userIDs: { name: require('./utils/crypto').uuid.generate(), email: `${require('./utils/crypto').uuid.generate()}@localhost.local` }, // you can pass multiple user IDs
+        format: 'armored' // output key format, defaults to 'armored' (other options: 'binary' or 'object')
+    });
+    // console.log(privateKey);     // '-----BEGIN PGP PRIVATE KEY BLOCK ... '
+    // console.log(publicKey);      // '-----BEGIN PGP PUBLIC KEY BLOCK ... '
+    // console.log(revocationCertificate); // '-----BEGIN PGP PUBLIC KEY BLOCK ...
+    
+    if (!require('./memory').db.server.openpgp) {
+        require('./memory').db.server.openpgp = { 
+            priv: Buffer.from(privateKey).toString('base64'),
+            pub: Buffer.from(publicKey).toString('base64'),
+            revcert: Buffer.from(revocationCertificate).toString('base64')
+        }
+    }
+
+    //console.log(require('./memory').db.server);
+    //console.log(Buffer.from(require('./memory').db.server.openpgp.pub, 'base64').toString());
 
     require('./controllers/socketio.s2s').init_ioserver();
     require('./controllers/socketio').init();
