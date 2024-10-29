@@ -93,11 +93,13 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 // 'data'
                 console.log(`\n  => DATA as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
                 const _index = require('../memory').db.get.peer.index(_deserialized_s2s.uuid)
-                const _ecdh = require('../memory').db.peers[_index].ecdh;
-                require('../memory').db.peers[_index].socket.emit('data ack', await serialize_s2s(_deserialized_s2s.data, _ecdh));
+                //const _ecdh = require('../memory').db.peers[_index].ecdh;
+                const _openpgp = require('../memory').db.peers[_index].openpgp;
+                require('../memory').db.peers[_index].socket.emit('data ack', await serialize_s2s(_deserialized_s2s.data, _openpgp));
             } else {
                 // 'data ack'
                 console.log(`\n  => DATA ACK as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
+                console.log(require('../memory').db);
             }
         }
     } else {
