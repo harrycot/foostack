@@ -12,11 +12,10 @@
         "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/bundle.js --out-path ./dist",
         "exec:pkg": "cd dist && cross-env NODE_ENV=development server-win.exe",
         "exec:bundle": "cd dist && cross-env NODE_ENV=development node bundle.js",
-        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development bundle-win.exe",
-        
-        "clone:elliptic": "cd node_modules && git clone https://github.com/indutny/elliptic"
+        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development bundle-win.exe"
     },
     "dependencies": {
+        "@openpgp/elliptic": "github:openpgpjs/elliptic",
         "lowdb": "^1.0.0",
         "socket.io": "^4.7.2",
         "socket.io-client": "^4.7.2"

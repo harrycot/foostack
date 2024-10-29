@@ -14,7 +14,7 @@ exports.http = require('node:http').createServer(function(req, res){
             { req: '/styles.css', path: 'view/styles.css', type: 'text/css' },
             { req: '/body.js', path: 'view/body.js', type: 'text/javascript' },
             { req: '/socketio.js', path: '../node_modules/socket.io-client/dist/socket.io.js', type: 'text/javascript' },
-            { req: '/elliptic.js', path: '../node_modules/elliptic/dist/elliptic.js', type: 'text/javascript' },
+            { req: '/elliptic.js', path: '../node_modules/@openpgp/elliptic/dist/elliptic.js', type: 'text/javascript' },
         ];
     for (file of _files) {
         if (req.url == file.req) {

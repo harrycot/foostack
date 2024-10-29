@@ -8,6 +8,8 @@ The exchanged data contain : data, signature(data), uuid, signature(uuid).
 
 https://github.com/indutny/elliptic will be used for web client side.
   => consider using this fork https://github.com/openpgpjs/elliptic which includes brainpool curves (https://github.com/indutny/elliptic/pull/144/files)
+
+maybe use https://github.com/openpgpjs/openpgpjs as an all in one tool.
 ```
 
 
