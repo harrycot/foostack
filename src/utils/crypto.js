@@ -3,9 +3,9 @@ const crypto = require('node:crypto');
 const CONST_ALGORITHM = 'aes-256-cbc';
 const CONST_ALGORITHM_LENGTH = 32; // 256 bits == 32 bytes/characters (32*8) 
 const CONST_IV_LENGTH = 16; // IV => For AES, the size is always 16 (buffer) || 32 (hex) || 128 bits (16*8)
-const CONST_HASH = 'sha256';
-const CONST_ECDSA_ALGORITHM = 'sect239k1';
-const CONST_ECDH_ALGORITHM = 'secp521r1';
+const CONST_HASH = 'sha512';
+const CONST_ECDSA_ALGORITHM = 'brainpoolP384r1';
+const CONST_ECDH_ALGORITHM = 'brainpoolP512r1';
 const CONST_ECDSA_PRIV_KEY_TYPE = 'pkcs8';
 const CONST_ECDSA_PUB_KEY_TYPE = 'spki';
 
@@ -26,6 +26,9 @@ exports.uuid = {
 exports.ecdh = {
     // store b64
     generate: () => {
+        //console.log(crypto.getHashes());
+        //console.log(crypto.getCurves());
+        //console.log(crypto.getCiphers());
         const ecdh = crypto.createECDH(CONST_ECDH_ALGORITHM);
         const pub = ecdh.generateKeys('base64');
         const priv = ecdh.getPrivateKey('base64');
