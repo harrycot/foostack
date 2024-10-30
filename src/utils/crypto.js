@@ -23,6 +23,29 @@ exports.uuid = {
     }
 }
 
+// to share a secret one time
+exports.dh = {
+    generate: () => {
+        const _ecdh = crypto.createECDH(CONST_CURVE_NAME);
+        const _pub64 = _ecdh.generateKeys('base64');
+        const _priv64 = _ecdh.getPrivateKey('base64');
+        return { priv: _priv64, pub: _pub64 }
+    },
+    secret: (priv64, pub64) => {
+        const _ecdh = crypto.createECDH(CONST_CURVE_NAME);
+        _ecdh.setPrivateKey(priv64, 'base64');
+        return _ecdh.computeSecret(pub64, 'base64', 'hex');
+    },
+    encrypt: (data, priv64, pub64) => { // using shared secret
+        const _secret = this.dh.secret(priv64, pub64);
+        return this.cipher(_secret, data);
+    },
+    decrypt: (data, priv64, pub64) => { // using shared secret
+        const _secret = this.keys.secret(priv64, pub64);
+        return this.decipher(_secret, data);
+    }
+}
+
 exports.keys = {
     generate: () => {
         //console.log(crypto.getCurves());
@@ -34,21 +57,11 @@ exports.keys = {
             pub: Buffer.from(publicKey.export({ type: CONST_PUB_KEY_TYPE, format: CONST_KEY_FORMAT })).toString('base64')
         }
     },
-    secret: (pub64) => {
-        const ecdh = crypto.createECDH(CONST_CURVE_NAME);
-        const pub = ecdh.generateKeys('base64');
-        console.log(this.keys.get.private.string());
-        console.log(ecdh.getPrivateKey('base64'));
-        ecdh.setPrivateKey(this.keys.get.private.string(), 'base64');
-        return ecdh.computeSecret(pub64, 'base64', 'hex');
+    encrypt: (data, pub64) => { // using pub key
+        //
     },
-    encrypt: (data, pub64) => {
-        const secret = this.keys.secret(pub64);
-        return this.cipher(secret, data);
-    },
-    decrypt: (data, pub64) => {
-        const secret = this.keys.secret(pub64);
-        return this.decipher(secret, data);
+    decrypt: (data, pub64) => { // using priv key
+        //
     },
     sign: (data) => {
         const privateKey = this.keys.get.private.object()
