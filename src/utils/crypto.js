@@ -3,11 +3,12 @@ const crypto = require('node:crypto');
 const CONST_ALGORITHM = 'aes-256-cbc';
 const CONST_ALGORITHM_LENGTH = 32; // 256 bits == 32 bytes/characters (32*8) 
 const CONST_IV_LENGTH = 16; // IV => For AES, the size is always 16 (buffer) || 32 (hex) || 128 bits (16*8)
+
 const CONST_HASH = 'sha512';
-const CONST_ECDSA_ALGORITHM = 'brainpoolP384r1';
-const CONST_ECDH_ALGORITHM = 'brainpoolP512r1';
-const CONST_ECDSA_PRIV_KEY_TYPE = 'pkcs8';
-const CONST_ECDSA_PUB_KEY_TYPE = 'spki';
+const CONST_CURVE_NAME = 'brainpoolP512r1';
+const CONST_PRIV_KEY_TYPE = 'pkcs8';
+const CONST_PUB_KEY_TYPE = 'spki';
+const CONST_KEY_FORMAT = 'der';
 
 exports.uuid = {
     generate: () => {
@@ -22,100 +23,76 @@ exports.uuid = {
     }
 }
 
-// pub: encrypt ; priv: decrypt
-exports.ecdh = {
-    // store b64
+exports.keys = {
     generate: () => {
-        //console.log(crypto.getHashes());
         //console.log(crypto.getCurves());
-        //console.log(crypto.getCiphers());
-        const ecdh = crypto.createECDH(CONST_ECDH_ALGORITHM);
+        const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: CONST_CURVE_NAME });
+        //console.log(privateKey.export({ type: CONST_PRIV_KEY_TYPE, format: CONST_KEY_FORMAT })); // 189 Buffer length
+        //console.log(publicKey.export({ type: CONST_PUB_KEY_TYPE, format: CONST_KEY_FORMAT })); // 124 Buffer length
+        return {
+            priv: Buffer.from(privateKey.export({ type: CONST_PRIV_KEY_TYPE, format: CONST_KEY_FORMAT })).toString('base64'),
+            pub: Buffer.from(publicKey.export({ type: CONST_PUB_KEY_TYPE, format: CONST_KEY_FORMAT })).toString('base64')
+        }
+    },
+    secret: (pub64) => {
+        const ecdh = crypto.createECDH(CONST_CURVE_NAME);
         const pub = ecdh.generateKeys('base64');
-        const priv = ecdh.getPrivateKey('base64');
-        console.log(ecdh.getPublicKey().length); // 129 Buffer length
-        console.log(ecdh.getPrivateKey().length); // 64 Buffer length
-        return { priv: priv, pub: pub }
+        console.log(this.keys.get.private.string());
+        console.log(ecdh.getPrivateKey('base64'));
+        ecdh.setPrivateKey(this.keys.get.private.string(), 'base64');
+        return ecdh.computeSecret(pub64, 'base64', 'hex');
     },
     encrypt: (data, pub64) => {
-        const secret = this.ecdh.secret(pub64);
+        const secret = this.keys.secret(pub64);
         return this.cipher(secret, data);
     },
     decrypt: (data, pub64) => {
-        const secret = this.ecdh.secret(pub64);
+        const secret = this.keys.secret(pub64);
         return this.decipher(secret, data);
     },
-    secret: (pub64) => {
-        const ecdh = crypto.createECDH(CONST_ECDH_ALGORITHM);
-        ecdh.setPrivateKey(this.ecdh.local.get.private(), 'base64');
-        return ecdh.computeSecret(pub64, 'base64', 'hex');
-    },
-    local: {
-        get: {
-            public: {
-                string: () => {
-                    return require('../memory').db.server.keys.ecdh.pub;
-                }
-            },
-            private: () => {
-                return require('../memory').db.server.keys.ecdh.priv;
-            }
-        }
-    }
-
-}
-
-// pub: verify ; priv: sign
-exports.ecdsa = {
-    generate: () => {
-        const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: CONST_ECDSA_ALGORITHM });
-        //console.log(privateKey.export({ type: CONST_ECDSA_PRIV_KEY_TYPE, format: 'der' }).length); // 189 Buffer length
-        //console.log(publicKey.export({ type: CONST_ECDSA_PUB_KEY_TYPE, format: 'der' }).length); // 124 Buffer length
-
-        return {
-            priv: Buffer.from(privateKey.export({ type: CONST_ECDSA_PRIV_KEY_TYPE, format: 'der' })).toString('base64'),
-            pub: Buffer.from(publicKey.export({ type: CONST_ECDSA_PUB_KEY_TYPE, format: 'der' })).toString('base64')
-        }
-    },
     sign: (data) => {
-        const privateKey = this.ecdsa.local.get.private.object()
+        const privateKey = this.keys.get.private.object()
         const sign = crypto.createSign(CONST_HASH);
         sign.update(data);
         sign.end();
         return sign.sign(privateKey, 'base64');
     },
     verify: (data, signature, pub64) => {
-        const publicKey = this.ecdsa.local.get.public.object(pub64);
+        const publicKey = this.keys.get.public.object(pub64);
         const verify = crypto.createVerify(CONST_HASH);
         verify.update(data);
         verify.end();
         return verify.verify(publicKey, signature, 'base64');
     },
-    local: {
-        get: {
-            private: {
-                object: () => {
-                    const privateKey = crypto.createPrivateKey({
-                        key: Buffer.from(require('../memory').db.server.keys.ecdsa.priv, 'base64'),
-                        type: CONST_ECDSA_PRIV_KEY_TYPE, format: 'der'
-                    });
-                    return privateKey;
-                }
+    get: {
+        public: {
+            string: () => {
+                return require('../memory').db.server.keys.pub;
             },
-            public: {
-                object: (pub) => {
-                    const publicKey = crypto.createPublicKey({
-                        key: Buffer.from(pub, 'base64'),
-                        type: CONST_ECDSA_PUB_KEY_TYPE, format: 'der'
-                    });
-                    return publicKey;
-                },
-                string: () => {
-                    return require('../memory').db.server.keys.ecdsa.pub;
-                }
+            object: (pub) => {
+                const _pub = pub ? pub : this.keys.get.public.string();
+                const publicKey = crypto.createPublicKey({
+                    key: Buffer.from(_pub, 'base64'),
+                    type: CONST_PUB_KEY_TYPE, format: CONST_KEY_FORMAT
+                });
+                return publicKey;
+            }
+        },
+        private: {
+            string: () => {
+                return require('../memory').db.server.keys.priv;
+            },
+            object: () => {
+                const privateKey = crypto.createPrivateKey({
+                    key: Buffer.from(this.keys.get.private.string(), 'base64'),
+                    type: CONST_PRIV_KEY_TYPE, format: CONST_KEY_FORMAT
+                });
+                return privateKey;
             }
         }
     }
 }
+
 
 // INPUT_DATA == String
 // Return BASE64
