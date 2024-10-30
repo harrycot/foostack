@@ -1,23 +1,24 @@
 exports.serialize_s2s = (data, pub) => {
     // pub is the ecdh pub of the destination
-    const { uuid, ecdsa, ecdh } = require('../utils/crypto');
+    const { uuid, keys, dhkeys } = require('../utils/crypto');
     
-    const _ecdsa_local_pub = ecdsa.local.get.public.string();
-    const _ecdh_local_pub = ecdh.local.get.public.string();
+    const _keys_local_pub = keys.get.public.string();
+    const _dhkeys_local_pub = dhkeys.get.public.string();
 
-    const _data = data ? Buffer.from(ecdh.encrypt(data, pub)).toString('base64') : '';
-    const _data_signature = ecdsa.sign(_data);
+    const _data = data ? dhkeys.encrypt(data, pub) : '';
+    //const _data = data ? keys.encrypt(data, pub) : '';
+    const _data_signature = keys.sign(_data);
     const _uuid = Buffer.from(uuid.get()).toString('base64');
-    const _uuid_signature = ecdsa.sign(_uuid);
+    const _uuid_signature = keys.sign(_uuid);
 
     // _final is different if it's for handshake or data
-    const _final = data ? [_data, _data_signature, _uuid, _uuid_signature].join(':') : [_uuid, _uuid_signature, _ecdsa_local_pub, _ecdh_local_pub].join(':');
+    const _final = data ? [_data, _data_signature, _uuid, _uuid_signature].join(':') : [_uuid, _uuid_signature, _keys_local_pub, _dhkeys_local_pub].join(':');
 
     return Buffer.from(_final).toString('base64');
 }
 
 exports.deserialize_s2s = (serialized_data) => {
-    const { uuid, ecdsa, ecdh } = require('../utils/crypto');
+    const { uuid, keys, dhkeys } = require('../utils/crypto');
 
     const _table = Buffer.from(serialized_data, 'base64').toString().split(':');
 
@@ -25,11 +26,11 @@ exports.deserialize_s2s = (serialized_data) => {
     const _json_data = uuid.validate(Buffer.from(_table[0], 'base64').toString()) ? {
         uuid: Buffer.from(_table[0], 'base64').toString(),
         uuid_signature: _table[1],
-        ecdsa: _table[2],
-        ecdh: _table[3],
+        pub: _table[2],
+        dhpub: _table[3],
         err: {}
     } : {
-        data: Buffer.from(_table[0], 'base64').toString(),
+        data: _table[0],
         data_signature: _table[1],
         uuid: Buffer.from(_table[2], 'base64').toString(),
         uuid_signature: _table[3],
@@ -39,13 +40,16 @@ exports.deserialize_s2s = (serialized_data) => {
     // decrypt only if ecdsa check is valid
     if (_json_data.data) {
         const _peer = require('../memory').db.peers[require('../memory').db.get.peer.index(_json_data.uuid)];
-        const is_verified_data = ecdsa.verify(_table[0], _json_data.data_signature, _peer.ecdsa);
-        const is_verified_uuid = ecdsa.verify(_table[2], _json_data.uuid_signature, _peer.ecdsa);
+        const is_verified_data = keys.verify(_table[0], _json_data.data_signature, _peer.pub);
+        const is_verified_uuid = keys.verify(_table[2], _json_data.uuid_signature, _peer.pub);
         if (!is_verified_data) { _json_data.err.ecdsa_data = "data ecdsa signature error" }
         if (!is_verified_uuid) { _json_data.err.ecdsa_uuid = "uuid ecdsa signature error" }
-        if (is_verified_data && is_verified_uuid) { _json_data.data = ecdh.decrypt(_json_data.data, _peer.ecdh) }
+        if (is_verified_data && is_verified_uuid) { // here decrypt using dh shared secret
+            try { _json_data.data = dhkeys.decrypt(_json_data.data, _peer.dhpub) } catch (e) { _json_data.err.dh_data = `data dh decrypt error: ${e}` }
+            //try { _json_data.data = keys.decrypt(_json_data.data) } catch (e) { _json_data.err.data = `data decrypt error: ${e}` }
+        }
     } else {
-        const is_verified_uuid = ecdsa.verify(_table[0], _json_data.uuid_signature, _json_data.ecdsa);
+        const is_verified_uuid = keys.verify(_table[0], _json_data.uuid_signature, _json_data.pub);
         if (!is_verified_uuid) { _json_data.err.ecdsa_uuid = "uuid ecdsa signature error" }
     }
     

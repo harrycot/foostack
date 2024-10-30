@@ -5,7 +5,7 @@ exports.config = {
 }
 
 exports.db = {
-    server: { uuid: false, keys: { ecdsa: false, ecdh: false }, socket: false },
+    server: { uuid: false, keys: false, dhkeys: false, socket: false },
     peers: [],
     get: {
         peer: {
@@ -23,8 +23,8 @@ exports.db = {
         peer: (index, deserialized_handshake) => {
             if ( !this.db.get.peer.exist(deserialized_handshake.uuid) && index ) {
                 this.db.peers[index].uuid = deserialized_handshake.uuid;
-                this.db.peers[index].ecdh = deserialized_handshake.ecdh;
-                this.db.peers[index].ecdsa = deserialized_handshake.ecdsa;
+                this.db.peers[index].pub = deserialized_handshake.pub;
+                this.db.peers[index].dhpub = deserialized_handshake.dhpub;
                 this.db.peers[index].seen = Date.now();
             } else if ( this.db.get.peer.exist(deserialized_handshake.uuid) ) {
                 this.db.peers[this.db.get.peer.index(deserialized_handshake.uuid)].seen = Date.now();

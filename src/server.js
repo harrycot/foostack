@@ -52,11 +52,11 @@ require('./utils/network').get_port_to_use( (_port) => {
     if (!require('./memory').db.server.uuid) {
         require('./memory').db.server.uuid = require('./utils/crypto').uuid.generate();
     }
-    if (!require('./memory').db.server.keys.ecdsa) {
-        require('./memory').db.server.keys.ecdsa = require('./utils/crypto').ecdsa.generate();
+    if (!require('./memory').db.server.keys) {
+        require('./memory').db.server.keys = require('./utils/crypto').keys.generate();
     }
-    if (!require('./memory').db.server.keys.ecdh) {
-        require('./memory').db.server.keys.ecdh = require('./utils/crypto').ecdh.generate();
+    if (!require('./memory').db.server.dhkeys) {
+        require('./memory').db.server.dhkeys = require('./utils/crypto').dhkeys.generate();
     }
 
     require('./controllers/socketio.s2s').init_ioserver();
@@ -69,7 +69,8 @@ require('./utils/network').get_port_to_use( (_port) => {
         console.log(`SENDING: ${data}`);
         for (peer of require('./memory').db.peers) {
             if (peer.socket.connected) {
-                peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.ecdh));
+                peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.dhpub));
+                //peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.pub));
             }
         }
     })

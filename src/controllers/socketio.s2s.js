@@ -93,8 +93,10 @@ const on_data_common = (index, serialized_data, send_ack) => {
                 // 'data'
                 console.log(`\n  => DATA as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
                 const _index = require('../memory').db.get.peer.index(_deserialized_s2s.uuid)
-                const _ecdh = require('../memory').db.peers[_index].ecdh;
-                require('../memory').db.peers[_index].socket.emit('data ack', serialize_s2s(_deserialized_s2s.data, _ecdh));
+                //const _pub = require('../memory').db.peers[_index].pub;
+                //require('../memory').db.peers[_index].socket.emit('data ack', serialize_s2s(_deserialized_s2s.data, _pub));
+                const _dhpub = require('../memory').db.peers[_index].dhpub;
+                require('../memory').db.peers[_index].socket.emit('data ack', serialize_s2s(_deserialized_s2s.data, _dhpub));
             } else {
                 // 'data ack'
                 console.log(`\n  => DATA ACK as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
