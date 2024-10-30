@@ -79,7 +79,11 @@ const on_data_common = async (index, serialized_data, send_ack) => {
         }
 
         if (!_deserialized_s2s.data){ // handshake
+
+
             // find a way to remove old peer if a node reboot
+
+            
             if (send_ack) {
                 // 'data' (as handshake init)
                 console.log(`\n  => HANDSHAKE as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid}\n`);
@@ -100,11 +104,10 @@ const on_data_common = async (index, serialized_data, send_ack) => {
             } else {
                 // 'data ack'
                 console.log(`\n  => DATA ACK as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
-                console.log(require('../memory').db);
             }
         }
     } else {
-        // HMAC ECDSA
+        // 
         console.log(_deserialized_s2s.err);
         console.log('WARNING do something..');
     }

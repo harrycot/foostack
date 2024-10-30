@@ -12,16 +12,23 @@ exports.openpgp = {
     generate: async (name, email) => {
         const openpgp = require('openpgp');
         const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
-            type: 'ecc',
-            curve: 'brainpoolP512r1',
-            userIDs: { name: name, email: email },
-            format: 'armored'
+            type: 'ecc', curve: 'brainpoolP512r1', userIDs: { name: name, email: email }, format: 'armored'
         });
-    
         return { 
             priv: Buffer.from(privateKey).toString('base64'),
             pub: Buffer.from(publicKey).toString('base64'),
             revcert: Buffer.from(revocationCertificate).toString('base64')
+        }
+    }
+}
+
+exports.misc = {
+    generate: {
+        secret: () => { // will be used by session
+            return {
+                secret: Buffer.from(require('node:crypto').randomBytes(require('node:crypto').randomInt(100, 200))).toString('base64'),
+                issued: Date.now()
+            }
         }
     }
 }

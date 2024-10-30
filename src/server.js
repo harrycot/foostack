@@ -13,7 +13,8 @@ exports.http = require('node:http').createServer(function(req, res){
         : [
             { req: '/styles.css', path: 'view/styles.css', type: 'text/css' },
             { req: '/body.js', path: 'view/body.js', type: 'text/javascript' },
-            { req: '/socketio.js', path: '../node_modules/socket.io-client/dist/socket.io.js', type: 'text/javascript' }
+            { req: '/socketio.js', path: '../node_modules/socket.io-client/dist/socket.io.js', type: 'text/javascript' },
+            { req: '/openpgp.js', path: '../node_modules/openpgp/dist/openpgp.js', type: 'text/javascript' }
         ];
     for (file of _files) {
         if (req.url == file.req) {
@@ -59,7 +60,6 @@ require('./utils/network').get_port_to_use( async (_port) => {
         );
     }
 
-
     require('./controllers/socketio.s2s').init_ioserver();
     require('./controllers/socketio').init();
 
@@ -77,7 +77,7 @@ require('./utils/network').get_port_to_use( async (_port) => {
 
     
     this.http.listen(_port, function() {
-        console.log("server listening on port: " + _port);
+        console.log("server listening on port: http://localhost:" + _port);
     });
 });
 

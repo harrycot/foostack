@@ -37,24 +37,20 @@ exports.deserialize_s2s = async (serialized_data) => {
 
     const _openpgp_local_priv_obj = await openpgp.readKey({ armoredKey: Buffer.from(_openpgp_local_priv, 'base64').toString() });
 
-    const _verified = await openpgp.verify({ message: _signed, verificationKeys: _json_data_openpgp_pub_obj });
+    const _verify_result_clear = await openpgp.verify({ message: _signed, verificationKeys: _json_data_openpgp_pub_obj });
     
-    const { verified } = _verified.signatures[0];
-
-    try { await verified } catch (e) { _json_data.err.signature_clear = `clear: Signature could not be verified: ${e.message}` }
+    try { await _verify_result_clear.signatures[0].verified } catch (e) { _json_data.err.signature_clear = `clear: Signature could not be verified: ${e.message}` }
 
     if (_json_data.data) {
         const _message = await openpgp.readMessage({
             armoredMessage: Buffer.from(_json_data.data, 'base64').toString()
         });
-        const { data: decrypted, signatures } = await openpgp.decrypt({
-            message: _message,
-            verificationKeys: _json_data_openpgp_pub_obj,
-            decryptionKeys: _openpgp_local_priv_obj
+        const { data: _decrypted, _signatures } = await openpgp.decrypt({
+            message: _message, verificationKeys: _json_data_openpgp_pub_obj, decryptionKeys: _openpgp_local_priv_obj
         });
         try {
-            await signatures[0].verified;
-            _json_data.data = decrypted;
+            await _signatures[0].verified;
+            _json_data.data = _decrypted;
         } catch (e) {
             _json_data.err.signature_data = `data: Signature could not be verified: ${e.message}`
         }

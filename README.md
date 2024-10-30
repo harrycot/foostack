@@ -1,7 +1,9 @@
 ```
-When you start multiple instances of this project   $ npm run dev    you can see each server making an "handshake" (exchange of uuid and openpgp public key).
+When you start multiple instances of this project   $ npm run dev
+you can see each server making an "handshake" (exchange of uuid and openpgp public key).
 
-Currently, when you type a string in the stdin of an instance, you can see the replication across others sending acknowlegment to the emitter (the data is verified on both sides);
+Currently, when you type a string in the stdin of an instance,
+you can see the replication across others sending acknowlegment to the emitter (the data is verified on both sides);
 
 on handshake: uuid and pub is signed and sent in clear.
 on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
@@ -9,7 +11,7 @@ on data: uuid and data is signed and sent as clear but data is encrypted and sig
 ```
 
 
-```json
+```
 // db of ./memory.js file looks like this
 {
     server: {
