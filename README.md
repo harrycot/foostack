@@ -5,6 +5,7 @@ Currently, when you type a string in the stdin of an instance, you can see the r
 
 on handshake: uuid and pub is signed and sent in clear.
 on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
+
 ```
 
 

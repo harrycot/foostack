@@ -96,6 +96,7 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 //const _ecdh = require('../memory').db.peers[_index].ecdh;
                 const _openpgp = require('../memory').db.peers[_index].openpgp;
                 require('../memory').db.peers[_index].socket.emit('data ack', await serialize_s2s(_deserialized_s2s.data, _openpgp));
+
             } else {
                 // 'data ack'
                 console.log(`\n  => DATA ACK as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
