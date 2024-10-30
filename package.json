@@ -1,6 +1,6 @@
 {
     "name": "s2s",
-    "version": "0.0.6",
+    "version": "0.0.7-openpgp",
     "description": "",
     "main": "src/server.js",
     "author": "Florian Blanc",

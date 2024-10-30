@@ -52,24 +52,11 @@ require('./utils/network').get_port_to_use( async (_port) => {
     if (!require('./memory').db.server.uuid) {
         require('./memory').db.server.uuid = require('./utils/crypto').uuid.generate();
     }
-
-    const openpgp = require('openpgp');
-    const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
-        type: 'ecc', // Type of the key, defaults to ECC
-        curve: 'brainpoolP512r1', // ECC curve name, defaults to curve25519
-        userIDs: { name: require('./utils/crypto').uuid.generate(), email: `${require('./utils/crypto').uuid.generate()}@localhost.local` }, // you can pass multiple user IDs
-        format: 'armored' // output key format, defaults to 'armored' (other options: 'binary' or 'object')
-    });
-    // console.log(privateKey);     // '-----BEGIN PGP PRIVATE KEY BLOCK ... '
-    // console.log(publicKey);      // '-----BEGIN PGP PUBLIC KEY BLOCK ... '
-    // console.log(revocationCertificate); // '-----BEGIN PGP PUBLIC KEY BLOCK ...
-    
     if (!require('./memory').db.server.openpgp) {
-        require('./memory').db.server.openpgp = { 
-            priv: Buffer.from(privateKey).toString('base64'),
-            pub: Buffer.from(publicKey).toString('base64'),
-            revcert: Buffer.from(revocationCertificate).toString('base64')
-        }
+        require('./memory').db.server.openpgp = await require('./utils/crypto').openpgp.generate(
+            require('./memory').db.server.uuid,
+            `${require('./memory').db.server.uuid}@localhost.local`
+        );
     }
 
     require('./controllers/socketio.s2s').init_ioserver();
