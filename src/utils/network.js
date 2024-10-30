@@ -1,58 +1,65 @@
-exports.serialize_s2s = (data, pub) => {
-    // pub is the ecdh pub of the destination
-    const { uuid, keys, dhkeys } = require('../utils/crypto');
-    
-    const _keys_local_pub = keys.get.public.string();
-    const _dhkeys_local_pub = dhkeys.get.public.string();
+exports.serialize_s2s = async (data, pub) => {
+    const openpgp = require('openpgp');
 
-    const _data = data ? dhkeys.encrypt(data, pub) : '';
-    //const _data = data ? keys.encrypt(data, pub) : '';
-    const _data_signature = keys.sign(_data);
-    const _uuid = Buffer.from(uuid.get()).toString('base64');
-    const _uuid_signature = keys.sign(_uuid);
+    const _openpgp_local_pub = require('../memory').db.server.openpgp.pub;
+    const _openpgp_local_priv = require('../memory').db.server.openpgp.priv;
 
-    // _final is different if it's for handshake or data
-    const _final = data ? [_data, _data_signature, _uuid, _uuid_signature].join(':') : [_uuid, _uuid_signature, _keys_local_pub, _dhkeys_local_pub].join(':');
+    const _openpgp_local_priv_obj = await openpgp.readKey({ armoredKey: Buffer.from(_openpgp_local_priv, 'base64').toString() });
 
-    return Buffer.from(_final).toString('base64');
+    const _message = data
+        ? { text: `{ "uuid": "${require('../memory').db.server.uuid}", "data": "${
+            Buffer.from(await openpgp.encrypt({
+                message: await openpgp.createMessage({ text: data }),
+                encryptionKeys: await openpgp.readKey({ armoredKey: Buffer.from(pub, 'base64').toString() }),
+                signingKeys: _openpgp_local_priv_obj
+            })).toString('base64')
+        }" }` }
+        : { text: `{ "uuid": "${require('../memory').db.server.uuid}", "pub": "${_openpgp_local_pub}" }` };
+
+    const _unsigned = await openpgp.createCleartextMessage(_message);
+    const _signed = await openpgp.sign({ message: _unsigned, signingKeys: _openpgp_local_priv_obj });
+
+    return Buffer.from(_signed).toString('base64');
 }
 
-exports.deserialize_s2s = (serialized_data) => {
-    const { uuid, keys, dhkeys } = require('../utils/crypto');
+exports.deserialize_s2s = async (serialized_data) => {
+    const openpgp = require('openpgp');
 
-    const _table = Buffer.from(serialized_data, 'base64').toString().split(':');
+    const _signed = await openpgp.readCleartextMessage({ cleartextMessage: Buffer.from(serialized_data, 'base64').toString() });
+    const _json_data = JSON.parse(_signed.text); _json_data.err = {};
 
-    // if it's an uuid at _table[0] => it's an handshake ; else it's data without ecdsa & ecdh
-    const _json_data = uuid.validate(Buffer.from(_table[0], 'base64').toString()) ? {
-        uuid: Buffer.from(_table[0], 'base64').toString(),
-        uuid_signature: _table[1],
-        pub: _table[2],
-        dhpub: _table[3],
-        err: {}
-    } : {
-        data: _table[0],
-        data_signature: _table[1],
-        uuid: Buffer.from(_table[2], 'base64').toString(),
-        uuid_signature: _table[3],
-        err: {}
-    };
+    const _openpgp_local_priv = require('../memory').db.server.openpgp.priv;
 
-    // decrypt only if ecdsa check is valid
-    if (_json_data.data) {
-        const _peer = require('../memory').db.peers[require('../memory').db.get.peer.index(_json_data.uuid)];
-        const is_verified_data = keys.verify(_table[0], _json_data.data_signature, _peer.pub);
-        const is_verified_uuid = keys.verify(_table[2], _json_data.uuid_signature, _peer.pub);
-        if (!is_verified_data) { _json_data.err.ecdsa_data = "data ecdsa signature error" }
-        if (!is_verified_uuid) { _json_data.err.ecdsa_uuid = "uuid ecdsa signature error" }
-        if (is_verified_data && is_verified_uuid) { // here decrypt using dh shared secret
-            try { _json_data.data = dhkeys.decrypt(_json_data.data, _peer.dhpub) } catch (e) { _json_data.err.dh_data = `data dh decrypt error: ${e}` }
-            //try { _json_data.data = keys.decrypt(_json_data.data) } catch (e) { _json_data.err.data = `data decrypt error: ${e}` }
-        }
-    } else {
-        const is_verified_uuid = keys.verify(_table[0], _json_data.uuid_signature, _json_data.pub);
-        if (!is_verified_uuid) { _json_data.err.ecdsa_uuid = "uuid ecdsa signature error" }
-    }
+    const _json_data_openpgp_pub_obj = !_json_data.data
+        ? await openpgp.readKey({ armoredKey: Buffer.from(_json_data.pub, 'base64').toString() })
+        : await openpgp.readKey({ armoredKey: Buffer.from(
+            require('../memory').db.peers[require('../memory').db.get.peer.index(_json_data.uuid)].openpgp, 'base64').toString() });
+
+    const _openpgp_local_priv_obj = await openpgp.readKey({ armoredKey: Buffer.from(_openpgp_local_priv, 'base64').toString() });
+
+    const _verified = await openpgp.verify({ message: _signed, verificationKeys: _json_data_openpgp_pub_obj });
     
+    const { verified } = _verified.signatures[0];
+
+    try { await verified } catch (e) { _json_data.err.signature_clear = `clear: Signature could not be verified: ${e.message}` }
+
+    if (_json_data.data) {
+        const _message = await openpgp.readMessage({
+            armoredMessage: Buffer.from(_json_data.data, 'base64').toString()
+        });
+        const { data: decrypted, signatures } = await openpgp.decrypt({
+            message: _message,
+            verificationKeys: _json_data_openpgp_pub_obj,
+            decryptionKeys: _openpgp_local_priv_obj
+        });
+        try {
+            await signatures[0].verified;
+            _json_data.data = decrypted;
+        } catch (e) {
+            _json_data.err.signature_data = `data: Signature could not be verified: ${e.message}`
+        }
+    }
+
     return _json_data;
 }
 

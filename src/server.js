@@ -13,8 +13,7 @@ exports.http = require('node:http').createServer(function(req, res){
         : [
             { req: '/styles.css', path: 'view/styles.css', type: 'text/css' },
             { req: '/body.js', path: 'view/body.js', type: 'text/javascript' },
-            { req: '/socketio.js', path: '../node_modules/socket.io-client/dist/socket.io.js', type: 'text/javascript' },
-            { req: '/elliptic.js', path: '../node_modules/@openpgp/elliptic/dist/elliptic.js', type: 'text/javascript' },
+            { req: '/socketio.js', path: '../node_modules/socket.io-client/dist/socket.io.js', type: 'text/javascript' }
         ];
     for (file of _files) {
         if (req.url == file.req) {
@@ -49,14 +48,15 @@ require('./utils/network').get_port_to_use( async (_port) => {
         session: require('lowdb')(new DBFileSync(path.join(cwd, `db/${_port}/sessions.json`), { defaultValue: [] })),
     }
     // db init
+
     if (!require('./memory').db.server.uuid) {
         require('./memory').db.server.uuid = require('./utils/crypto').uuid.generate();
     }
-    if (!require('./memory').db.server.keys) {
-        require('./memory').db.server.keys = require('./utils/crypto').keys.generate();
-    }
-    if (!require('./memory').db.server.dhkeys) {
-        require('./memory').db.server.dhkeys = require('./utils/crypto').dhkeys.generate();
+    if (!require('./memory').db.server.openpgp) {
+        require('./memory').db.server.openpgp = await require('./utils/crypto').openpgp.generate(
+            require('./memory').db.server.uuid,
+            `${require('./memory').db.server.uuid}@localhost.local`
+        );
     }
 
 
@@ -65,13 +65,12 @@ require('./utils/network').get_port_to_use( async (_port) => {
 
 
     process.stdin.setEncoding('utf8');
-    process.stdin.on("data", (data) => {
+    process.stdin.on("data", async (data) => {
         data = data.toString();
         console.log(`SENDING: ${data}`);
         for (peer of require('./memory').db.peers) {
             if (peer.socket.connected) {
-                peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.dhpub));
-                //peer.socket.emit('data', require('./utils/network').serialize_s2s(data, peer.pub));
+                peer.socket.emit('data', await require('./utils/network').serialize_s2s(data, peer.openpgp));
             }
         }
     })
