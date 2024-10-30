@@ -40,7 +40,7 @@ if (!require('./memory').config.is_production) {
     // push server list for prod
 }
 
-require('./utils/network').get_port_to_use( (_port) => {
+require('./utils/network').get_port_to_use( async (_port) => {
     require('./memory').config.network.port = _port;
     
     if (!fs.existsSync(path.join(cwd, 'db'))) { fs.mkdirSync(path.join(cwd, 'db')) }
@@ -58,6 +58,7 @@ require('./utils/network').get_port_to_use( (_port) => {
     if (!require('./memory').db.server.dhkeys) {
         require('./memory').db.server.dhkeys = require('./utils/crypto').dhkeys.generate();
     }
+
 
     require('./controllers/socketio.s2s').init_ioserver();
     require('./controllers/socketio').init();

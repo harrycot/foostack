@@ -8,7 +8,10 @@ const CONST_HASH = 'sha512';
 const CONST_CURVE_NAME = 'brainpoolP512r1';
 const CONST_KEY_PRIV_TYPE = 'pkcs8';
 const CONST_KEY_PUB_TYPE = 'spki';
-const CONST_KEY_FORMAT = 'der';
+const CONST_KEY_FORMAT = 'pem';
+
+// cipher/decipher is 'salt' important when secret is known by 2 peers?
+
 
 exports.uuid = {
     generate: () => {
@@ -46,10 +49,10 @@ exports.keys = {
         verify.end();
         return verify.verify(publicKey, signature, 'base64');
     },
-    encrypt: (data, pub64) => {
+    encrypt: (data, pub64) => { // https://stackoverflow.com/questions/53373994/encrypt-with-public-key-and-decrypt-with-private-key-using-elliptic-curve-crypto/53373997#53373997
         return Buffer.from(crypto.publicEncrypt(this.keys.get.public.object(pub64), Buffer.from(data))).toString('base64');
     },
-    decrypt: (data64) => {
+    decrypt: (data64) => { // https://stackoverflow.com/questions/53373994/encrypt-with-public-key-and-decrypt-with-private-key-using-elliptic-curve-crypto/53373997#53373997
         return Buffer.from(crypto.privateDecrypt(this.keys.get.private.object(), Buffer.from(data64, 'base64'))).toString();
     },
     get: {

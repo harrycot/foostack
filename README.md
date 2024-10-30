@@ -6,10 +6,9 @@ Currently, when you type a string in the stdin of an instance, you can see the r
 The key exchange contain: uuid, signature(uuid), ecdsa(pub), ecdh(pub).
 The exchanged data contain : data, signature(data), uuid, signature(uuid).
 
-https://github.com/indutny/elliptic will be used for web client side.
-  => consider using this fork https://github.com/openpgpjs/elliptic which includes brainpool curves (https://github.com/indutny/elliptic/pull/144/files)
+https://stackoverflow.com/questions/53373994/encrypt-with-public-key-and-decrypt-with-private-key-using-elliptic-curve-crypto/53373997#53373997
+can't use the ec keys via publicEncrypt and privateDecrypt crypto functions
 
-maybe use https://github.com/openpgpjs/openpgpjs as an all in one tool.
 ```
 
 
