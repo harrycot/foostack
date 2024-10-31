@@ -5,7 +5,7 @@ exports.config = {
 }
 
 exports.db = {
-    server: { uuid: false, openpgp: false, socket: false },
+    server: { uuid: false, openpgp: false, socket: false, socketweb: false },
     peers: [],
     get: {
         peer: {

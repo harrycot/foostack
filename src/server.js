@@ -40,8 +40,6 @@ exports.io = require('socket.io')(this.http, {
       }
 });
 
-
-
 if (!require('./memory').config.is_production) {
     for (let port = require('./memory').config.port_range.start; port <= require('./memory').config.port_range.end; port++) {
         require('./memory').db.peers.push({ server: `localhost:${port}`});
