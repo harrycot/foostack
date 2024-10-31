@@ -1,5 +1,5 @@
 exports.init_ioserver = () => {
-    require('../server').io.of('s2s').on('connection', async (socket) => {
+    require('../server').io.of('/s2s').on('connection', async (socket) => {
         require('../memory').db.server.socket = socket;
         console.log(`as ioserver got client id ${require('../memory').db.server.socket.client.conn.id}: connected`);
 

@@ -9,7 +9,7 @@ exports.db = {} // set db path when we know which port to use
 exports.http = require('node:http').createServer(function(req, res){
     console.log(req.url);
     const _files = require('./memory').config.is_production
-        ? []
+        ? [] // use webpack
         : [
             { req: '/styles.css', path: 'view/styles.css', type: 'text/css' },
             { req: '/body.js', path: 'view/body.js', type: 'text/javascript' },
@@ -30,7 +30,17 @@ exports.http = require('node:http').createServer(function(req, res){
     });
 });
 
-exports.io = require('socket.io')(this.http);
+exports.io = require('socket.io')(this.http, {
+    cookie: {
+        name: "io",
+        path: "/",
+        httpOnly: true,
+        sameSite: "strict",
+        secure: false
+      }
+});
+
+
 
 if (!require('./memory').config.is_production) {
     for (let port = require('./memory').config.port_range.start; port <= require('./memory').config.port_range.end; port++) {
