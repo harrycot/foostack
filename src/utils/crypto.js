@@ -24,9 +24,9 @@ exports.openpgp = {
 
 exports.misc = {
     generate: {
-        secret: () => { // will be used by session
+        seed: (min, max) => { // return a random base64 seed of lenght between min and max
             return {
-                secret: Buffer.from(require('node:crypto').randomBytes(require('node:crypto').randomInt(100, 200))).toString('base64'),
+                seed: Buffer.from(require('node:crypto').randomBytes(require('node:crypto').randomInt(min, max))).toString('base64'),
                 issued: Date.now()
             }
         }

@@ -21,7 +21,7 @@ exports.db = {
     },
     set: {
         peer: (index, deserialized_handshake) => {
-            if ( !this.db.get.peer.exist(deserialized_handshake.uuid) && index ) {
+            if ( !this.db.get.peer.exist(deserialized_handshake.uuid) && index ) { // overwrite at given index if uuid don't exist in peers
                 this.db.peers[index].openpgp = deserialized_handshake.pub;
                 this.db.peers[index].uuid = deserialized_handshake.uuid;
                 this.db.peers[index].seen = Date.now();

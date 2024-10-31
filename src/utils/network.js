@@ -45,12 +45,12 @@ exports.deserialize_s2s = async (serialized_data) => {
         const _message = await openpgp.readMessage({
             armoredMessage: Buffer.from(_json_data.data, 'base64').toString()
         });
-        const { data: _decrypted, _signatures } = await openpgp.decrypt({
+        const { data: decrypted, signatures } = await openpgp.decrypt({
             message: _message, verificationKeys: _json_data_openpgp_pub_obj, decryptionKeys: _openpgp_local_priv_obj
         });
         try {
-            await _signatures[0].verified;
-            _json_data.data = _decrypted;
+            await signatures[0].verified;
+            _json_data.data = decrypted;
         } catch (e) {
             _json_data.err.signature_data = `data: Signature could not be verified: ${e.message}`
         }

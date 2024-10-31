@@ -26,8 +26,6 @@ exports.init_ioserver = () => {
         }
 
         require('../memory').db.server.socket.on('data', (serialized_data) => {
-            //console.log('\n\nServer Socket');
-            //console.log(require('../memory').db.server.socket.server.engine.clients);
             on_data_common(index = false, serialized_data, send_ack = true);
         });
 
@@ -78,12 +76,7 @@ const on_data_common = async (index, serialized_data, send_ack) => {
             require('../memory').db.set.peer(index, _deserialized_s2s);
         }
 
-        if (!_deserialized_s2s.data){ // handshake
-
-
-            // find a way to remove old peer if a node reboot
-
-            
+        if (!_deserialized_s2s.data){ // handshake            
             if (send_ack) {
                 // 'data' (as handshake init)
                 console.log(`\n  => HANDSHAKE as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid}\n`);
@@ -97,7 +90,6 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 // 'data'
                 console.log(`\n  => DATA as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
                 const _index = require('../memory').db.get.peer.index(_deserialized_s2s.uuid)
-                //const _ecdh = require('../memory').db.peers[_index].ecdh;
                 const _openpgp = require('../memory').db.peers[_index].openpgp;
                 require('../memory').db.peers[_index].socket.emit('data ack', await serialize_s2s(_deserialized_s2s.data, _openpgp));
 
