@@ -1,6 +1,6 @@
 {
     "name": "s2s",
-    "version": "0.0.7-openpgp",
+    "version": "0.0.8",
     "description": "",
     "main": "src/server.js",
     "author": "Florian Blanc",
@@ -22,6 +22,7 @@
         "socket.io-client": "^4.7.2"
     },
     "devDependencies": {
+        "buffer": "^6.0.3",
         "bufferutil": "^4.0.8",
         "cross-env": "^7.0.3",
         "css-loader": "^7.1.2",

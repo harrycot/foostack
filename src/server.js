@@ -61,7 +61,7 @@ require('./utils/network').get_port_to_use( async (_port) => {
         console.log(`  => Server init with uuid: ${require('./memory').db.server.uuid}\n`);
     }
     if (!require('./memory').db.server.openpgp) {
-        require('./memory').db.server.openpgp = await require('./utils/crypto').openpgp.generate(
+        require('./memory').db.server.openpgp = await require('./utils/common/crypto').openpgp.generate(
             require('./memory').db.server.uuid,
             `${require('./memory').db.server.uuid}@localhost.local`
         );
@@ -77,7 +77,7 @@ require('./utils/network').get_port_to_use( async (_port) => {
         console.log(`SENDING: ${data}`);
         for (peer of require('./memory').db.peers) {
             if (peer.socket.connected) {
-                peer.socket.emit('data', await require('./utils/network').serialize_s2s(data, peer.openpgp));
+                peer.socket.emit('data', await require('./utils/network').serialize(require('./memory').db.server.uuid, require('./memory').db.server.openpgp, data, peer.openpgp));
             }
         }
     })

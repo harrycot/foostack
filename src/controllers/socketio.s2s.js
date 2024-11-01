@@ -44,12 +44,12 @@ exports.init_ioserver = () => {
 }
 
 const init_ioclient = (index) => {
-    const { serialize_s2s } = require('../utils/network');
+    const { serialize } = require('../utils/common/network');
     require('../memory').db.peers[index].socket = require('socket.io-client')('http://' + require('../memory').db.peers[index].server + '/s2s');
     
     require('../memory').db.peers[index].socket.on('connect', async () => {
         console.log(`as ioclient id ${require('../memory').db.peers[index].socket.io.engine.id}: connected`);
-        require('../memory').db.peers[index].socket.emit('data', await serialize_s2s()); // handshake init - handshake init - handshake init - handshake init
+        require('../memory').db.peers[index].socket.emit('data', await serialize(require('../memory').db.server.uuid, require('../memory').db.server.openpgp)); // handshake init - handshake init - handshake init - handshake init
     });
 
     //acting as an index helper
@@ -64,40 +64,40 @@ const init_ioclient = (index) => {
 
 const on_data_common = async (index, serialized_data, send_ack) => {
     // index value: false on 'data' handled by server socket
-    const { serialize_s2s, deserialize_s2s } = require('../utils/network');
+    const { serialize, deserialize } = require('../utils/common/network');
 
-    const _deserialized_s2s = await deserialize_s2s(serialized_data);
+    const _deserialized = await deserialize(require('../memory').db.server.openpgp, serialized_data, is_s2s = true);
 
-    if (!Object.keys(_deserialized_s2s.err).length) {
-        if (!_deserialized_s2s.data){ // handshake
+    if (!Object.keys(_deserialized.err).length) {
+        if (!_deserialized.data){ // handshake
             if (send_ack) {
                 // 'data' (as handshake init)
-                console.log(`\n  => HANDSHAKE as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid}\n`);
-                require('../server').io.of('/s2s').emit('indexing handshake', await serialize_s2s()); // index helper
+                console.log(`\n  => HANDSHAKE as server:${require('../memory').db.server.uuid} got from client:${_deserialized.uuid}\n`);
+                require('../server').io.of('/s2s').emit('indexing handshake', await serialize(require('../memory').db.server.uuid, require('../memory').db.server.openpgp)); // index helper
             } else {
                 // 'indexing' (part of the handshake)
-                if (!require('../memory').db.get.peer.exist(_deserialized_s2s.uuid)) {
-                    console.log(`\n  => INDEXING HANDSHAKE from server:${_deserialized_s2s.uuid}\n`);
-                    require('../memory').db.set.peer(index, _deserialized_s2s); // ADD PEER - ADD PEER - ADD PEER - ADD PEER
+                if (!require('../memory').db.get.peer.exist(_deserialized.uuid)) {
+                    console.log(`\n  => INDEXING HANDSHAKE from server:${_deserialized.uuid}\n`);
+                    require('../memory').db.set.peer(index, _deserialized); // ADD PEER - ADD PEER - ADD PEER - ADD PEER
                 }
             }
         } else { // data
             if (send_ack) {
                 // 'data'
-                console.log(`\n  => DATA as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
-                const _index = require('../memory').db.get.peer.index(_deserialized_s2s.uuid)
+                console.log(`\n  => DATA as server:${require('../memory').db.server.uuid} got from client:${_deserialized.uuid} : ${_deserialized.data}`);
+                const _index = require('../memory').db.get.peer.index(_deserialized.uuid)
                 const _openpgp = require('../memory').db.peers[_index].openpgp;
-                require('../memory').db.peers[_index].socket.emit('data ack', await serialize_s2s(_deserialized_s2s.data, _openpgp));
+                require('../memory').db.peers[_index].socket.emit('data ack', await serialize(require('../memory').db.server.uuid, require('../memory').db.server.openpgp, _deserialized.data, _openpgp));
 
             } else {
                 // 'data ack'
-                console.log(`\n  => DATA ACK as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
-                require('../memory').db.set.peer(index, _deserialized_s2s); // UPDATE PEER - UPDATE PEER - UPDATE PEER - UPDATE PEER
+                console.log(`\n  => DATA ACK as server:${require('../memory').db.server.uuid} got from client:${_deserialized.uuid} : ${_deserialized.data}`);
+                require('../memory').db.set.peer(index, _deserialized); // UPDATE PEER - UPDATE PEER - UPDATE PEER - UPDATE PEER
             }
         }
     } else {
         // 
-        console.log(_deserialized_s2s.err);
+        console.log(_deserialized.err);
         console.log('WARNING do something..');
     }
 }

@@ -1,4 +1,6 @@
 const path = require('node:path');
+const webpack = require('webpack');
+
 const TerserPlugin = require("terser-webpack-plugin");
 const WebpackObfuscator = require('webpack-obfuscator');
 
@@ -27,6 +29,11 @@ module.exports = [
                 }
             ]
         },
+        resolve: {
+            fallback: {
+                buffer: require.resolve('buffer/'),
+            },
+        },
         optimization: is_production ? {
             minimize: false,
             minimizer: [
@@ -46,9 +53,15 @@ module.exports = [
             new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
                 rotateStringArray: true,
                 target: 'browser-no-eval'
-            }, [''])
+            }, ['']),
+            new webpack.ProvidePlugin({
+                Buffer: ['buffer', 'Buffer'],
+            })
         ] : [
             // dev only
+            new webpack.ProvidePlugin({
+                Buffer: ['buffer', 'Buffer'],
+            })
         ]
     },
     {

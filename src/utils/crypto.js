@@ -8,20 +8,6 @@ exports.uuid = {
     }
 }
 
-exports.openpgp = {
-    generate: async (name, email) => {
-        const openpgp = require('openpgp');
-        const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
-            type: 'ecc', curve: 'brainpoolP512r1', userIDs: { name: name, email: email }, format: 'armored'
-        });
-        return { 
-            priv: Buffer.from(privateKey).toString('base64'),
-            pub: Buffer.from(publicKey).toString('base64'),
-            revcert: Buffer.from(revocationCertificate).toString('base64')
-        }
-    }
-}
-
 exports.misc = {
     generate: {
         seed: (min, max) => { // return a random base64 seed of lenght between min and max
