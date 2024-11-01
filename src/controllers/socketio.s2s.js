@@ -72,14 +72,14 @@ const on_data_common = async (index, serialized_data, send_ack) => {
         if ( (!deserialize_s2s.data && index) || _deserialized_s2s.data ) { // if it's everything else handshake init
             // ADD UPDATE PEER to array
             // an index is necessary to know which uuid become with wich host
-            require('../memory').db.set.peer(index, _deserialized_s2s);
+            //require('../memory').db.set.peer(index, _deserialized_s2s);
         }
 
         if (!_deserialized_s2s.data){ // handshake
             if (require('../memory').db.get.peer.exist(_deserialized_s2s.uuid)) {
-                console.log('PEER EXIST');
+                console.log(`PEER EXIST ${_deserialized_s2s.uuid}`);
             } else {
-                console.log('!! PEER DONT EXIST');
+                console.log(`!! PEER DONT EXIST ${_deserialized_s2s.uuid}`);
             }
             if (send_ack) {
                 // 'data' (as handshake init)
@@ -88,6 +88,7 @@ const on_data_common = async (index, serialized_data, send_ack) => {
             } else {
                 // 'indexing' (part of the handshake) require('../memory').db.set.peer(index, _deserialized_s2s)
                 console.log(`\n  => INDEXING HANDSHAKE as client:${_deserialized_s2s.uuid} got from server:${require('../memory').db.server.uuid}\n`);
+                require('../memory').db.set.peer(index, _deserialized_s2s);
             }
         } else { // data
             if (send_ack) {
