@@ -75,7 +75,7 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 console.log(`\n  => HANDSHAKE as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid}\n`);
                 require('../server').io.of('/s2s').emit('indexing handshake', await serialize_s2s()); // index helper
             } else {
-                // 'indexing' (part of the handshake) require('../memory').db.set.peer(index, _deserialized_s2s)
+                // 'indexing' (part of the handshake)
                 if (!require('../memory').db.get.peer.exist(_deserialized_s2s.uuid)) {
                     console.log(`\n  => INDEXING HANDSHAKE from server:${_deserialized_s2s.uuid}\n`);
                     require('../memory').db.set.peer(index, _deserialized_s2s); // ADD PEER - ADD PEER - ADD PEER - ADD PEER

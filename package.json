@@ -6,12 +6,12 @@
     "author": "Florian Blanc",
     "private": true,
     "scripts": {
-        "dev": "cross-env NODE_ENV=development node ./src/server.js",
+        "dev": "cross-env NODE_ENV=development webpack --config-name web && node ./src/server.js",
         "pkg": "cross-env NODE_ENV=production pkg ./src/server.js --out-path ./dist",
         "bundle": "cross-env NODE_ENV=production webpack",
-        "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/bundle.js --out-path ./dist",
+        "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/server.bundle.js --out-path ./dist",
         "exec:pkg": "cd dist && cross-env NODE_ENV=development server-win.exe",
-        "exec:bundle": "cd dist && cross-env NODE_ENV=development node bundle.js",
+        "exec:bundle": "cd dist && cross-env NODE_ENV=development node server.bundle.js",
         "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development bundle-win.exe"
     },
     "dependencies": {
@@ -22,10 +22,12 @@
         "socket.io-client": "^4.7.2"
     },
     "devDependencies": {
+        "bufferutil": "^4.0.8",
         "cross-env": "^7.0.3",
         "javascript-obfuscator": "^4.1.0",
         "pkg": "^5.8.1",
         "terser-webpack-plugin": "^5.3.9",
+        "utf-8-validate": "^6.0.4",
         "webpack": "^5.89.0",
         "webpack-cli": "^5.1.4",
         "webpack-obfuscator": "^3.5.1"

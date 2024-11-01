@@ -12,9 +12,7 @@ exports.http = require('node:http').createServer(function(req, res){
         ? [] // use webpack
         : [
             { req: '/styles.css', path: 'view/styles.css', type: 'text/css' },
-            { req: '/body.js', path: 'view/body.js', type: 'text/javascript' },
-            { req: '/socketio.js', path: '../node_modules/socket.io-client/dist/socket.io.js', type: 'text/javascript' },
-            { req: '/openpgp.js', path: '../node_modules/openpgp/dist/openpgp.js', type: 'text/javascript' }
+            { req: '/body.js', path: 'view/body.bundle.js', type: 'text/javascript' },
         ];
     for (file of _files) {
         if (req.url == file.req) {

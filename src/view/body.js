@@ -1,4 +1,5 @@
-const socket = io('/web');
+const socket = require('socket.io-client')('/web');
+const openpgp = require('openpgp');
 
 console.log(openpgp);
 

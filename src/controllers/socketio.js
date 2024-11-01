@@ -15,7 +15,6 @@ exports.init = () => {
             }
         });
         
-        // reuse same logic and functions from s2s
         socket.on('data', (serialized_data) => {
             console.log(`web: as ioserver got client id ${socket.client.conn.id}: data`);
             //
