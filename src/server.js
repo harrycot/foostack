@@ -60,6 +60,7 @@ require('./utils/network').get_port_to_use( async (_port) => {
 
     if (!require('./memory').db.server.uuid) {
         require('./memory').db.server.uuid = require('./utils/crypto').uuid.generate();
+        console.log(`  => Server init with uuid: ${require('./memory').db.server.uuid}\n`);
     }
     if (!require('./memory').db.server.openpgp) {
         require('./memory').db.server.openpgp = await require('./utils/crypto').openpgp.generate(

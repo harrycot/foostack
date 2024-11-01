@@ -69,26 +69,17 @@ const on_data_common = async (index, serialized_data, send_ack) => {
     const _deserialized_s2s = await deserialize_s2s(serialized_data);
 
     if (!Object.keys(_deserialized_s2s.err).length) {
-        if ( (!deserialize_s2s.data && index) || _deserialized_s2s.data ) { // if it's everything else handshake init
-            // ADD UPDATE PEER to array
-            // an index is necessary to know which uuid become with wich host
-            //require('../memory').db.set.peer(index, _deserialized_s2s);
-        }
-
         if (!_deserialized_s2s.data){ // handshake
-            if (require('../memory').db.get.peer.exist(_deserialized_s2s.uuid)) {
-                console.log(`PEER EXIST ${_deserialized_s2s.uuid}`);
-            } else {
-                console.log(`!! PEER DONT EXIST ${_deserialized_s2s.uuid}`);
-            }
             if (send_ack) {
                 // 'data' (as handshake init)
                 console.log(`\n  => HANDSHAKE as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid}\n`);
                 require('../server').io.of('/s2s').emit('indexing handshake', await serialize_s2s()); // index helper
             } else {
                 // 'indexing' (part of the handshake) require('../memory').db.set.peer(index, _deserialized_s2s)
-                console.log(`\n  => INDEXING HANDSHAKE as client:${_deserialized_s2s.uuid} got from server:${require('../memory').db.server.uuid}\n`);
-                require('../memory').db.set.peer(index, _deserialized_s2s);
+                if (!require('../memory').db.get.peer.exist(_deserialized_s2s.uuid)) {
+                    console.log(`\n  => INDEXING HANDSHAKE from server:${_deserialized_s2s.uuid}\n`);
+                    require('../memory').db.set.peer(index, _deserialized_s2s); // ADD PEER - ADD PEER - ADD PEER - ADD PEER
+                }
             }
         } else { // data
             if (send_ack) {
@@ -101,6 +92,7 @@ const on_data_common = async (index, serialized_data, send_ack) => {
             } else {
                 // 'data ack'
                 console.log(`\n  => DATA ACK as server:${require('../memory').db.server.uuid} got from client:${_deserialized_s2s.uuid} : ${_deserialized_s2s.data}`);
+                require('../memory').db.set.peer(index, _deserialized_s2s); // UPDATE PEER - UPDATE PEER - UPDATE PEER - UPDATE PEER
             }
         }
     } else {
