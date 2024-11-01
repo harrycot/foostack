@@ -2,9 +2,7 @@
 exports.init = () => {
     // think about a channel to update web clients
     require('../server').io.of('/web').on('connection', async (socket) => {
-        // update socket object to memory
-        require('../memory').db.server.socketweb = socket;
-        console.log(`web: as ioserver got client id ${require('../memory').db.server.socketweb.client.conn.id}: connected`);
+        console.log(`web: as ioserver got client id ${socket.client.conn.id}: connected`);
 
         const cookie = require('cookie');
         // handle cookie to handle login
@@ -18,18 +16,18 @@ exports.init = () => {
         });
         
         // reuse same logic and functions from s2s
-        require('../memory').db.server.socketweb.on('data', (serialized_data) => {
-            console.log(`web: as ioserver got client id ${require('../memory').db.server.socketweb.client.conn.id}: data`);
+        socket.on('data', (serialized_data) => {
+            console.log(`web: as ioserver got client id ${socket.client.conn.id}: data`);
             //
-            require('../memory').db.server.socketweb.emit('data ack', `ackn: ${serialized_data}`);
+            socket.emit('data ack', `ackn: ${serialized_data}`);
         });
 
-        require('../memory').db.server.socketweb.on('data ack', (serialized_data) => {
-            console.log(`web: as ioserver got client id ${require('../memory').db.server.socketweb.client.conn.id}: data ack`);
+        socket.on('data ack', (serialized_data) => {
+            console.log(`web: as ioserver got client id ${socket.client.conn.id}: data ack`);
         });
 
-        require('../memory').db.server.socketweb.on('disconnect', () => {
-            console.log(`web: as ioserver got client id ${require('../memory').db.server.socketweb.client.conn.id}: disconnected`);
+        socket.on('disconnect', () => {
+            console.log(`web: as ioserver got client id ${socket.client.conn.id}: disconnected`);
         });
     });
 }
