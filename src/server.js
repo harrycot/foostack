@@ -11,8 +11,8 @@ exports.http = require('node:http').createServer(function(req, res){
     const _files = require('./memory').config.is_production
         ? [] // use webpack
         : [
-            { req: '/styles.css', path: 'view/styles.css', type: 'text/css' },
-            { req: '/body.js', path: 'view/body.bundle.js', type: 'text/javascript' },
+            { req: '/styles.css', path: 'view/scss/styles.bundle.css', type: 'text/css' },
+            { req: '/body.js', path: 'view/js/body.bundle.js', type: 'text/javascript' },
         ];
     for (file of _files) {
         if (req.url == file.req) {

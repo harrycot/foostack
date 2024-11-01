@@ -10,10 +10,22 @@ module.exports = [
         target: 'web',
         mode: process.env.NODE_ENV,
         devtool: is_production ? false : 'eval-source-map',
-        entry: './src/view/body.js',
+        entry: ['./src/view/js/body.js', './src/view/scss/styles.scss'],
         output: {
-            path: path.resolve(path.join(__dirname, 'src/view')),
-            filename: "body.bundle.js"
+            path: path.resolve(__dirname),
+            filename: 'src/view/js/body.bundle.js'
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.scss$/,
+                    type: "asset/resource",
+                    generator: {
+                        filename: 'src/view/scss/styles.bundle.css',
+                    },
+                    use: ["sass-loader"],
+                }
+            ]
         },
         optimization: is_production ? {
             minimize: false,

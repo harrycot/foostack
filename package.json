@@ -24,8 +24,12 @@
     "devDependencies": {
         "bufferutil": "^4.0.8",
         "cross-env": "^7.0.3",
+        "css-loader": "^7.1.2",
         "javascript-obfuscator": "^4.1.0",
         "pkg": "^5.8.1",
+        "sass": "^1.80.5",
+        "sass-loader": "^16.0.3",
+        "style-loader": "^4.0.0",
         "terser-webpack-plugin": "^5.3.9",
         "utf-8-validate": "^6.0.4",
         "webpack": "^5.89.0",
