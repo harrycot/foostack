@@ -26,11 +26,20 @@ exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
     const _signed = await openpgp.readCleartextMessage({ cleartextMessage: Buffer.from(serialized_data, 'base64').toString() });
     const _json_data = JSON.parse(_signed.text); _json_data.err = {};
 
+
+    if (!openpgp_pub) {
+        is_peer_exist = require('../server/db/memory').db.get.peer.exist(_json_data.uuid, require('../server/db/memory').db.peers);
+        is_webpeer_exist = require('../server/db/memory').db.get.peer.exist(_json_data.uuid, require('../server/db/memory').db.webpeers);
+        console.log(is_peer_exist); console.log(is_webpeer_exist);
+        if (is_peer_exist) {
+            openpgp_pub = require('../server/db/memory').db.peers[require('../server/db/memory').db.get.peer.index(_json_data.uuid, require('../server/db/memory').db.peers)].openpgp;
+        } else if (is_webpeer_exist) {
+            openpgp_pub = require('../server/db/memory').db.webpeers[require('../server/db/memory').db.get.peer.index(_json_data.uuid, require('../server/db/memory').db.webpeers)].openpgp;
+        }
+    }
     const _json_data_openpgp_pub_obj = !_json_data.data
         ? await openpgp.readKey({ armoredKey: Buffer.from(_json_data.pub, 'base64').toString() })
-        : await openpgp.readKey({ armoredKey: openpgp_pub ? Buffer.from(openpgp_pub, 'base64').toString() : Buffer.from(
-            require('../../memory').db.peers[require('../../memory').db.get.peer.index(_json_data.uuid)].openpgp, 'base64').toString() });
-    // find a way to fix this require
+        : await openpgp.readKey({ armoredKey: Buffer.from(openpgp_pub, 'base64').toString() });
 
     const _openpgp_local_priv_obj = await openpgp.readKey({ armoredKey: Buffer.from(openpgpcreds.priv, 'base64').toString() });
 
