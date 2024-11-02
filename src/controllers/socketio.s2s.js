@@ -66,7 +66,7 @@ const on_data_common = async (index, serialized_data, send_ack) => {
     // index value: false on 'data' handled by server socket
     const { serialize, deserialize } = require('../utils/common/network');
 
-    const _deserialized = await deserialize(require('../memory').db.server.openpgp, serialized_data, is_s2s = true);
+    const _deserialized = await deserialize(require('../memory').db.server.openpgp, serialized_data);
 
     if (!Object.keys(_deserialized.err).length) {
         if (!_deserialized.data){ // handshake

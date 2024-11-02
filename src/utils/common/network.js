@@ -28,7 +28,7 @@ exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
 
     const _json_data_openpgp_pub_obj = !_json_data.data
         ? await openpgp.readKey({ armoredKey: Buffer.from(_json_data.pub, 'base64').toString() })
-        : await openpgp.readKey({ armoredKey: openpgp_pub ? openpgp_pub : Buffer.from(
+        : await openpgp.readKey({ armoredKey: openpgp_pub ? Buffer.from(openpgp_pub, 'base64').toString() : Buffer.from(
             require('../../memory').db.peers[require('../../memory').db.get.peer.index(_json_data.uuid)].openpgp, 'base64').toString() });
     // find a way to fix this require
 
