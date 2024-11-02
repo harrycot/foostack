@@ -4,7 +4,7 @@ const webpack = require('webpack');
 const TerserPlugin = require("terser-webpack-plugin");
 const WebpackObfuscator = require('webpack-obfuscator');
 
-const is_production = require('./src/memory').config.is_production;
+const is_production = require('./src/server/server').config.is_production;
 
 module.exports = [
     {
@@ -69,7 +69,7 @@ module.exports = [
         target: 'node',
         mode: process.env.NODE_ENV,
         devtool: is_production ? false : 'eval-source-map',
-        entry: './src/server.js',
+        entry: './src/server/server.js',
         output: {
             path: path.resolve(path.join(__dirname, 'dist')),
             filename: "server.bundle.js"

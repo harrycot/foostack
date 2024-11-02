@@ -6,8 +6,8 @@
     "author": "Florian Blanc",
     "private": true,
     "scripts": {
-        "dev": "cross-env NODE_ENV=development webpack --config-name web && node ./src/server.js",
-        "pkg": "cross-env NODE_ENV=production pkg ./src/server.js --out-path ./dist",
+        "dev": "cross-env NODE_ENV=development webpack --config-name web && node ./src/server/server.js",
+        "pkg": "cross-env NODE_ENV=production pkg ./src/server/server.js --out-path ./dist",
         "bundle": "cross-env NODE_ENV=production webpack",
         "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/server.bundle.js --out-path ./dist",
         "exec:pkg": "cd dist && cross-env NODE_ENV=development server-win.exe",

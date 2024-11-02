@@ -3,12 +3,12 @@ const openpgp = require('openpgp');
 
 const client = { uuid: require('uuid').v4(), openpgpcreds: false, serverpub: false }
 
-const { serialize, deserialize } = require('../../utils/common/network');
+const { serialize, deserialize } = require('../../common/network');
 
 // console.log(openpgp);
 
 socket.on('connect', async () => {
-    client.openpgpcreds = await require('../../utils/common/crypto').openpgp.generate('test', 'test@test.local');
+    client.openpgpcreds = await require('../../common/crypto').openpgp.generate('test', 'test@test.local');
     console.log(client.openpgpcreds);
     socket.emit('data', await serialize(client.uuid, client.openpgpcreds));
 });
