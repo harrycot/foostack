@@ -26,7 +26,6 @@ exports.init = () => {
                 if (!require('../db/memory').db.get.peer.exist(_deserialized.uuid, require('../db/memory').db.webpeers)) {
                     require('../db/memory').db.set.webpeer(require('../db/memory').db.webpeers.length, _deserialized); // ADD PEER - ADD PEER - ADD PEER - ADD PEER
                 }
-                console.log(require('../db/memory').db.webpeers);
                 socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp));
             } else {
                 console.log('web: got data ; data');

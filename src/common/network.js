@@ -30,7 +30,6 @@ exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
     if (!openpgp_pub) {
         is_peer_exist = require('../server/db/memory').db.get.peer.exist(_json_data.uuid, require('../server/db/memory').db.peers);
         is_webpeer_exist = require('../server/db/memory').db.get.peer.exist(_json_data.uuid, require('../server/db/memory').db.webpeers);
-        console.log(is_peer_exist); console.log(is_webpeer_exist);
         if (is_peer_exist) {
             openpgp_pub = require('../server/db/memory').db.peers[require('../server/db/memory').db.get.peer.index(_json_data.uuid, require('../server/db/memory').db.peers)].openpgp;
         } else if (is_webpeer_exist) {

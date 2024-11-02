@@ -1,6 +1,6 @@
 {
     "name": "s2s",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "",
     "main": "src/server.js",
     "author": "Florian Blanc",

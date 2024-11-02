@@ -5,6 +5,11 @@ you can see each server making an "handshake" (exchange of uuid and openpgp publ
 Currently, when you type a string in the stdin of an instance,
 you can see the replication across others sending acknowlegment to the emitter (the data is verified on both sides);
 
+server:
+on handshake: uuid and pub is signed and sent in clear.
+on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
+
+web:
 on handshake: uuid and pub is signed and sent in clear.
 on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
 
@@ -55,7 +60,14 @@ using the buffer polyfill seems to have performance impact
       { server: 'localhost:8009', socket: [Socket] },
       { server: 'localhost:8010', socket: [Socket] }
     ],
+    webpeers: [
+      {
+        openpgp: 'LS0tLS1CRUdJTiBQR1AgUFVCTElDIEtFWSBCTE9DSy0tLS0tCgp4cE1FWnlaQ1BoTUpLeVFEQXdJSUFRRU5CQU1FaXFsZFZUOHp4eGduUVpHc3N2SlhrWnFSQ0luWmNQS2MKY1F5cS9WNzNWM2Nsa1dMRFdLVWM5OTZ2c3MrYUJ1WHNZUGR2SndXMzZZZC9rNTZQZ1MxSEVRTm1UOW02CkdQeHc3VnN0T1FXbXZQeEtTcEVrbURtM05PMCtIcW15ckFodVNjS2FyTFh1NGdwQjJCMG9HZDJyZGJZagpBdmFVbnRFaVQ1WFpsaHZGNWYzTkZuUmxjM1FnUEhSbGMzUkFkR1Z6ZEM1c2IyTmhiRDdDd0F3RUVCTUsKQUQ0RmdtY21RajRFQ3drSENBbVFhNVB1Rm05YmMrRURGUWdLQkJZQUFnRUNHUUVDbXdNQ0hnRVdJUVQwCjMrNGRvWWhiQUx2OG1CNXJrKzRXYjF0ejRRQUFWZmNCL1JkTGxpY3UwWGMvVjRhWC9NaFVTbVRGcXpDRgpubWxZRVRMTWtsY0VKTDhxOGNqaVU4NUlNNkt0NVFJV2NxUWd3TjZFSURzNjEvbC9qYmlTTFhkWU1uNEIKL1JITVNnUFQyeTE4VVdUTDExTmxOWmJuTnRPeS9NWlAzTFF3SVFwRHlrN29YQWZ1aXFwL25udkd6VllJCmcyUWZrVXJneEF5WGhDMTJkYUVtYVNuemNoek9sd1JuSmtJK0Vna3JKQU1EQWdnQkFRMEVBd1J0YVdLbwptSzgyazNKTWlKL2VldG9lZ2poOGZSbGUyc1M3T1NaamJ4VkRrRGFVUHFXMWE0Z1QzZjZ6OG9Mc3JNQ3YKUk9RVDRldXhqNHVyeWNZbmwxaEdXalU4UUtpNm5LamtJQlV3ZFdXWGxPZjU0MVMwNDdRenBWY05MZmZTCnFOcVdlUThJdVU4OStzejZaMFJ4RERLWHE1b25SQkxMMUdlOC90MG15NGFhdmdNQkNnbkN1QVFZRXdvQQpLZ1dDWnlaQ1BnbVFhNVB1Rm05YmMrRUNtd3dXSVFUMDMrNGRvWWhiQUx2OG1CNXJrKzRXYjF0ejRRQUEKRFd3Qi9pS3dUUEJHSUVWdi9tZXRSR3NEemp2LzRQbXJzK2prUkdXOUw1QTIvUDFPOEp3dlJhRUVKL1d1CjF1UktIM0g5blB5WC9OdzZYL1BTMGUyWEIrOVNOa3NCLzBRdGRkZHJqajJrdU5VMDBvTWNXZlhrblNzZQpncnZoT2Z0Q2ZwMEpONCt4OHMvR3NzTk9hTWRPaTQ0SzZqajNvT0hFbkE2eVdETE5hT0RDUTNXRmVRbz0KPWdxZUoKLS0tLS1FTkQgUEdQIFBVQkxJQyBLRVkgQkxPQ0stLS0tLQo=',
+        uuid: '048e4cbe-f3b3-4a53-8a51-7c555d1472dc',
+        seen: 1730560590635
+      }
+    ],
     get: { peer: { index: [Function: index], exist: [Function: exist] } },
-    set: { peer: [Function: peer] }
+    set: { peer: [Function: peer], webpeer: [Function: webpeer] }
 }
 ```
