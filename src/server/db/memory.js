@@ -1,7 +1,7 @@
 exports.db = {
     server: { uuid: false, openpgp: false },
     peers: [],
-    webpeers: [],
+    webpeers: [ {} ],
     get: {
         peer: {
             index: (uuid, array) => {
@@ -26,10 +26,7 @@ exports.db = {
         },
         webpeer: (index, deserialized_handshake) => {
             if ( !this.db.get.peer.exist(deserialized_handshake.uuid, this.db.webpeers) && index ) { // overwrite at given index if uuid don't exist in peers
-                console.log('ENTER');
-                this.db.webpeers[index].openpgp = deserialized_handshake.pub;
-                this.db.webpeers[index].uuid = deserialized_handshake.uuid;
-                this.db.webpeers[index].seen = Date.now();
+                this.db.webpeers[index] = { openpgp: deserialized_handshake.pub, uuid: deserialized_handshake.uuid, seen: Date.now() };
             } else if ( this.db.get.peer.exist(deserialized_handshake.uuid, this.db.webpeers) ) {
                 this.db.webpeers[this.db.get.peer.index(deserialized_handshake.uuid, this.db.webpeers)].seen = Date.now();
             }
