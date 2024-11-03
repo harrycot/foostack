@@ -36,13 +36,12 @@ exports.is_port_available = (port) => {
 
 exports.get_port_to_use = async (callback) => {
     const { port_range, network } = require('../server').config;
-    let port = port_range.start;
-    while (!network.port && port <= port_range.end) {
+    while (!network.port && port_range.start <= port_range.end) {
         try {
-            await this.is_port_available(port);
-            callback(port);
+            await this.is_port_available(port_range.start);
+            callback(port_range.start);
         } catch (ex) {
-            port++;
+            port_range.start++;
         }
     }
 }

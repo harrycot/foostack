@@ -2,23 +2,23 @@ exports.init_ioserver = () => {
     require('../server').io.of('/s2s').on('connection', async (socket) => {
         console.log(`as ioserver got client id ${socket.client.conn.id}: connected`);
 
-        // check if client ip is present in peers (ALLOWED) else disconnect and do something
-        if (require('../server').config.is_production) {
-            const client_ip = require('../utils/socketio').parse_client_ip(socket);
-            const is_client_allowed = this.db.peers.filter(function(peer) { return peer.server.includes(client_ip.v4) }).length == 0 ? false : true;
-            if (!is_client_allowed) {
-                console.log('CLIENT NOT ALLOWED, DO SOMETHING');
-                socket.disconnect();
-            }
-        }
+        // ITS BETTER IF EVERYONE CAN RUN A NODE
+        // // check if client ip is present in peers (ALLOWED) else disconnect and do something
+        // if (require('../server').config.is_production) {
+        //     const _client_ip = require('../utils/socketio').parse_client_ip(socket);
+        //     const _is_client_allowed = this.db.peers.filter(function(peer) { return peer.server.includes(_client_ip.v4) }).length == 0 ? false : true;
+        //     if (!_is_client_allowed) {
+        //         console.log('CLIENT NOT ALLOWED, DO SOMETHING');
+        //         socket.disconnect();
+        //     }
+        // }
 
         // if it's a self connection
         for (peer of require('../db/memory').db.peers) {
             if ((socket.handshake.headers.host).includes(peer.server)){ // !!host check can fail attention
                 if (peer.socket.io.engine.id === socket.client.conn.id) {
                     console.log(`as ioserver got client id ${socket.client.conn.id}: self connection detected`);
-                    const client_ip = require('../utils/socketio').parse_client_ip(socket);
-                    require('../server').config.network.ip = client_ip; // help to add ip to server config
+                    require('../server').config.network.ip = require('../utils/socketio').parse_client_ip(socket);  // help to add ip to server config
                     socket.disconnect();
                 }
             }
@@ -76,7 +76,7 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 require('../server').io.of('/s2s').emit('indexing handshake', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp)); // index helper
             } else {
                 // 'indexing' (part of the handshake)
-                if (!require('../db/memory').db.get.peer.exist(_deserialized.uuid, require('../db/memory').db.peers)) {
+                if (!require('../db/memory').db.get.peer.exist_uuid(_deserialized.uuid, require('../db/memory').db.peers)) {
                     console.log(`\n  => INDEXING HANDSHAKE from server:${_deserialized.uuid}\n`);
                     require('../db/memory').db.set.peer(index, _deserialized); // ADD PEER - ADD PEER - ADD PEER - ADD PEER
                 }
@@ -85,9 +85,9 @@ const on_data_common = async (index, serialized_data, send_ack) => {
             if (send_ack) {
                 // 'data'
                 console.log(`\n  => DATA as server:${require('../db/memory').db.server.uuid} got from client:${_deserialized.uuid} : ${_deserialized.data}`);
-                const _index = require('../db/memory').db.get.peer.index(_deserialized.uuid, require('../db/memory').db.peers)
-                const _openpgp = require('../db/memory').db.peers[_index].openpgp;
-                require('../db/memory').db.peers[_index].socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _deserialized.data, _openpgp));
+                const _index = require('../db/memory').db.get.peer.index_uuid(_deserialized.uuid, require('../db/memory').db.peers)
+                const _pub = require('../db/memory').db.peers[_index].pub;
+                require('../db/memory').db.peers[_index].socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _deserialized.data, _pub));
 
             } else {
                 // 'data ack'

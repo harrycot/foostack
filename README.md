@@ -16,6 +16,13 @@ on data: uuid and data is signed and sent as clear but data is encrypted and sig
 trying to reuse as much as possible functions,
 using the buffer polyfill seems to have performance impact
 (taking time to generate openpgp keys checking the browser console)
+
+the defaults openpgp keys are used for network only.
+
+the login is simulated by generating a new openpgp key pair (you can see more details in logs)
+=========
+TODO: - the user login using his pgp keys (signing random data);
+      - use db file as blockchain (everything dont need to be stored);
 ```
 
 

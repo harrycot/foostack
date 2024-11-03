@@ -5,7 +5,8 @@ const DBFileSync = require('lowdb/adapters/FileSync');
 exports.config = { 
     is_production: process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false,
     port_range: process.pkg ? { start: 443, end: 443} : { start: 8001, end: 8010 },
-    network: { ip: { v4: false, v6: false }, port: false }
+    network: { ip: { v4: false, v6: false }, port: false },
+    owner_pub: 'openpgp pub key'
 }
 
 const cwd = this.config.is_production ? process.cwd() : __dirname;
@@ -45,25 +46,25 @@ exports.io = require('socket.io')(this.http, {
 });
 
 if (!this.config.is_production) {
-    for (let port = this.config.port_range.start; port <= this.config.port_range.end; port++) {
-        require('./db/memory').db.peers.push({ server: `localhost:${port}`});
+    for (let _port = this.config.port_range.start; _port <= this.config.port_range.end; _port++) {
+        require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
     }
 } else {
     // push server list for prod
 }
 
-require('./utils/network').get_port_to_use( async (_port) => {
-    this.config.network.port = _port;
+require('./utils/network').get_port_to_use( async (port) => {
+    this.config.network.port = port;
     
     if (!fs.existsSync(path.join(cwd, 'db'))) { fs.mkdirSync(path.join(cwd, 'db')) }
-    if (!fs.existsSync(path.join(cwd, `db/${_port}`))) { fs.mkdirSync(path.join(cwd, `db/${_port}`)) }
+    if (!fs.existsSync(path.join(cwd, `db/${port}`))) { fs.mkdirSync(path.join(cwd, `db/${port}`)) }
     this.db = {
-        session: require('lowdb')(new DBFileSync(path.join(cwd, `db/${_port}/sessions.json`), { defaultValue: [] })),
+        session: require('lowdb')(new DBFileSync(path.join(cwd, `db/${port}/sessions.json`), { defaultValue: [] })),
     }
     // db init
 
     if (!require('./db/memory').db.server.uuid) {
-        require('./db/memory').db.server.uuid = require('uuid').v4();
+        require('./db/memory').db.server.uuid = require('uuid').v5('s2s', require('uuid').v4());
         console.log(`\n  => Server init with uuid: ${require('./db/memory').db.server.uuid}\n`);
     }
     if (!require('./db/memory').db.server.openpgp) {
@@ -83,14 +84,16 @@ require('./utils/network').get_port_to_use( async (_port) => {
         console.log(`SENDING: ${data}`);
         for (peer of require('./db/memory').db.peers) {
             if (peer.socket.connected) {
-                peer.socket.emit('data', await require('../common/network').serialize(require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, data, peer.openpgp));
+                peer.socket.emit('data', await require('../common/network').serialize(
+                    require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, data, peer.pub
+                ));
             }
         }
     })
 
     
-    this.http.listen(_port, function() {
-        console.log("server listening on port: http://localhost:" + _port);
+    this.http.listen(port, () => {
+        console.log("server listening on port: http://localhost:" + port);
     });
 });
 

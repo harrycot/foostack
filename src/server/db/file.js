@@ -1,0 +1,1 @@
+// here functions to manage file as blockchain

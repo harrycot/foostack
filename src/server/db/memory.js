@@ -1,34 +1,51 @@
 exports.db = {
     server: { uuid: false, openpgp: false },
     peers: [],
-    webpeers: [ {} ],
+    webpeers: [],
+    del: {
+        peer: (index) => {
+            this.db.peers.splice(index, 1);
+        },
+        webpeer: (index) => {
+            this.db.webpeers.splice(index, 1);
+        }
+    },
     get: {
         peer: {
-            index: (uuid, array) => {
+            index_uuid: (uuid, array) => {
                 for (index in array) {
                     if (array[index].uuid == uuid) { return index }
                 }
             },
-            exist: (uuid, array) => {
+            exist_uuid: (uuid, array) => {
                 return array.filter(function(peer) { return peer.uuid === uuid }).length == 0 ? false : true;
+            },
+            index_sid: (sid, array) => {
+                for (index in array) {
+                    if (array[index].sid == sid) { return index }
+                }
+            },
+            exist_sid: (sid, array) => {
+                return array.filter(function(peer) { return peer.sid === sid }).length == 0 ? false : true;
             }
         }
     },
     set: {
         peer: (index, deserialized_handshake) => {
-            if ( !this.db.get.peer.exist(deserialized_handshake.uuid, this.db.peers) && index ) { // overwrite at given index if uuid don't exist in peers
-                this.db.peers[index].openpgp = deserialized_handshake.pub;
+            if ( !this.db.get.peer.exist_uuid(deserialized_handshake.uuid, this.db.peers) && index ) { // overwrite at given index if uuid don't exist in peers
+                this.db.peers[index].pub = deserialized_handshake.pub;
                 this.db.peers[index].uuid = deserialized_handshake.uuid;
                 this.db.peers[index].seen = Date.now();
-            } else if ( this.db.get.peer.exist(deserialized_handshake.uuid, this.db.peers) ) {
-                this.db.peers[this.db.get.peer.index(deserialized_handshake.uuid, this.db.peers)].seen = Date.now();
+            } else if ( this.db.get.peer.exist_uuid(deserialized_handshake.uuid, this.db.peers) ) {
+                this.db.peers[this.db.get.peer.index_uuid(deserialized_handshake.uuid, this.db.peers)].seen = Date.now();
             }
         },
-        webpeer: (index, deserialized_handshake) => {
-            if ( !this.db.get.peer.exist(deserialized_handshake.uuid, this.db.webpeers) && index ) { // overwrite at given index if uuid don't exist in peers
-                this.db.webpeers[index] = { openpgp: deserialized_handshake.pub, uuid: deserialized_handshake.uuid, seen: Date.now() };
-            } else if ( this.db.get.peer.exist(deserialized_handshake.uuid, this.db.webpeers) ) {
-                this.db.webpeers[this.db.get.peer.index(deserialized_handshake.uuid, this.db.webpeers)].seen = Date.now();
+        webpeer: (deserialized_handshake, socket_id) => { // think about a ttl like to delete seen > 1h
+            if ( !this.db.get.peer.exist_uuid(deserialized_handshake.uuid, this.db.webpeers) ) { // overwrite at given index if uuid don't exist in peers
+                this.db.webpeers.push({ pub: deserialized_handshake.pub, uuid: deserialized_handshake.uuid, sid: socket_id, seen: Date.now() });
+            } else {
+                this.db.webpeers[this.db.get.peer.index_uuid(deserialized_handshake.uuid, this.db.webpeers)].sid = socket_id;
+                this.db.webpeers[this.db.get.peer.index_uuid(deserialized_handshake.uuid, this.db.webpeers)].seen = Date.now();
             }
         }
     }
