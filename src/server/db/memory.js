@@ -24,16 +24,18 @@ exports.db = {
         peer: {
             index_uuid: (uuid, array) => {
                 for (index in array) {
-                    if (array[index].uuid == uuid) { return index }
+                    if (array[index].uuid === uuid) { return index }
                 }
+                return false;
             },
             exist_uuid: (uuid, array) => {
                 return array.filter(function(peer) { return peer.uuid === uuid }).length == 0 ? false : true;
             },
             index_sid: (sid, array) => {
                 for (index in array) {
-                    if (array[index].sid == sid) { return index }
+                    if (array[index].sid === sid) { return index }
                 }
+                return false;
             },
             exist_sid: (sid, array) => {
                 return array.filter(function(peer) { return peer.sid === sid }).length == 0 ? false : true;

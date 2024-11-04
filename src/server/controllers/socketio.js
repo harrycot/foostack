@@ -34,6 +34,7 @@ exports.init = () => {
                         if (!Object.keys(_json_login_data_signed.err).length) {
                             if (_json_login_data_signed.login_data_seed === require('../db/memory').db.webpeers[_index].login.ask_login_data.seed) {
                                 require('../db/memory').db.webpeers[_index].login.pub = _json_login_data_signed.pub;
+                                require('../db/memory').db.webpeers[_index].login.cookie_token = require('../utils/crypto').misc.generate.seed(50,100);
                                 console.log(require('../db/memory').db.webpeers[_index]);
                                 socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, { connected: true }, require('../db/memory').db.webpeers[_index].pub));
                             } else {
