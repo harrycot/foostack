@@ -17,7 +17,7 @@ socket.on('data', async (serialized_data) => {
     console.log(`web: as ioclient ${socket.io.engine.id} got: data`);
     const _deserialized = await deserialize(client.openpgpcreds, serialized_data, client.serverpub);
     console.log(_deserialized);
-    //socket.emit('data ack', await serialize(client.uuid, client.openpgpcreds, _deserialized.data, client.serverpub));
+    socket.emit('data ack', await serialize(client.uuid, client.openpgpcreds, _deserialized.data, client.serverpub));
 
     const _data = JSON.parse(_deserialized.data);
     console.log(_data);

@@ -19,7 +19,14 @@ using the buffer polyfill seems to have performance impact
 
 the defaults openpgp keys are used for network only.
 
-the login is simulated by generating a new openpgp key pair (you can see more details in logs)
+the login is simulated by generating a new openpgp key pair (you can see more details in logs).
+  => signing random data
+
+when the page is reloaded, the session doesnt follow.
+
+cron: 10min
+- if a webpeer is not seen since 30 min he is deleted from memory.
+- logout every login (webpeer) >= 4h
 =========
 TODO: - the user login using his pgp keys (signing random data);
       - use db file as blockchain (everything dont need to be stored);

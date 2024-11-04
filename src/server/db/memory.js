@@ -17,6 +17,15 @@ exports.db = {
                         index--;
                     }
                 }
+            },
+            logins: (ms) => {
+                for (let index = 0; index < this.db.webpeers.length; index++) {
+                    if ( this.db.webpeers[index].login && this.db.webpeers[index].login.pub ) {
+                        if ( this.db.webpeers[index].login.ask_login_data.issued <= Date.now() - ms ) {
+                            this.db.webpeers[index].login = {}
+                        }
+                    }
+                }
             }
         }
     },

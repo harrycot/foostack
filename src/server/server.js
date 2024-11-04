@@ -37,33 +37,12 @@ exports.http = require('node:http').createServer(function(req, res){
 
 exports.io = require('socket.io')(this.http, {
     cookie: {
-        name: "socketid",
+        name: require('./utils/crypto').misc.generate.seed_int(100,4096),
         path: "/",
         httpOnly: true,
         sameSite: "strict",
         secure: false
-      }
-});
-const cookie = require('cookie');
-this.io.engine.on("headers", (headers, request) => {
-    if (!request.headers.cookie) return;
-    const _set_cookies = [];
-    const cookies = cookie.parse(request.headers.cookie);
-    if (cookies.lastsocketid) {
-        if (require('./db/memory').db.get.peer.exist_sid(cookies.lastsocketid, require('./db/memory').db.webpeers)) {
-            const _index = require('./db/memory').db.get.peer.index_sid(cookies.lastsocketid, require('./db/memory').db.webpeers);
-            if (require('./db/memory').db.webpeers[_index].login && require('./db/memory').db.webpeers[_index].login.pub) {
-                if (!cookies.token) {
-                    const _cookie = cookie.serialize("token", require('./db/memory').db.webpeers[_index].login.cookie_token.seed, { maxAge: 3600, path: "/", httpOnly: true, sameSite: "strict", secure: false });
-                    _set_cookies.push(_cookie);
-                }
-            }
-        }
     }
-
-    //
-    _set_cookies.push(cookie.serialize("lastsocketid", cookies.socketid, { maxAge: 86400, path: "/", httpOnly: true, sameSite: "strict", secure: false }))
-    headers["set-cookie"] = _set_cookies;
 });
 
 if (!this.config.is_production) {

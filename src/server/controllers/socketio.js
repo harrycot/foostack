@@ -21,7 +21,7 @@ exports.init = () => {
                     const _json_data = JSON.parse(_deserialized.data);
                     console.log(_json_data);
                     if (_json_data.ask_login_data) {
-                        const _ask_login_data = require('../utils/crypto').misc.generate.seed(50,100);
+                        const _ask_login_data = require('../utils/crypto').misc.generate.seed(50,100,'base64');
                         require('../db/memory').db.webpeers[_index].login = { ask_login_data: _ask_login_data };
                         socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, { login_data_seed: _ask_login_data.seed }, require('../db/memory').db.webpeers[_index].pub));
                     } else if (_json_data.login_data_signed) {
@@ -34,7 +34,6 @@ exports.init = () => {
                         if (!Object.keys(_json_login_data_signed.err).length) {
                             if (_json_login_data_signed.login_data_seed === require('../db/memory').db.webpeers[_index].login.ask_login_data.seed) {
                                 require('../db/memory').db.webpeers[_index].login.pub = _json_login_data_signed.pub;
-                                require('../db/memory').db.webpeers[_index].login.cookie_token = require('../utils/crypto').misc.generate.seed(50,100);
                                 console.log(require('../db/memory').db.webpeers[_index]);
                                 socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, { connected: true }, require('../db/memory').db.webpeers[_index].pub));
                             } else {
