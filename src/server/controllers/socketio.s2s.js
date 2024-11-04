@@ -1,4 +1,4 @@
-exports.init_ioserver = () => {
+exports.init = () => {
     require('../server').io.of('/s2s').on('connection', async (socket) => {
         console.log(`as ioserver got client id ${socket.client.conn.id}: connected`);
 

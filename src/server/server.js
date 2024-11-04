@@ -74,8 +74,11 @@ require('./utils/network').get_port_to_use( async (port) => {
         );
     }
 
-    require('./controllers/socketio.s2s').init_ioserver();
+    require('./controllers/socketio.s2s').init();
     require('./controllers/socketio').init();
+
+    
+    require('./controllers/cron').init();
 
 
     process.stdin.setEncoding('utf8');
