@@ -1,29 +1,30 @@
-//const delete_webpeers
+const CONST_1M = 60 * 1000;
+const CONST_1H = 60 * CONST_1M;
+const CONST_1D = 24 * CONST_1H;
 
 exports.init = () => {
-    setTimeout(() => { // 1 min
+    setInterval(() => { // 1 min
         console.log('\n==== RUNNING CRON 1 MIN ====\n');
         
-    }, 60 * 1000); // 1 min
+    }, CONST_1M); // 1 min
 
 
-    setTimeout(() => { // 10 min
+    setInterval(() => { // 10 min
         console.log('\n==== RUNNING CRON 10 MIN ====\n');
-        // delete webpeers if peer was seen >= 1h
-        const _webpeer_list = require('../db/memory').db.webpeers.filter(function(webpeer) { return webpeer.seen <= Date.now() - (3600 * 1000) });
-        let _webpeer_list_indexes = [];
-        for(webpeer of _webpeer_list){
-            const _index = require('../db/memory').db.get.peer.index_uuid(webpeer.uuid, require('../db/memory').db.webpeers);
-            _webpeer_list_indexes.push(_index);
-        }
-        for(index of _webpeer_list_indexes.reverse()){
-            require('../db/memory').db.del.webpeer(index);
-        }
-    }, 600 * 1000); // 10 min
+        // delete webpeers if peer was seen >= 30 min
+        require('../db/memory').db.del.webpeer.seens(30*CONST_1M);
+
+    }, 10 * CONST_1M); // 10 min
 
 
-    setTimeout(() => { // 1h
+    setInterval(() => { // 1h
         console.log('\n==== RUNNING CRON 1 HOUR ====\n');
 
-    }, 3600 * 1000); // 1h
+    }, CONST_1H); // 1h
+
+
+    setInterval(() => { // 1d
+        console.log('\n==== RUNNING CRON 1 DAY ====\n');
+
+    }, CONST_1D); // 1d
 }

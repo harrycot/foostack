@@ -37,13 +37,22 @@ exports.http = require('node:http').createServer(function(req, res){
 
 exports.io = require('socket.io')(this.http, {
     cookie: {
-        name: "io",
+        name: "socketid",
         path: "/",
         httpOnly: true,
         sameSite: "strict",
         secure: false
       }
 });
+// const cookie = require('cookie');
+// this.io.engine.on("headers", (headers, request) => {
+//     if (!request.headers.cookie) return;
+//     const cookies = cookie.parse(request.headers.cookie);
+//     console.log(cookies);
+//     if (!cookies.uuid) {
+//         headers["set-cookie"] = cookie.serialize("test", "abc", { maxAge: 86400 });
+//     }
+// });
 
 if (!this.config.is_production) {
     for (let _port = this.config.port_range.start; _port <= this.config.port_range.end; _port++) {

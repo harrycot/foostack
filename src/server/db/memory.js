@@ -6,8 +6,18 @@ exports.db = {
         peer: (index) => {
             this.db.peers.splice(index, 1);
         },
-        webpeer: (index) => {
-            this.db.webpeers.splice(index, 1);
+        webpeer: {
+            index: (index) => {
+                this.db.webpeers.splice(index, 1);
+            },
+            seens: (ms) => {
+                for (let index = 0; index < this.db.webpeers.length; index++) {
+                    if ( this.db.webpeers[index].seen <= Date.now() - ms ) {
+                        this.db.webpeers.splice(index, 1);
+                        index--;
+                    }
+                }
+            }
         }
     },
     get: {
