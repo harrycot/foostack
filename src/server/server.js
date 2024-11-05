@@ -59,7 +59,7 @@ require('./utils/network').get_port_to_use( async (port) => {
     if (!fs.existsSync(path.join(cwd, 'db'))) { fs.mkdirSync(path.join(cwd, 'db')) }
     if (!fs.existsSync(path.join(cwd, `db/${port}`))) { fs.mkdirSync(path.join(cwd, `db/${port}`)) }
     this.db = {
-        session: require('lowdb')(new DBFileSync(path.join(cwd, `db/${port}/sessions.json`), { defaultValue: [] })),
+        blockchain: require('lowdb')(new DBFileSync(path.join(cwd, `db/${port}/blockchain.json`), { defaultValue: [] })),
     }
     // db init
 
@@ -79,6 +79,7 @@ require('./utils/network').get_port_to_use( async (port) => {
 
     
     require('./controllers/cron').init();
+    require('./db/file').init();
 
 
     process.stdin.setEncoding('utf8');
