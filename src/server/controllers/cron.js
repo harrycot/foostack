@@ -12,13 +12,13 @@ exports.init = () => {
     setInterval(() => { // 10 min
         console.log('\n==== RUNNING CRON 10 MIN ====\n');
         require('../db/memory').db.del.webpeer.seens(30*CONST_1M); // seen >= 30 min (remove peer)
-        require('../db/memory').db.del.webpeer.logins(4*CONST_1H); // login >= 4h (logout but dont remove peer)
 
     }, 10 * CONST_1M); // 10 min
 
 
     setInterval(() => { // 1h
         console.log('\n==== RUNNING CRON 1 HOUR ====\n');
+        require('../db/memory').db.del.webpeer.logins(4*CONST_1H); // login >= 4h (logout but dont remove peer)
 
     }, CONST_1H); // 1h
 

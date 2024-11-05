@@ -65,7 +65,6 @@ exports.db = {
             if ( !this.db.get.peer.exist_uuid(deserialized_handshake.uuid, this.db.webpeers) ) { // overwrite at given index if uuid don't exist in peers
                 this.db.webpeers.push({ pub: deserialized_handshake.pub, uuid: deserialized_handshake.uuid, sid: socket_id, seen: Date.now() });
             } else {
-                this.db.webpeers[this.db.get.peer.index_uuid(deserialized_handshake.uuid, this.db.webpeers)].sid = socket_id;
                 this.db.webpeers[this.db.get.peer.index_uuid(deserialized_handshake.uuid, this.db.webpeers)].seen = Date.now();
             }
         }
