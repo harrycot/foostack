@@ -3,7 +3,8 @@ When you start multiple instances of this project   $ npm run dev
 you can see each server making an "handshake" (exchange of uuid and openpgp public key).
 
 Currently, when you type a string in the stdin of an instance,
-you can see the replication across others sending acknowlegment to the emitter (the data is verified on both sides);
+you can see the replication across others sending acknowlegment to the emitter
+(the data is verified on both sides on s2s, we'll see if data ack is important for web);
 
 server:
 on handshake: uuid and pub is signed and sent in clear.
@@ -13,9 +14,7 @@ web:
 on handshake: uuid and pub is signed and sent in clear.
 on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
 
-trying to reuse as much as possible functions,
-using the buffer polyfill seems to have performance impact
-(taking time to generate openpgp keys checking the browser console)
+trying to reuse as much as possible functions
 
 the defaults openpgp keys are used for network only.
 
@@ -26,9 +25,12 @@ when the page is reloaded, the session doesnt follow.
 
 cron: 10min
 - if a webpeer is not seen since 30 min he is deleted from memory.
+cron: 1hour
 - logout every login (webpeer) >= 4h
+
+thinking of removing the use of obfuscator.
 =========
-TODO: - the user login using his pgp keys (signing random data);
+TODO:
       - use db file as blockchain (everything dont need to be stored);
 ```
 

@@ -4,11 +4,13 @@ const openpgp = require('openpgp');
 const { serialize, deserialize } = require('../../common/network');
 
 
-const client = { uuid: require('uuid').v5('web', require('uuid').v4()), openpgpcreds: false, serverpub: false }
+const client = { uuid: false, openpgpcreds: false, serverpub: false }
 
 socket.on('connect', async () => {
     console.log(socket.io.engine.id);
+    client.uuid = require('uuid').v5('web', require('uuid').v4());
     client.openpgpcreds = await require('../../common/crypto').openpgp.generate(client.uuid, `${client.uuid}@test.local`);
+    client.serverpub = false;
     console.log(client.openpgpcreds);
     socket.emit('data', await serialize(client.uuid, client.openpgpcreds)); // handshake init
 });
@@ -61,6 +63,10 @@ const handle_login = async (deserialized) => {
             break;
         case 'connected':
             console.log('  => Connected');
+            break;
+        case 'disconnected':
+            console.log('  => Disconnected');
+            break;
     
         default:
             break;

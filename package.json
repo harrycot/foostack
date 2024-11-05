@@ -1,6 +1,6 @@
 {
     "name": "s2s",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "description": "",
     "main": "src/server.js",
     "author": "Florian Blanc",
@@ -15,7 +15,6 @@
         "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development bundle-win.exe"
     },
     "dependencies": {
-        "cookie": "^1.0.1",
         "lowdb": "^1.0.0",
         "openpgp": "^5.11.2",
         "socket.io": "^4.7.2",
