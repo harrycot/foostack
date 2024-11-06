@@ -21,7 +21,7 @@ socket.on('data', async (serialized_data) => {
     console.log(_deserialized);
     socket.emit('data ack', await serialize(client.uuid, client.openpgpcreds, _deserialized.data, client.serverpub));
 
-    const _json_data = JSON.parse(_deserialized.data);
+    const _json_data = _deserialized.data;
     console.log(_json_data);
 
     if (_json_data.login) {
@@ -45,7 +45,7 @@ socket.on('data ack', async (serialized_data) => {
 });
 
 const handle_login = async (deserialized) => {
-    const _json_data = JSON.parse(deserialized.data);
+    const _json_data = deserialized.data;
 
     switch (_json_data.login) {
         case 'ask_login_data':

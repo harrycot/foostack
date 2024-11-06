@@ -56,7 +56,7 @@ exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
         });
         try {
             await _signatures[0].verified;
-            _json_data.data = _decrypted;
+            _json_data.data = JSON.parse(_decrypted);
         } catch (e) {
             _json_data.err.signature_data = `data: Signature could not be verified: ${e.message}`
         }

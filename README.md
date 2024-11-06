@@ -3,16 +3,18 @@ When you start multiple instances of this project   $ npm run dev
 you can see each server making an "handshake" (exchange of uuid and openpgp public key).
 
 Currently, when you type a string in the stdin of an instance,
-you can see the replication across others sending acknowlegment to the emitter
+  you can see the replication across others sending acknowlegment to the emitter
+    the data is stored in file as blockchain without enough checks
+
 (the data is verified on both sides on s2s, we'll see if data ack is important for web);
 
 server:
-on handshake: uuid and pub is signed and sent in clear.
-on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
+  on handshake: uuid and pub is signed and sent in clear.
+  on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
 
 web:
-on handshake: uuid and pub is signed and sent in clear.
-on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
+  on handshake: uuid and pub is signed and sent in clear.
+  on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
 
 trying to reuse as much as possible functions
 
@@ -31,7 +33,7 @@ cron: 1hour
 thinking of removing the use of obfuscator.
 =========
 TODO:
-      - use db file as blockchain (everything dont need to be stored);
+      - blockchain sync and manage which nodes are right.
 ```
 
 
