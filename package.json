@@ -2,9 +2,10 @@
     "name": "s2s",
     "version": "0.1.4",
     "description": "",
-    "main": "src/server.js",
+    "main": "src/server/server.js",
     "author": "Florian Blanc",
-    "private": true,
+    "license": "LGPL-3.0+",
+    "homepage": "https://github.com/harrycot",
     "scripts": {
         "dev": "cross-env NODE_ENV=development webpack --config-name web && node ./src/server/server.js",
         "pkg": "cross-env NODE_ENV=production pkg ./src/server/server.js --out-path ./dist",
