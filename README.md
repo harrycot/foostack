@@ -31,9 +31,12 @@ cron: 1hour
 - logout every login (webpeer) >= 4h
 
 thinking of removing the use of obfuscator.
-=========
+==========
 TODO:
       - blockchain sync and manage which nodes are right.
+==========
+
+you can support me here: https://buymeacoffee.com/foostack
 ```
 
 
