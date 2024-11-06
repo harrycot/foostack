@@ -87,6 +87,10 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 console.log(`\n  => DATA as server:${require('../db/memory').db.server.uuid} got from client:${_deserialized.uuid} : ${_deserialized.data}`);
                 const _index = require('../db/memory').db.get.peer.index_uuid(_deserialized.uuid, require('../db/memory').db.peers)
                 const _pub = require('../db/memory').db.peers[_index].pub;
+                if (_deserialized.data.block) {
+                    console.log(`\ngot new block ${_deserialized.data.block}\n`);
+                    require('../db/file').new_block_from_node(_deserialized.data);
+                }
                 require('../db/memory').db.peers[_index].socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _deserialized.data, _pub));
 
             } else {

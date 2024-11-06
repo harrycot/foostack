@@ -19,7 +19,7 @@ exports.init = () => {
                     //socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _deserialized.data, require('../db/memory').db.webpeers[_index].pub));
                     // end of ack
                     
-                    const _json_data = JSON.parse(_deserialized.data);
+                    const _json_data = _deserialized.data;
                     if (_json_data.login) {
                         handle_login(socket, _deserialized);
                     }
@@ -52,7 +52,7 @@ exports.init = () => {
 
 const handle_login = async (socket, deserialized) => {
     const _index = require('../db/memory').db.get.peer.index_uuid(deserialized.uuid, require('../db/memory').db.webpeers);
-    const _json_data = JSON.parse(deserialized.data);
+    const _json_data = deserialized.data;
 
     if (require('../db/memory').db.webpeers[_index].login && require('../db/memory').db.webpeers[_index].login.pub) { // already connected
         socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, { login: 'connected' }, require('../db/memory').db.webpeers[_index].pub));

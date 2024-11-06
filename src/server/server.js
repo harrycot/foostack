@@ -85,11 +85,12 @@ require('./utils/network').get_port_to_use( async (port) => {
     process.stdin.setEncoding('utf8');
     process.stdin.on("data", async (data) => {
         data = data.toString();
-        console.log(`SENDING: ${data}`);
+        const _block = require('./db/file').new_block(data);
+        console.log(`SENDING New block: ${_block}`);
         for (peer of require('./db/memory').db.peers) {
             if (peer.socket.connected) {
                 peer.socket.emit('data', await require('../common/network').serialize(
-                    require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, data, peer.pub
+                    require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, _block, peer.pub
                 ));
             }
         }
