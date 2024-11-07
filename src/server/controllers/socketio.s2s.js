@@ -40,6 +40,8 @@ exports.init = () => {
     // init connections as client for each server in peers
     for (index in require('../db/memory').db.peers) {
         init_ioclient(index);
+
+        // 
     }
 }
 
@@ -79,6 +81,9 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 if (!require('../db/memory').db.get.peer.exist_uuid(_deserialized.uuid, require('../db/memory').db.peers)) {
                     console.log(`\n  => INDEXING HANDSHAKE from server:${_deserialized.uuid}\n`);
                     require('../db/memory').db.set.peer(index, _deserialized); // ADD PEER - ADD PEER - ADD PEER - ADD PEER
+
+                    // ready to sync with (but minimum of nodes required?)
+                    //     require('../db/blockchain').sync_chain();
                 }
             }
         } else { // data
@@ -89,10 +94,20 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 const _pub = require('../db/memory').db.peers[_index].pub;
                 if (_deserialized.data.block) {
                     console.log(`\ngot new block ${_deserialized.data.block}\n`);
-                    require('../db/file').new_block_from_node(_deserialized.data);
+                    require('../db/blockchain').new_block_from_node(_deserialized.data);
                 }
                 require('../db/memory').db.peers[_index].socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _deserialized.data, _pub));
-
+                if (_deserialized.data.blockchain) {
+                    switch (_deserialized.data.blockchain) {
+                        case 'get_last':
+                            const _last_block = require('../db/blockchain').blockchain.last().value();
+                            require('../db/memory').db.peers[_index].socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _last_block, _pub));
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                }
             } else {
                 // 'data ack'
                 console.log(`\n  => DATA ACK as server:${require('../db/memory').db.server.uuid} got from client:${_deserialized.uuid} : ${_deserialized.data}`);

@@ -1,6 +1,5 @@
 const path = require('node:path');
 const fs = require('node:fs');
-const DBFileSync = require('lowdb/adapters/FileSync');
 
 exports.config = { 
     is_production: process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false,
@@ -10,8 +9,6 @@ exports.config = {
 }
 
 const cwd = this.config.is_production ? process.cwd() : __dirname;
-
-exports.db = {} // set db path when we know which port to use
 
 exports.http = require('node:http').createServer(function(req, res){
     console.log(req.url);
@@ -38,10 +35,7 @@ exports.http = require('node:http').createServer(function(req, res){
 exports.io = require('socket.io')(this.http, {
     cookie: {
         name: require('./utils/crypto').misc.generate.seed_int(100,4096),
-        path: "/",
-        httpOnly: true,
-        sameSite: "strict",
-        secure: false
+        path: "/", httpOnly: true, sameSite: "strict", secure: false
     }
 });
 
@@ -55,13 +49,6 @@ if (!this.config.is_production) {
 
 require('./utils/network').get_port_to_use( async (port) => {
     this.config.network.port = port;
-    
-    if (!fs.existsSync(path.join(cwd, 'db'))) { fs.mkdirSync(path.join(cwd, 'db')) }
-    if (!fs.existsSync(path.join(cwd, `db/${port}`))) { fs.mkdirSync(path.join(cwd, `db/${port}`)) }
-    this.db = {
-        blockchain: require('lowdb')(new DBFileSync(path.join(cwd, `db/${port}/blockchain.json`), { defaultValue: [{ block: 0, data: '', prev: false }] })),
-    }
-    // db init
 
     if (!require('./db/memory').db.server.uuid) {
         require('./db/memory').db.server.uuid = require('uuid').v5('s2s', require('uuid').v4());
@@ -76,16 +63,14 @@ require('./utils/network').get_port_to_use( async (port) => {
 
     require('./controllers/socketio.s2s').init();
     require('./controllers/socketio').init();
-
-    
     require('./controllers/cron').init();
-    require('./db/file').init();
+    require('./db/blockchain').init(port);
 
 
     process.stdin.setEncoding('utf8');
     process.stdin.on("data", async (data) => {
         data = data.toString();
-        const _block = require('./db/file').new_block(data);
+        const _block = require('./db/blockchain').new_block(data);
         console.log(`SENDING New block: ${_block}`);
         for (peer of require('./db/memory').db.peers) {
             if (peer.socket.connected) {

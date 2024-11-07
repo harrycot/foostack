@@ -2,5 +2,5 @@
 dist
 node_modules
 package-lock.json
-src/server/db/8*
+src/server/db/_blockchain
 src/view/**/*.bundle.*
