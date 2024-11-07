@@ -1,47 +1,51 @@
+<h3 align="center">foostack</h3>
+<p align="center">fullstack webapp horizontally scalable using socketio and openpgp</p>
+<p align="center">
+    <a href="https://github.com/harrycot/foostack/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-LGPLv3-green.svg" alt="LGPLv3 License"></a>
+    <img src="https://img.shields.io/badge/contributions-welcome-ff69b4.svg" alt="Contributions Welcome">
+</p>
+<p align="center"><i>(work in progress)</i></p>
+
+
+Each peer _(both server and webclient)_ generates a new openpgp key pair at startup. These keys are only used for data transport _(signature and encryption)_. Anything not stored on the blockchain remains in memory during execution like keys and peer list.
+
+Currently, when you type a string in the stdin of an instance, a block is created, saved to a file named blockchain.json and sent to every node which check if the hash of this new block match the computed hash of the previous block. An acknowledgment is sent back to the emitter (but currently nothing is really performed after that).
+
+Server peers are currently limited to a defined list.
+
+#### Serialization:
+  - **on handshake**: uuid and pub is signed and sent in clear. _The receiver returns his uuid and pub as an acknowledgement._
+  - **on data**: uuid and data is signed and sent as clear but data is encrypted and signed too. _The receiver return the same data as an acknowledgement._
+
+#### View:
+- the login is simulated by generating a new openpgp key pair (you can see more details in logs).
+  - asking a seed to the server.
+  - signing { seed, pub } _where pub is the new openpgp public key_.
+- when the page is reloaded, the session doesn't follow.
+
+#### Cron:
+- 10 min:
+  - if a webpeer is not seen since 30 min he is deleted from memory.
+- 1 hour:
+  - logout every login (webpeer) >= 4h.
+
+## Usage
+
+Check the "scripts" content of the package.json file:
+```sh
+$ npm run dev
 ```
-When you start multiple instances of this project   $ npm run dev
-you can see each server making an "handshake" (exchange of uuid and openpgp public key).
+and start multiple instances like that.
 
-Currently, when you type a string in the stdin of an instance,
-  you can see the replication across others sending acknowlegment to the emitter
-    the data is stored in file as blockchain without enough checks
 
-(the data is verified on both sides on s2s, we'll see if data ack is important for web);
+<h3 align="right"><a href="https://buymeacoffee.com/foostack">[buymeacoffee.com/foostack]</a></h3>
 
-server:
-  on handshake: uuid and pub is signed and sent in clear.
-  on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
+#### TODO:
+- blockchain sync and manage which nodes are right.
+- maybe removing the use of the obfuscator.
 
-web:
-  on handshake: uuid and pub is signed and sent in clear.
-  on data: uuid and data is signed and sent as clear but data is encrypted and signed too.
-
-trying to reuse as much as possible functions
-
-the defaults openpgp keys are used for network only.
-
-the login is simulated by generating a new openpgp key pair (you can see more details in logs).
-  => signing random data
-
-when the page is reloaded, the session doesnt follow.
-
-cron: 10min
-- if a webpeer is not seen since 30 min he is deleted from memory.
-cron: 1hour
-- logout every login (webpeer) >= 4h
-
-thinking of removing the use of obfuscator.
-==========
-TODO:
-      - blockchain sync and manage which nodes are right.
-==========
-
-you can support me here: https://buymeacoffee.com/foostack
+#### memory.js file content looks like this when running
 ```
-
-
-```
-// db of ./memory.js file looks like this
 {
     server: {
       uuid: '0ccb69ee-ff89-4692-b29d-4cd939f59ace',
