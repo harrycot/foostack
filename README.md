@@ -44,6 +44,7 @@ and start multiple instances like that.
 - blockchain sync and manage which nodes are right.
 - maybe removing the use of the obfuscator.
 - **review data ack s2s and handle data like API (well defined)**
+ - fix process unknown from web view comment in (memory.js).config
 
 #### memory.js file content looks like this when running
 ```

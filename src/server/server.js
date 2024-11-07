@@ -1,18 +1,11 @@
 const path = require('node:path');
 const fs = require('node:fs');
 
-exports.config = { 
-    is_production: process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false,
-    port_range: process.pkg ? { start: 443, end: 443} : { start: 8001, end: 8010 },
-    network: { ip: { v4: false, v6: false }, port: false },
-    owner_pub: 'openpgp pub key'
-}
-
-const cwd = this.config.is_production ? process.cwd() : __dirname;
+const cwd = require('./db/memory').config.is_production ? process.cwd() : __dirname;
 
 exports.http = require('node:http').createServer(function(req, res){
     console.log(req.url);
-    const _files = require('../server/server').config.is_production
+    const _files = require('./db/memory').config.is_production
         ? [] // use webpack
         : [
             { req: '/styles.css', path: '../view/scss/styles.bundle.css', type: 'text/css' },
@@ -39,13 +32,12 @@ exports.io = require('socket.io')(this.http, {
     }
 });
 
-if (!this.config.is_production) {
-    // for (let _port = this.config.port_range.start; _port <= this.config.port_range.end; _port++) {
+if (!require('./db/memory').config.is_production) {
+    // for (let _port = require('./db/memory').config.port_range.start; _port <= require('./db/memory').config.port_range.end; _port++) {
     //     require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
     // }
     require('./db/memory').db.peers = [
-        { server: 'localhost:8001' },
-        { server: 'localhost:8002' }
+        { server: 'localhost:8001' }
     ];
 } else {
     require('./db/memory').db.peers = [
@@ -55,7 +47,7 @@ if (!this.config.is_production) {
 }
 
 require('./utils/network').get_port_to_use( async (port) => {
-    this.config.network.port = port;
+    require('./db/memory').config.network.port = port;
 
     if (!require('./db/memory').db.server.uuid) {
         require('./db/memory').db.server.uuid = require('uuid').v5('s2s', require('uuid').v4());
@@ -78,7 +70,11 @@ require('./utils/network').get_port_to_use( async (port) => {
     process.stdin.on("data", async (data) => {
         data = data.toString();
         const _block = require('./db/blockchain').new_block(data);
-        console.log(`SENDING New block: ${_block}`);
+
+        console.log(require('./db/memory').db.peers);
+
+        console.log(`\n\nSENDING New block: ${_block}`);
+
         for (peer of require('./db/memory').db.peers) {
             if (peer.socket.connected) {
                 peer.socket.emit('data', await require('../common/network').serialize(

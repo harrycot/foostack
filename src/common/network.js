@@ -14,7 +14,7 @@ exports.serialize = async (uuid, openpgpcreds, data, pub) => {
                 signingKeys: _openpgp_local_priv_obj
             })).toString('base64')
         }" }` }
-        : { text: `{ "uuid": "${uuid}", "pub": "${openpgpcreds.pub}" }` };
+        : { text: `{ "uuid": "${uuid}", "pub": "${openpgpcreds.pub}", "port": "${require('../server/db/memory').config.network.port}" }` };
 
     const _unsigned = await openpgp.createCleartextMessage(_message);
     const _signed = await openpgp.sign({ message: _unsigned, signingKeys: _openpgp_local_priv_obj });

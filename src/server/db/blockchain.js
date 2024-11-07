@@ -4,7 +4,7 @@ const DBFileSync = require('lowdb/adapters/FileSync');
 
 const CONST_HASH = 'sha512';
 
-const cwd = require('../server').config.is_production ? process.cwd() : __dirname;
+const cwd = require('../db/memory').config.is_production ? process.cwd() : __dirname;
 
 exports.blockchain = false;
 

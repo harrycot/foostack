@@ -1,3 +1,14 @@
+
+exports.config = { 
+    //is_production: process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false,
+    //port_range: process.pkg ? { start: 443, end: 443} : { start: 8001, end: 8010 },
+    // process unknown from web view
+    is_production: false,
+    port_range: { start: 8001, end: 8010 },
+    network: { ip: { v4: false, v6: false }, port: false },
+    owner_pub: 'openpgp pub key'
+}
+
 exports.db = {
     server: { uuid: false, openpgp: false },
     peers: [],
@@ -58,8 +69,12 @@ exports.db = {
         }
     },
     set: {
-        peer: (index, deserialized_handshake) => {
+        peer: (index, deserialized_handshake, server) => {
             if ( !this.db.get.peer.exist_uuid(deserialized_handshake.uuid, this.db.peers) && index ) { // overwrite at given index if uuid don't exist in peers
+                if (!this.db.peers[index]) {
+                    this.db.peers[index] = { server: server }
+                }
+                this.db.peers[index].port = deserialized_handshake.port;
                 this.db.peers[index].pub = deserialized_handshake.pub;
                 this.db.peers[index].uuid = deserialized_handshake.uuid;
                 this.db.peers[index].seen = Date.now();
