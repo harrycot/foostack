@@ -67,6 +67,7 @@ const on_data_common = async (index, serialized_data, send_ack) => {
     const { serialize, deserialize } = require('../../common/network');
 
     const _deserialized = await deserialize(require('../db/memory').db.server.openpgp, serialized_data);
+    if (!_deserialized) { console.log('\n  => data received without handshake done: ignore\n'); return; }
 
     if (!Object.keys(_deserialized.err).length) {
         if (!_deserialized.data){ // handshake
@@ -83,7 +84,6 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                     // when connection done between masters/indexers
                     //   => get list of available peers
 
-                    console.log(index); 
                     const _pub = require('../db/memory').db.peers[index].pub;
                     const _data = { node: 'get_onlines' };
                     require('../db/memory').db.peers[index].socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _data, _pub));
@@ -99,11 +99,11 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 console.log(`\n  => DATA as server:${require('../db/memory').db.server.uuid} got from client:${_deserialized.uuid} : ${_deserialized.data}`);
                 const _index = require('../db/memory').db.get.peer.index_uuid(_deserialized.uuid, require('../db/memory').db.peers)
                 const _pub = require('../db/memory').db.peers[_index].pub;
+                require('../db/memory').db.peers[_index].socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _deserialized.data, _pub));
                 if (_deserialized.data.block) {
                     console.log(`\ngot new block ${_deserialized.data.block}\n`);
                     require('../db/blockchain').new_block_from_node(_deserialized.data);
                 }
-                require('../db/memory').db.peers[_index].socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _deserialized.data, _pub));
                 if (_deserialized.data.blockchain) {
                     switch (_deserialized.data.blockchain) {
                         case 'get_last':
@@ -118,9 +118,21 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                 if (_deserialized.data.node) {
                     switch (_deserialized.data.node) {
                         case 'get_onlines':
-                            const _onlines = require('../db/memory').db.get.peer.onlines();
-                            console.log('\nONLINES:')
-                            console.log(_onlines);
+                            if (_deserialized.data.onlines) { // got response
+                                console.log('\n  => GOT ONLINES:');
+                                console.log(_deserialized.data.onlines);
+                                for ( server of _deserialized.data.onlines ) { // server is string 'IP:PORT'
+                                    if (!require('../db/memory').db.get.peer.exist_server(server)) {
+                                        require('../db/memory').db.peers.push({ server: server });
+                                        // init ioc
+                                        init_ioclient(require('../db/memory').db.peers.length-1);
+                                    }
+                                }
+                            } else { // got ask
+                                const _onlines = require('../db/memory').db.get.peer.onlines();
+                                const _data = { node: 'get_onlines', onlines: _onlines }
+                                require('../db/memory').db.peers[_index].socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _data, _pub));
+                            }
                             break;
                     
                         default:

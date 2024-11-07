@@ -40,9 +40,13 @@ exports.io = require('socket.io')(this.http, {
 });
 
 if (!this.config.is_production) {
-    for (let _port = this.config.port_range.start; _port <= this.config.port_range.end; _port++) {
-        require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
-    }
+    // for (let _port = this.config.port_range.start; _port <= this.config.port_range.end; _port++) {
+    //     require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
+    // }
+    require('./db/memory').db.peers = [
+        { server: 'localhost:8001' },
+        { server: 'localhost:8002' }
+    ];
 } else {
     require('./db/memory').db.peers = [
         { server: 'IP:PORT' },

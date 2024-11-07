@@ -43,6 +43,7 @@ and start multiple instances like that.
 #### TODO:
 - blockchain sync and manage which nodes are right.
 - maybe removing the use of the obfuscator.
+- **review data ack s2s and handle data like API (well defined)**
 
 #### memory.js file content looks like this when running
 ```

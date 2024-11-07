@@ -35,6 +35,8 @@ exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
             openpgp_pub = require('../server/db/memory').db.peers[require('../server/db/memory').db.get.peer.index_uuid(_json_data.uuid, require('../server/db/memory').db.peers)].pub;
         } else if (is_webpeer_exist) {
             openpgp_pub = require('../server/db/memory').db.webpeers[require('../server/db/memory').db.get.peer.index_uuid(_json_data.uuid, require('../server/db/memory').db.webpeers)].pub;
+        } else if ( (!is_peer_exist && _json_data.data) || (!is_webpeer_exist && _json_data.data) ) {
+            return false; // data received without handshake done: ignore
         }
     }
     const _json_data_openpgp_pub_obj = !_json_data.data
