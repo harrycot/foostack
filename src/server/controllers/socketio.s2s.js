@@ -40,8 +40,6 @@ exports.init = () => {
     // init connections as client for each server in peers
     for (index in require('../db/memory').db.peers) {
         init_ioclient(index);
-
-        // 
     }
 }
 
@@ -82,6 +80,15 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                     console.log(`\n  => INDEXING HANDSHAKE from server:${_deserialized.uuid}\n`);
                     require('../db/memory').db.set.peer(index, _deserialized); // ADD PEER - ADD PEER - ADD PEER - ADD PEER
 
+                    // when connection done between masters/indexers
+                    //   => get list of available peers
+
+                    console.log(index); 
+                    const _pub = require('../db/memory').db.peers[index].pub;
+                    const _data = { node: 'get_onlines' };
+                    require('../db/memory').db.peers[index].socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _data, _pub));
+                    // trying to deserialize without handshake done
+
                     // ready to sync with (but minimum of nodes required?)
                     //     require('../db/blockchain').sync_chain();
                 }
@@ -102,6 +109,18 @@ const on_data_common = async (index, serialized_data, send_ack) => {
                         case 'get_last':
                             const _last_block = require('../db/blockchain').blockchain.last().value();
                             require('../db/memory').db.peers[_index].socket.emit('data ack', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _last_block, _pub));
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                }
+                if (_deserialized.data.node) {
+                    switch (_deserialized.data.node) {
+                        case 'get_onlines':
+                            const _onlines = require('../db/memory').db.get.peer.onlines();
+                            console.log('\nONLINES:')
+                            console.log(_onlines);
                             break;
                     
                         default:

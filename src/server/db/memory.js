@@ -48,6 +48,9 @@ exports.db = {
             },
             exist_sid: (sid, array) => {
                 return array.filter(function(peer) { return peer.sid === sid }).length == 0 ? false : true;
+            },
+            onlines: () => {
+                return this.peers.filter((peer) => { if (peer.socket.connected) { return peer.server } else { return false } });
             }
         }
     },

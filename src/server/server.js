@@ -44,7 +44,10 @@ if (!this.config.is_production) {
         require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
     }
 } else {
-    // push server list for prod
+    require('./db/memory').db.peers = [
+        { server: 'IP:PORT' },
+        { server: 'IP:PORT' }
+    ];
 }
 
 require('./utils/network').get_port_to_use( async (port) => {
