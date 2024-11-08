@@ -143,6 +143,17 @@ const handle_data = async (deserialized, index, pub) => {
             case 'get_firstlast':
                 if (deserialized.data.blockchain.firstlast) { // got response
                     // think about something to handle events
+                    if (deserialized.data.blockchain.callback) {
+                        switch (deserialized.data.blockchain.callback) {
+                            case 'sync_chain':
+                                const _callback_data = { blockchain: 'get_firstlast', first_last: deserialized.data.blockchain.firstlast, server: require('../db/memory').db.peers[index].server };
+                                require('../db/blockchain').sync_chain(_callback_data);
+                                break;
+                        
+                            default:
+                                break;
+                        }
+                    }
                 } else { // got ask
                     const _first_block = require('../db/blockchain').blockchain.first().value();
                     const _last_block = require('../db/blockchain').blockchain.last().value();

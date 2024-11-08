@@ -35,15 +35,45 @@ exports.new_block_from_node = (block) => {
     }
 }
 
-exports.sync_chain = async (at) => {
+exports.sync_chain = async (callback_data) => {
     console.log('SYNC CHAIN');
-    for (peer of require('./memory').db.peers) { // maybe dont ask every peer
-        if (peer.socket.connected) {
-            const _data = { blockchain: 'get_firstlast', callback: 'sync_chain' };
-            peer.socket.emit('data', await require('../common/network').serialize(
-                require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, _data, peer.pub
-            ));
-
+    if (!callback_data) {
+        for (peer of require('./memory').db.peers) { // maybe dont ask every peer
+            if (peer.socket.connected) {
+                const _data = { blockchain: 'get_firstlast', callback: 'sync_chain' };
+                require('../db/memory').db.firstlast.push( { server: peer.server, sent: Date.now() } );
+                peer.socket.emit('data', await require('../common/network').serialize(
+                    require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, _data, peer.pub
+                ));
+            }
+        }
+    } else {
+        // { blockchain: 'get_firstlast', first_last: { first: x, last: x }, server: 'IP:PORT' };
+        // 
+        console.log(callback_data);
+        switch (callback_data.blockchain) {
+            case 'get_firstlast':
+                for (let index = 0; index < require('../db/memory').db.firstlast.length; index++) {
+                    if (require('../db/memory').db.firstlast[index].server === callback_data.server) {
+                        require('../db/memory').db.firstlast[index].firstlast = callback_data.firstlast;
+                    }
+                    // remove timeout
+                    if ( require('../db/memory').db.firstlast[index].sent <= (Date.now() - (10*1000)) ) { // 10s
+                        if (!require('../db/memory').db.firstlast[index].firstlast) {
+                            require('../db/memory').db.firstlast.splice(index, 1);
+                            index--;
+                        }
+                    }
+                }
+                if (require('../db/memory').db.firstlast.filter((el) => { return el.firstlast }).length == require('../db/memory').db.firstlast.length) {
+                    console.log('\n\n  => firstlast array done:')
+                    console.log(require('../db/memory').db.firstlast);
+                }
+                //
+                break;
+        
+            default:
+                break;
         }
     }
 }

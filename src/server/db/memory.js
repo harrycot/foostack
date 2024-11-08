@@ -8,6 +8,7 @@ exports.config = {
 exports.db = {
     server: { uuid: false, openpgp: false },
     peers: [],
+    firstlast: [],
     webpeers: [],
     del: {
         peer: (index) => {
