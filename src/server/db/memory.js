@@ -6,10 +6,12 @@ exports.config = {
 }
 
 exports.db = {
+    state: { got_online_peers: false, is_blockchain_sync: false },
     server: { uuid: false, openpgp: false },
+    default_peers: [],
     peers: [],
-    firstlast: [],
     webpeers: [],
+    blockchain_firstlast: [],
     del: {
         peer: (index) => {
             this.db.peers.splice(index, 1);
