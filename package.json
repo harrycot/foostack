@@ -1,6 +1,6 @@
 {
     "name": "foostack",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "description": "fullstack webapp using socketio and openpgp",
     "main": "src/server/server.js",
     "author": "Florian Blanc",

@@ -11,11 +11,17 @@ Each peer _(both server and webclient)_ generates a new openpgp key pair at star
 
 Currently, when you type a string in the stdin of an instance, a block is created, saved to a file named blockchain.json and sent to every node which check if the hash of this new block match the computed hash of the previous block. An acknowledgment is sent back to the emitter (but currently nothing is really performed after that).
 
-Server peers are currently limited to a defined list.
+Connected peers are discovered by asking a list of online nodes to everyone.
+
 
 #### Serialization:
   - **on handshake**: uuid, pub and port  is signed and sent in clear. _The receiver returns his uuid and pub as an acknowledgement._
   - **on data**: uuid and data  is signed and sent as clear but data is encrypted and signed too. _The receiver return the same data as an acknowledgement._
+
+#### Blockchain:
+  - a block contain { block: _number_, data: _json_, prev: _hash-of-previous-block_ }.
+  - on sync, first and last block is asked to every online nodes. _timeout 10seconds_.
+  - check TODO below
 
 #### View:
 - the login is simulated by generating a new openpgp key pair (you can see more details in logs).
@@ -41,9 +47,12 @@ and start multiple instances like that.
 <h3 align="right"><a href="https://buymeacoffee.com/foostack">[buymeacoffee.com/foostack]</a></h3>
 
 #### TODO:
-- blockchain sync and manage which nodes are right.
 - maybe removing the use of the obfuscator.
-- add a kind of callback parameter to emitted data.
+- blockchain: trust the majority of first/last blocks.
+    - try to sync with a random from the majority.
+    - emit 'wrong' to the minority to let them resync.
+        - handle blacklist.
+- remove peer from peers on disconnect
 
 #### memory.js file content looks like this when running
 ```

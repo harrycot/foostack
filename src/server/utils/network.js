@@ -1,5 +1,3 @@
-
-
 exports.get_http_headers = (content_type) => {
     // https://github.com/helmetjs/helmet
     //'Content-Security-Policy': "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"

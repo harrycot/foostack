@@ -19,6 +19,12 @@ exports.init = () => {
         });
         socket.on('disconnect', () => {
             console.log(`as ioserver got client id ${socket.client.conn.id}: disconnected`);
+
+            // bad sid ???
+            // console.log(require('../db/memory').db.peers);
+            // const _peer_index = require('../db/memory').db.get.peer.index_sid(socket.client.conn.id, require('../db/memory').db.peers);
+            // require('../db/memory').db.del.peer(_peer_index);
+            // console.log(require('../db/memory').db.peers);
         });
     });
     // init connections as client for each server in peers
