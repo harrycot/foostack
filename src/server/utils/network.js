@@ -5,7 +5,7 @@ exports.get_http_headers = (content_type) => {
     //'Content-Security-Policy': "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
     return {
         'Content-Type': content_type,
-        'Content-Security-Policy': require('../db/memory').config.is_production
+        'Content-Security-Policy': require('../server').is_production
             ? "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
             : "",
         'Cross-Origin-Opener-Policy': "same-origin",

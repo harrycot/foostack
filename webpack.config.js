@@ -4,7 +4,7 @@ const webpack = require('webpack');
 const TerserPlugin = require("terser-webpack-plugin");
 const WebpackObfuscator = require('webpack-obfuscator');
 
-const is_production = require('./src/server/db/memory').config.is_production;
+const is_production = require('./src/server/server').is_production;
 
 module.exports = [
     {

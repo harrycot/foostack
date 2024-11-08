@@ -4,7 +4,7 @@ const DBFileSync = require('lowdb/adapters/FileSync');
 
 const CONST_HASH = 'sha512';
 
-const cwd = require('../db/memory').config.is_production ? process.cwd() : __dirname;
+const cwd = require('../server').is_production ? process.cwd() : __dirname;
 
 exports.blockchain = false;
 
@@ -37,12 +37,13 @@ exports.new_block_from_node = (block) => {
 
 exports.sync_chain = async (at) => {
     console.log('SYNC CHAIN');
-    for (peer of require('./memory').db.peers) {
+    for (peer of require('./memory').db.peers) { // maybe dont ask every peer
         if (peer.socket.connected) {
-            const _data = { blockchain: 'get_last' };
+            const _data = { blockchain: 'get_firstlast', callback: 'sync_chain' };
             peer.socket.emit('data', await require('../common/network').serialize(
                 require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, _data, peer.pub
             ));
+
         }
     }
 }

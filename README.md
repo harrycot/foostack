@@ -14,8 +14,8 @@ Currently, when you type a string in the stdin of an instance, a block is create
 Server peers are currently limited to a defined list.
 
 #### Serialization:
-  - **on handshake**: uuid and pub is signed and sent in clear. _The receiver returns his uuid and pub as an acknowledgement._
-  - **on data**: uuid and data is signed and sent as clear but data is encrypted and signed too. _The receiver return the same data as an acknowledgement._
+  - **on handshake**: uuid, pub and port  is signed and sent in clear. _The receiver returns his uuid and pub as an acknowledgement._
+  - **on data**: uuid and data  is signed and sent as clear but data is encrypted and signed too. _The receiver return the same data as an acknowledgement._
 
 #### View:
 - the login is simulated by generating a new openpgp key pair (you can see more details in logs).
@@ -43,8 +43,7 @@ and start multiple instances like that.
 #### TODO:
 - blockchain sync and manage which nodes are right.
 - maybe removing the use of the obfuscator.
-- **review data ack s2s and handle data like API (well defined)**
- - fix process unknown from web view comment in (memory.js).config
+- add a kind of callback parameter to emitted data.
 
 #### memory.js file content looks like this when running
 ```

@@ -1,11 +1,13 @@
 const path = require('node:path');
 const fs = require('node:fs');
 
-const cwd = require('./db/memory').config.is_production ? process.cwd() : __dirname;
+exports.is_production = process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false;
+
+const cwd = this.is_production ? process.cwd() : __dirname;
 
 exports.http = require('node:http').createServer(function(req, res){
     console.log(req.url);
-    const _files = require('./db/memory').config.is_production
+    const _files = require('./server').is_production
         ? [] // use webpack
         : [
             { req: '/styles.css', path: '../view/scss/styles.bundle.css', type: 'text/css' },
@@ -32,7 +34,7 @@ exports.io = require('socket.io')(this.http, {
     }
 });
 
-if (!require('./db/memory').config.is_production) {
+if (!this.is_production) {
     // for (let _port = require('./db/memory').config.port_range.start; _port <= require('./db/memory').config.port_range.end; _port++) {
     //     require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
     // }
@@ -70,15 +72,12 @@ require('./utils/network').get_port_to_use( async (port) => {
     process.stdin.on("data", async (data) => {
         data = data.toString();
         const _block = require('./db/blockchain').new_block(data);
-
-        console.log(require('./db/memory').db.peers);
-
-        console.log(`\n\nSENDING New block: ${_block}`);
-
+        const _data = { blockchain: 'new_block', block: _block }
+        console.log(`\n\nSENDING New block: ${_block.block}`);
         for (peer of require('./db/memory').db.peers) {
             if (peer.socket.connected) {
                 peer.socket.emit('data', await require('../common/network').serialize(
-                    require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, _block, peer.pub
+                    require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, _data, peer.pub
                 ));
             }
         }
