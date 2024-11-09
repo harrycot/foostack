@@ -57,6 +57,7 @@ exports.sync_chain = async (callback_data) => {
                 }
             }
             this.sync_chain({ blockchain: 'get_firstlast' });
+            
         }, 10*1000); // 10s
     } else {
         // { blockchain: 'get_firstlast', first_last: { first: x, last: x }, server: 'IP:PORT' };

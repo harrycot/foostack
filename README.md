@@ -52,7 +52,6 @@ and start multiple instances like that.
     - try to sync with a random from the majority.
     - emit 'wrong' to the minority to let them resync.
         - handle blacklist.
-- remove peer from peers on disconnect
 
 #### memory.js file content looks like this when running
 ```

@@ -44,7 +44,6 @@ exports.db = {
                 for (index in array) {
                     if (array[index].uuid === uuid) { return index }
                 }
-                return false;
             },
             exist_uuid: (uuid, array) => {
                 return array.filter(function(peer) { return peer.uuid === uuid }).length == 0 ? false : true;
@@ -53,7 +52,6 @@ exports.db = {
                 for (index in array) {
                     if (array[index].sid === sid) { return index }
                 }
-                return false;
             },
             exist_sid: (sid, array) => {
                 return array.filter(function(peer) { return peer.sid === sid }).length == 0 ? false : true;
@@ -61,21 +59,24 @@ exports.db = {
             exist_server: (server) => {
                 return this.db.peers.filter((peer) => { return peer.server === server }).length == 0 ? false : true;
             },
+            index_server: (server) => {
+                for (index in this.db.peers) {
+                    if (this.db.peers[index].server === server) { return index }
+                }
+            },
             onlines: () => {
                 return this.db.peers.filter((peer) => { return peer.socket.connected }).map((peer) => { return peer.server });
             }
         }
     },
     set: {
-        peer: (index, deserialized_handshake, server) => {
-            if ( !this.db.get.peer.exist_uuid(deserialized_handshake.uuid, this.db.peers) && index ) { // overwrite at given index if uuid don't exist in peers
-                if (!this.db.peers[index] && server) { this.db.peers[index] = { server: server } }
-                this.db.peers[index].pub = deserialized_handshake.pub;
-                this.db.peers[index].uuid = deserialized_handshake.uuid;
-                this.db.peers[index].seen = Date.now();
-            } else if ( this.db.get.peer.exist_uuid(deserialized_handshake.uuid, this.db.peers) ) {
-                this.db.peers[this.db.get.peer.index_uuid(deserialized_handshake.uuid, this.db.peers)].seen = Date.now();
-            }
+        peer: (index, deserialized_handshake) => {
+            if (!this.db.peers[index]) { this.db.peers[index] = {} }
+            if (deserialized_handshake.server) { this.db.peers[index].server = deserialized_handshake.server }
+            if (deserialized_handshake.sid) { this.db.peers[index].sid = deserialized_handshake.sid }
+            if (deserialized_handshake.pub) { this.db.peers[index].pub = deserialized_handshake.pub }
+            if (deserialized_handshake.uuid) { this.db.peers[index].uuid = deserialized_handshake.uuid }
+            this.db.peers[index].seen = Date.now();
         },
         webpeer: (deserialized_handshake, socket_id) => { // think about a ttl like to delete seen > 1h
             if ( !this.db.get.peer.exist_uuid(deserialized_handshake.uuid, this.db.webpeers) ) { // overwrite at given index if uuid don't exist in peers

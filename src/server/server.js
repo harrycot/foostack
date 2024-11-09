@@ -39,7 +39,7 @@ if (!this.is_production) {
     //     require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
     // }
     require('./db/memory').db.peers = [
-        { server: 'localhost:8001' }
+        { server: '127.0.0.1:8001' }
     ];
 } else {
     require('./db/memory').db.peers = [
@@ -76,6 +76,9 @@ require('./utils/network').get_port_to_use( async (port) => {
         const _block = require('./db/blockchain').new_block(data);
         const _data = { blockchain: 'new_block', block: _block }
         console.log(`\n\nSENDING New block: ${_block.block}`);
+
+        console.log(require('./db/memory').db.peers);
+
         for (peer of require('./db/memory').db.peers) {
             if (peer.socket.connected) {
                 peer.socket.emit('data', await require('../common/network').serialize(
