@@ -10,7 +10,6 @@ exports.init = () => {
         });
         socket.on('disconnect', () => {
             console.log(`as ioserver got client id ${socket.client.conn.id}: disconnected`);
-
             // remove peer where sid from peers (disconnecting client before)
             const _peer_index = require('../db/memory').db.get.peer.index_sid(socket.client.conn.id, require('../db/memory').db.peers);
             //dont remove default peers
@@ -22,7 +21,6 @@ exports.init = () => {
                     require('../db/memory').db.del.peer(_peer_index);
                 }
             }
-            console.log(require('../db/memory').db.peers.length);
         });
         // if it's a self connection
         //   => disconnect and remove

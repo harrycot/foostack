@@ -2,7 +2,7 @@ exports.openpgp = {
     generate: async (name, email) => {
         const openpgp = require('openpgp');
         const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
-            type: 'ecc', curve: 'brainpoolP512r1', userIDs: { name: name, email: email }, format: 'armored'
+            date: new Date(Date.now()-1000), type: 'ecc', curve: 'brainpoolP512r1', userIDs: { name: name, email: email }, format: 'armored'
         });
         return { 
             priv: Buffer.from(privateKey).toString('base64'),

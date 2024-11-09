@@ -1,7 +1,6 @@
 exports.serialize = async (uuid, openpgpcreds, data, pub) => {
-    if ( typeof data !== 'string' ){
-        data = JSON.stringify(data);
-    }
+    const _date = new Date(Date.now() - 1000);
+    if ( typeof data !== 'string' ){ data = JSON.stringify(data) }
     const openpgp = require('openpgp');
 
     const _openpgp_local_priv_obj = await openpgp.readKey({ armoredKey: Buffer.from(openpgpcreds.priv, 'base64').toString() });
@@ -9,6 +8,7 @@ exports.serialize = async (uuid, openpgpcreds, data, pub) => {
     const _message = data
         ? { text: `{ "uuid": "${uuid}", "data": "${
             Buffer.from(await openpgp.encrypt({
+                date: _date,
                 message: await openpgp.createMessage({ text: data }),
                 encryptionKeys: await openpgp.readKey({ armoredKey: Buffer.from(pub, 'base64').toString() }),
                 signingKeys: _openpgp_local_priv_obj
@@ -17,12 +17,13 @@ exports.serialize = async (uuid, openpgpcreds, data, pub) => {
         : { text: `{ "uuid": "${uuid}", "pub": "${openpgpcreds.pub}", "port": "${require('../server/db/memory').config.network.port}" }` };
 
     const _unsigned = await openpgp.createCleartextMessage(_message);
-    const _signed = await openpgp.sign({ message: _unsigned, signingKeys: _openpgp_local_priv_obj });
+    const _signed = await openpgp.sign({ date: _date, message: _unsigned, signingKeys: _openpgp_local_priv_obj });
 
     return Buffer.from(_signed).toString('base64');
 }
 
 exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
+    const _date = new Date(Date.now());
     const openpgp = require('openpgp');
 
     const _signed = await openpgp.readCleartextMessage({ cleartextMessage: Buffer.from(serialized_data, 'base64').toString() });
@@ -45,7 +46,7 @@ exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
 
     const _openpgp_local_priv_obj = await openpgp.readKey({ armoredKey: Buffer.from(openpgpcreds.priv, 'base64').toString() });
 
-    const _verify_result_clear = await openpgp.verify({ message: _signed, verificationKeys: _json_data_openpgp_pub_obj });
+    const _verify_result_clear = await openpgp.verify({ date: _date, message: _signed, verificationKeys: _json_data_openpgp_pub_obj });
     
     try { await _verify_result_clear.signatures[0].verified } catch (e) { _json_data.err.signature_clear = `clear: Signature could not be verified: ${e.message}` }
 
@@ -54,11 +55,11 @@ exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
             armoredMessage: Buffer.from(_json_data.data, 'base64').toString()
         });
         const { data: _decrypted, signatures: _signatures } = await openpgp.decrypt({
-            message: _message, verificationKeys: _json_data_openpgp_pub_obj, decryptionKeys: _openpgp_local_priv_obj
+            date: _date, message: _message, verificationKeys: _json_data_openpgp_pub_obj, decryptionKeys: _openpgp_local_priv_obj
         });
         try {
             await _signatures[0].verified;
-            _json_data.data = JSON.parse(_decrypted);
+            _json_data.data = JSON.parse(_decrypted); // Signature creation time is in the future: https://github.com/harrycot/foostack/issues/7
         } catch (e) {
             _json_data.err.signature_data = `data: Signature could not be verified: ${e.message}`
         }
