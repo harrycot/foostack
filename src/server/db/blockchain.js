@@ -41,8 +41,8 @@ exports.sync_chain = async (callback_data) => {
         require('./memory').db.state.is_blockchain_sync = true;
         for (peer of require('./memory').db.peers) { // maybe dont ask every peer
             if (peer.socket.connected) {
-                const _data = { blockchain: 'get_firstlast', callback: 'sync_chain' };
-                require('./memory').db.blockchain_firstlast.push( { server: peer.server } );
+                const _data = { blockchain: 'get_firstlast', callback: 'sync_chain', server: peer.server, port: peer.port };
+                require('./memory').db.blockchain_firstlast.push(_data);
                 peer.socket.emit('data', await require('../../common/network').serialize(
                     require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, peer.pub
                 ));
@@ -51,27 +51,27 @@ exports.sync_chain = async (callback_data) => {
         setTimeout(() => { // 10s
             // remove timeout
             for (let index = 0; index < require('../db/memory').db.blockchain_firstlast.length; index++) {
-                if (!require('./memory').db.blockchain_firstlast[index].first_last) {
+                if (!require('./memory').db.blockchain_firstlast[index].response) {
                     require('./memory').db.blockchain_firstlast.splice(index, 1);
                     index--;
                 }
             }
-            this.sync_chain({ blockchain: 'get_firstlast' });
+            this.sync_chain({ blockchain: 'get_firstlast', timeout: true });
             
         }, 10*1000); // 10s
     } else {
         // { blockchain: 'get_firstlast', first_last: { first: x, last: x }, server: 'IP:PORT' };
+        console.log(callback_data);
         switch (callback_data.blockchain) {
             case 'get_firstlast':
                 for (let index = 0; index < require('../db/memory').db.blockchain_firstlast.length; index++) {
-                    if (require('./memory').db.blockchain_firstlast[index].server === callback_data.server) {
-                        require('./memory').db.blockchain_firstlast[index].first_last = callback_data.first_last;
+                    if (require('./memory').db.blockchain_firstlast[index].server === callback_data.server
+                        && require('./memory').db.blockchain_firstlast[index].port === callback_data.port) {
+                            require('./memory').db.blockchain_firstlast[index].response = callback_data.response;
                     }
                 }
 
-                if (require('./memory').db.blockchain_firstlast.filter((el) => { return el.first_last }).length == require('./memory').db.blockchain_firstlast.length) {
-                    
-                    // entering twice here (timeout).
+                if (callback_data.timeout) { // on timeout do
                     console.log('\n\n  => blockchain firstlast array done:');
                     console.log(require('./memory').db.blockchain_firstlast);
 

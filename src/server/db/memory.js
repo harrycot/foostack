@@ -1,6 +1,6 @@
 exports.config = {
     port_range: { start: 8001, end: 8010 },
-    network: { ip: { v4: false, v6: false }, port: false },
+    network: { ip: false, port: false },
     owner_pub: 'openpgp pub key'
 }
 
@@ -56,16 +56,16 @@ exports.db = {
             exist_sid: (sid, array) => {
                 return array.filter(function(peer) { return peer.sid === sid }).length == 0 ? false : true;
             },
-            exist_server: (server) => {
-                return this.db.peers.filter((peer) => { return peer.server === server }).length == 0 ? false : true;
+            exist_server: (server, port) => {
+                return this.db.peers.filter((peer) => { return (peer.server === server) && (peer.port === port) }).length == 0 ? false : true;
             },
-            index_server: (server) => {
+            index_server: (server, port) => {
                 for (index in this.db.peers) {
-                    if (this.db.peers[index].server === server) { return index }
+                    if ( (this.db.peers[index].server === server) && (this.db.peers[index].port === port) ) { return index }
                 }
             },
             onlines: () => {
-                return this.db.peers.filter((peer) => { return peer.socket.connected }).map((peer) => { return peer.server });
+                return this.db.peers.filter((peer) => { return peer.socket.connected }).map((peer) => { return { server: peer.server, port: peer.port } });
             }
         }
     },
@@ -73,6 +73,7 @@ exports.db = {
         peer: (index, deserialized_handshake) => {
             if (!this.db.peers[index]) { this.db.peers[index] = {} }
             if (deserialized_handshake.server) { this.db.peers[index].server = deserialized_handshake.server }
+            if (deserialized_handshake.port) { this.db.peers[index].port = deserialized_handshake.port }
             if (deserialized_handshake.sid) { this.db.peers[index].sid = deserialized_handshake.sid }
             if (deserialized_handshake.pub) { this.db.peers[index].pub = deserialized_handshake.pub }
             if (deserialized_handshake.uuid) { this.db.peers[index].uuid = deserialized_handshake.uuid }
