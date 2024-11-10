@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const DBFileSync = require('lowdb/adapters/FileSync');
 
 const CONST_HASH = 'sha512';
+const CONST_HASH_ENCODING = 'base64';
 
 const cwd = require('../server').is_production ? process.cwd() : __dirname;
 
@@ -21,7 +22,7 @@ exports.init = (port) => {
 
 exports.new_block = (data) => {
     const _last_block = this.blockchain.last().value();
-    const _prev_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_last_block)).digest('base64');
+    const _prev_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_last_block)).digest(CONST_HASH_ENCODING);
     const _block = { block: _last_block.block+1, data: data, prev: _prev_hash };
     this.blockchain.push(_block).write();
     return _block;
@@ -29,7 +30,7 @@ exports.new_block = (data) => {
 
 exports.new_block_from_node = (block) => {
     const _last_block = this.blockchain.last().value();
-    const _last_block_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_last_block)).digest('base64');
+    const _last_block_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_last_block)).digest(CONST_HASH_ENCODING);
     if (_last_block_hash === block.prev) {
         this.blockchain.push(block).write();
     }
@@ -57,7 +58,6 @@ exports.sync_chain = async (callback_data) => {
                 }
             }
             this.sync_chain({ blockchain: 'get_firstlast', timeout: true });
-            
         }, 10*1000); // 10s
     } else {
         // { blockchain: 'get_firstlast', first_last: { first: x, last: x }, server: 'IP:PORT' };
@@ -75,6 +75,23 @@ exports.sync_chain = async (callback_data) => {
                     console.log('\n\n  => blockchain firstlast array done:');
                     console.log(require('./memory').db.blockchain_firstlast);
 
+                    const _first_block = this.blockchain.first().value();
+                    const _first_block_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_first_block)).digest(CONST_HASH_ENCODING);
+                    const _last_block = this.blockchain.last().value();
+                    const _last_block_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_last_block)).digest(CONST_HASH_ENCODING);
+
+                    for (let index = 0; index < require('./memory').db.blockchain_firstlast.length; index++) {
+                        const _this_first_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(require('./memory').db.blockchain_firstlast[index].response.first)).digest(CONST_HASH_ENCODING);
+                        if (_this_first_hash !== _first_block_hash) { // for every peer where first block is different, blacklist(24h) and disconnect. not same chain.
+                            require('../db/memory').db.blacklist.push({ server: require('./memory').db.blockchain_firstlast.server, port: require('./memory').db.blockchain_firstlast.port, date: Date.now() });
+                            const _index_server = require('../db/memory').db.get.peer.index_server(require('./memory').db.blockchain_firstlast.server, require('./memory').db.blockchain_firstlast.port);
+                            require('../db/memory').db.peers[_index_server].socket.disconnect();
+                            require('./memory').db.blockchain_firstlast.splice(index, 1);
+                            index--;
+                        }
+                        // group by response.last
+                        
+                    }
                     // trust the majority
                     // end try to sync with a random peer
                 }
@@ -90,19 +107,15 @@ exports.sync_chain = async (callback_data) => {
 exports.verify_chain = () => {
     const _last_block = this.blockchain.last().value();
     if (_last_block.block > 0) {
-        let _init_sync_at = false;
         for (let index = 1; index <= _last_block.block; index++) {
             const _block = this.blockchain.find({ block: index }).value();
             const _prev_block = this.blockchain.find({ block: index-1 }).value();
             const _prev_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_prev_block)).digest('base64');
             if (_block.prev != _prev_hash) {
                 console.log(`\n!! block ${_block.block} DOESN'T contain the good hash of the block ${_prev_block.block}`);
-                _init_sync_at = index;
+                this.sync_chain(index);
                 break;
             }
-        }
-        if (_init_sync_at) {
-            this.sync_chain(_init_sync_at);
         }
     }
 }

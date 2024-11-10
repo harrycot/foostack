@@ -1,16 +1,17 @@
 exports.config = {
-    port_range: { start: 8001, end: 8010 },
     network: { ip: '', port: false },
-    owner_pub: 'openpgp pub key'
+    owner_pub: 'openpgp pub key',
+    port_range: { start: 8001, end: 8010 }
 }
 
 exports.db = {
-    state: { got_online_peers: false, is_blockchain_sync: false },
-    server: { uuid: false, openpgp: false },
+    blacklist: [],
+    blockchain_firstlast: [],
     default_peers: [],
     peers: [],
+    server: { uuid: false, openpgp: false },
+    state: { got_online_peers: false, is_blockchain_sync: false },
     webpeers: [],
-    blockchain_firstlast: [],
     del: {
         peer: (index) => {
             this.db.peers.splice(index, 1);

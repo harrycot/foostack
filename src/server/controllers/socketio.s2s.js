@@ -1,5 +1,5 @@
 exports.init = () => {
-    require('../server').io.of('/s2s').on('connection', async (socket) => {
+    require('../server').io.of('/s2s').on('connection', async (socket) => { // TODO if in require('../db/memory').db.blacklist => disconnect()
         console.log(`as ioserver got client id ${socket.client.conn.id}: connected`);
 
         socket.on('data', (serialized_data) => {
@@ -46,7 +46,7 @@ exports.init = () => {
     }
 }
 
-const init_ioclient = (index) => {
+const init_ioclient = (index) => { // TODO if in require('../db/memory').db.blacklist => return;
     console.log(`\n  IOC INIT ${require('../db/memory').db.peers[index].server} :${require('../db/memory').db.peers[index].port}\n`)
     const { serialize } = require('../../common/network');
 
