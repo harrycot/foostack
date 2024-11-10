@@ -42,7 +42,7 @@ exports.sync_chain = async (callback_data) => {
         for (peer of require('./memory').db.peers) { // maybe dont ask every peer
             if (peer.socket.connected) {
                 const _data = { blockchain: 'get_firstlast', callback: 'sync_chain' };
-                require('./memory').db.blockchain_firstlast.push( { server: peer.server } );
+                require('./memory').db.blockchain_firstlast.push( { server: peer.server, port: peer.port } );
                 peer.socket.emit('data', await require('../../common/network').serialize(
                     require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, peer.pub
                 ));
@@ -64,7 +64,8 @@ exports.sync_chain = async (callback_data) => {
         switch (callback_data.blockchain) {
             case 'get_firstlast':
                 for (let index = 0; index < require('../db/memory').db.blockchain_firstlast.length; index++) {
-                    if (require('./memory').db.blockchain_firstlast[index].server === callback_data.server) {
+                    if (require('./memory').db.blockchain_firstlast[index].server === callback_data.server
+                                    && require('./memory').db.blockchain_firstlast[index].port === callback_data.port) {
                         require('./memory').db.blockchain_firstlast[index].first_last = callback_data.first_last;
                     }
                 }
