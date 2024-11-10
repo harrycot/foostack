@@ -1,6 +1,6 @@
 exports.config = {
     port_range: { start: 8001, end: 8010 },
-    network: { ip: false, port: false },
+    network: { ip: '', port: false },
     owner_pub: 'openpgp pub key'
 }
 

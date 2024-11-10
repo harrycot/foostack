@@ -24,22 +24,21 @@ exports.init = () => {
         });
         // if it's a self connection
         //   => disconnect and remove
-        //
-        // review this to not loop every peers on connection
-        const _port = socket.handshake.headers.host.slice(socket.handshake.headers.host.lastIndexOf(':') + 1);
-        const _ip = socket.handshake.headers.host.slice(0, socket.handshake.headers.host.lastIndexOf(':'));
-        for (let index = 0; index < require('../db/memory').db.peers.length; index++) {
-            if ( (require('../db/memory').db.peers[index].server).includes(_ip) && (_port == require('../db/memory').db.peers[index].port) ){ // !!host check can fail attention
-                if (require('../db/memory').db.peers[index].socket.io.engine.id === socket.client.conn.id) {
-                    console.log(`as ioserver got client id ${socket.client.conn.id}: self connection detected`);
-                    require('../db/memory').config.network.ip = socket.handshake.address; // help to know which ip I have
-                    require('../db/memory').db.peers[index].socket.disconnect();
-                    require('../db/memory').db.del.peer(index);
-                    break;
+        if (require('../db/memory').config.network.ip.length == 0) {
+            const _port = socket.handshake.headers.host.slice(socket.handshake.headers.host.lastIndexOf(':') + 1);
+            const _ip = socket.handshake.headers.host.slice(0, socket.handshake.headers.host.lastIndexOf(':'));
+            for (let index = 0; index < require('../db/memory').db.peers.length; index++) {
+                if ( require('../db/memory').db.peers[index].server.includes(_ip) && (_port == require('../db/memory').db.peers[index].port) ){
+                    if (require('../db/memory').db.peers[index].socket.io.engine.id === socket.client.conn.id) {
+                        console.log(`as ioserver got client id ${socket.client.conn.id}: self connection detected`);
+                        require('../db/memory').config.network.ip = socket.handshake.address; // help to know which ip I have
+                        require('../db/memory').db.peers[index].socket.disconnect();
+                        require('../db/memory').db.del.peer(index);
+                        break;
+                    }
                 }
             }
         }
-        
     });
     // init connections as client for each server in peers
     for (index in require('../db/memory').db.peers) {
@@ -83,6 +82,7 @@ const on_data_common = async (index, serialized_data, send_ack, socket) => {
                 console.log(`\n  => HANDSHAKE as server:${require('../db/memory').db.server.uuid} got from client:${_deserialized.uuid}\n`);
                 require('../server').io.of('/s2s').emit('indexing handshake', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp)); // index helper
 
+                // connect back to peer on connection
                 _deserialized.server = socket.handshake.address;
                 _deserialized.sid = socket.client.conn.id;
                 if (!require('../db/memory').db.get.peer.exist_server(_deserialized.server, _deserialized.port)) {
@@ -167,10 +167,12 @@ const handle_data = async (deserialized, index, pub) => {
             case 'get_onlines':
                 if (deserialized.data.response) { // got response
                     for (online of deserialized.data.response ) { // onlines => [ { server: '', port: '' }, ... ]
-                        if (!require('../db/memory').db.get.peer.exist_server(online.server, online.port)) {
-                            require('../db/memory').db.peers.push(online); // online => { server: '', port: '' }
-                            // init ioc
-                            init_ioclient(require('../db/memory').db.peers.length-1);
+                        if (!require('../db/memory').db.get.peer.exist_server(online.server, online.port)) {                          // avoid reconnecting to himself
+                            if (!require('../db/memory').config.network.ip.includes(online.server) && (require('../db/memory').config.network.port != online.port)) {
+                                require('../db/memory').db.peers.push(online); // online => { server: '', port: '' }
+                                // init ioc
+                                init_ioclient(require('../db/memory').db.peers.length-1);
+                            }
                         }
                     }
 
