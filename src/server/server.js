@@ -39,7 +39,7 @@ if (!this.is_production) {
     //     require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
     // }
     require('./db/memory').db.peers = [
-        { server: '127.0.0.1:8001' }
+        { server: '127.0.0.1', port: '8001' }
     ];
 } else {
     require('./db/memory').db.peers = [
@@ -89,8 +89,8 @@ require('./utils/network').get_port_to_use( async (port) => {
     })
 
     
-    this.http.listen(port, () => {
-        console.log("server listening on port: http://localhost:" + port);
+    this.http.listen({ port: port }, () => {
+        console.log(`  server listening on port: ${port}\n`);
     });
 });
 

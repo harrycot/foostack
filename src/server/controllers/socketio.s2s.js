@@ -30,7 +30,8 @@ exports.init = () => {
             if ((socket.handshake.headers.host).includes(require('../db/memory').db.peers[index].server)){ // !!host check can fail attention
                 if (require('../db/memory').db.peers[index].socket.io.engine.id === socket.client.conn.id) {
                     console.log(`as ioserver got client id ${socket.client.conn.id}: self connection detected`);
-                    require('../db/memory').config.network.ip = require('../utils/socketio').parse_client_ip(socket); // help to know which ip I have
+                    console.log(socket.handshake.headers.host);
+                    require('../db/memory').config.network.ip = socket.handshake.address; // help to know which ip I have
                     require('../db/memory').db.peers[index].socket.disconnect();
                     require('../db/memory').db.del.peer(index);
                     break;
@@ -46,9 +47,14 @@ exports.init = () => {
 }
 
 const init_ioclient = (index) => {
-    console.log(`\n  IOC INIT ${require('../db/memory').db.peers[index].server}\n`)
+    console.log(`\n  IOC INIT ${require('../db/memory').db.peers[index].server} :${require('../db/memory').db.peers[index].port}\n`)
     const { serialize } = require('../../common/network');
-    require('../db/memory').db.peers[index].socket = require('socket.io-client')('http://' + require('../db/memory').db.peers[index].server + '/s2s');
+
+    const _ip = require('../utils/socketio').parse_client_ip(require('../db/memory').db.peers[index].server);
+    const _server = _ip.v4 ? _ip.v4 : _ip.v6 ? `[${_ip.v6}]` : false; if (!_server) { return }
+    const _port = require('../db/memory').db.peers[index].port;
+
+    require('../db/memory').db.peers[index].socket = require('socket.io-client')(`http://${_server}:${_port}/s2s`);
     
     require('../db/memory').db.peers[index].socket.on('connect', async () => {
         console.log(`as ioclient id ${require('../db/memory').db.peers[index].socket.io.engine.id}: connected`);
@@ -75,14 +81,8 @@ const on_data_common = async (index, serialized_data, send_ack, socket) => {
                 // 'data' (as handshake init) as SERVER do !
                 console.log(`\n  => HANDSHAKE as server:${require('../db/memory').db.server.uuid} got from client:${_deserialized.uuid}\n`);
                 require('../server').io.of('/s2s').emit('indexing handshake', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp)); // index helper
-                
-                
-                // to review - to review - to review
-                const _ip_client = require('../utils/socketio').parse_client_ip(socket);
-                _deserialized.server = `${_ip_client.v4}:${_deserialized.port}`;
-                // to review - to review - to review
 
-
+                _deserialized.server = socket.handshake.address;
                 _deserialized.sid = socket.client.conn.id;
                 if (!require('../db/memory').db.get.peer.exist_server(_deserialized.server)) {
                     require('../db/memory').db.set.peer(require('../db/memory').db.peers.length, _deserialized); // ADD PEER
