@@ -24,16 +24,20 @@ exports.init = () => {
         });
         // if it's a self connection
         //   => disconnect and remove
+        //
+        // review this to not loop every peers on connection
         for (let index = 0; index < require('../db/memory').db.peers.length; index++) {
             if ((socket.handshake.headers.host).includes(require('../db/memory').db.peers[index].server)){ // !!host check can fail attention
                 if (require('../db/memory').db.peers[index].socket.io.engine.id === socket.client.conn.id) {
                     console.log(`as ioserver got client id ${socket.client.conn.id}: self connection detected`);
+                    require('../db/memory').config.network.ip = require('../utils/socketio').parse_client_ip(socket); // help to know which ip I have
                     require('../db/memory').db.peers[index].socket.disconnect();
                     require('../db/memory').db.del.peer(index);
                     break;
                 }
             }
         }
+        
     });
     // init connections as client for each server in peers
     for (index in require('../db/memory').db.peers) {
@@ -75,12 +79,10 @@ const on_data_common = async (index, serialized_data, send_ack, socket) => {
                 
                 // to review - to review - to review
                 const _ip_client = require('../utils/socketio').parse_client_ip(socket);
-                if (_ip_client.v6 == '::1' ) { _ip_client.v4 = '127.0.0.1' }
-                _ip_client.v4 = '127.0.0.1';
+                _deserialized.server = `${_ip_client.v4}:${_deserialized.port}`;
                 // to review - to review - to review
 
 
-                _deserialized.server = `${_ip_client.v4}:${_deserialized.port}`;
                 _deserialized.sid = socket.client.conn.id;
                 if (!require('../db/memory').db.get.peer.exist_server(_deserialized.server)) {
                     require('../db/memory').db.set.peer(require('../db/memory').db.peers.length, _deserialized); // ADD PEER
