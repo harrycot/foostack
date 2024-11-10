@@ -32,7 +32,6 @@ exports.init = () => {
             if ( (require('../db/memory').db.peers[index].server).includes(_ip) && (_port == require('../db/memory').db.peers[index].port) ){ // !!host check can fail attention
                 if (require('../db/memory').db.peers[index].socket.io.engine.id === socket.client.conn.id) {
                     console.log(`as ioserver got client id ${socket.client.conn.id}: self connection detected`);
-                    console.log(socket.handshake.headers.host);
                     require('../db/memory').config.network.ip = socket.handshake.address; // help to know which ip I have
                     require('../db/memory').db.peers[index].socket.disconnect();
                     require('../db/memory').db.del.peer(index);
@@ -86,16 +85,11 @@ const on_data_common = async (index, serialized_data, send_ack, socket) => {
 
                 _deserialized.server = socket.handshake.address;
                 _deserialized.sid = socket.client.conn.id;
-                console.log(require('../db/memory').db.peers);
-                console.log(_deserialized);
                 if (!require('../db/memory').db.get.peer.exist_server(_deserialized.server, _deserialized.port)) {
                     require('../db/memory').db.set.peer(require('../db/memory').db.peers.length, _deserialized); // ADD PEER
                     init_ioclient(require('../db/memory').db.peers.length-1); // init new io client
                 } else { // update peer with sid (init_ioclient called from get_onlines)
                     const _index = require('../db/memory').db.get.peer.index_server(_deserialized.server, _deserialized.port);
-                    
-                    
-                    console.log(_index); // undefined
                     require('../db/memory').db.set.peer(_index, _deserialized); // UPDATE PEER
                 }
             } else {
@@ -146,7 +140,7 @@ const handle_data = async (deserialized, index, pub) => {
                 require('../db/blockchain').new_block_from_node(deserialized.data);
                 break;
             case 'get_firstlast':
-                if (deserialized.data.first_last) { // got response
+                if (deserialized.data.response) { // got response
                     // think about something to handle events
                     if (deserialized.data.callback) {
                         switch (deserialized.data.callback) {
@@ -160,9 +154,7 @@ const handle_data = async (deserialized, index, pub) => {
                 } else { // got ask
                     const _first_block = require('../db/blockchain').blockchain.first().value();
                     const _last_block = require('../db/blockchain').blockchain.last().value();
-                    const _data = { blockchain: 'get_firstlast', first_last: { first: _first_block, last: _last_block },
-                                    server: require('../db/memory').db.peers[index].server, port: require('../db/memory').db.peers[index].port };
-                    if (deserialized.data.callback) { _data.callback = deserialized.data.callback }
+                    const _data = Object.assign(deserialized.data, { response: { first: _first_block, last: _last_block } });
                     require('../db/memory').db.peers[index].socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _data, pub));
                 }
                 break;
@@ -173,8 +165,8 @@ const handle_data = async (deserialized, index, pub) => {
     if (deserialized.data.node) {
         switch (deserialized.data.node) {
             case 'get_onlines':
-                if (deserialized.data.onlines) { // got response
-                    for (online of deserialized.data.onlines ) { // onlines => [ { server: '', port: '' }, ... ]
+                if (deserialized.data.response) { // got response
+                    for (online of deserialized.data.response ) { // onlines => [ { server: '', port: '' }, ... ]
                         if (!require('../db/memory').db.get.peer.exist_server(online.server, online.port)) {
                             require('../db/memory').db.peers.push(online); // online => { server: '', port: '' }
                             // init ioc
@@ -191,9 +183,7 @@ const handle_data = async (deserialized, index, pub) => {
                     }
                 } else { // got ask
                     const _onlines = require('../db/memory').db.get.peer.onlines();
-                    console.log('\n\nONLINES:');
-                    console.log(_onlines);
-                    const _data = { node: 'get_onlines', onlines: _onlines }
+                    const _data = Object.assign(deserialized.data, { response: _onlines } );
                     require('../db/memory').db.peers[index].socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _data, pub));
                 }
                 break;
