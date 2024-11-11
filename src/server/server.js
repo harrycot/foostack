@@ -47,8 +47,7 @@ if (!this.is_production) {
         { server: 'IP:PORT' }
     ];
 }
-require('./db/memory').db.default_peers = require('./db/memory').db.peers;
-
+require('./db/memory').db.default_peers = [...require('./db/memory').db.peers];
 
 require('./utils/network').get_port_to_use( async (port) => {
     require('./db/memory').config.network.port = port;
