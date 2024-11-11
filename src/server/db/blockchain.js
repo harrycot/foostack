@@ -79,8 +79,8 @@ exports.sync_chain = async (callback_data) => {
                     const _last_block = this.blockchain.last().value();
                     const _last_block_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_last_block)).digest(CONST_HASH_ENCODING);
 
-                    const _trusted = []
-                    const _grouped = [];
+                    const _trusted = []; // containing only 1 blockchain_firstlast element
+                    const _grouped = {};
                     for (let index = 0; index < require('./memory').db.blockchain_firstlast.length; index++) {
                         const _this_first_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(require('./memory').db.blockchain_firstlast[index].response.first)).digest(CONST_HASH_ENCODING);
                         const _this_last_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(require('./memory').db.blockchain_firstlast[index].response.last)).digest(CONST_HASH_ENCODING);
@@ -93,49 +93,48 @@ exports.sync_chain = async (callback_data) => {
                         } else {
                             for (peer of require('../db/memory').db.default_peers) {
                                 if ( (peer.server == require('./memory').db.blockchain_firstlast[index].server) && (peer.port == require('./memory').db.blockchain_firstlast[index].port) ) {
-                                    _trusted.push(require('./memory').db.blockchain_firstlast[index]);
+                                    if (_trusted.length > 0) {
+                                        if (_trusted[0].response.last.block < require('./memory').db.blockchain_firstlast[index].response.last.block) {
+                                            _trusted.push(require('./memory').db.blockchain_firstlast[index]);
+                                        }
+                                    } else {
+                                        _trusted.push(require('./memory').db.blockchain_firstlast[index]);
+                                    }
                                 }
                             }
-                            
-                            // if (Object.keys(_grouped).length > 0) {
-                            //     console.log(_grouped);
-                            //     _grouped[_this_last_hash].push(require('./memory').db.blockchain_firstlast[index]);
-                            // } else {
-                            //     // todo check all default_peers and choose
-                                
-                            // }
+                            if (!_grouped[_this_last_hash]) { _grouped[_this_last_hash] = [] }
+                            _grouped[_this_last_hash].push(require('./memory').db.blockchain_firstlast[index]);
                         }
                     }
-                    console.log(_trusted);
+                    const _trusted_last_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_trusted[0].response.last)).digest(CONST_HASH_ENCODING);
+                    console.log('\n\n  => Trusted last hash nodes list:');
+                    console.log(_grouped[_trusted_last_hash]);
 
-                    // const _grouped_hashes = [];
-                    // const _grouped_length = [];
-                    // for (hash in _grouped) {
-                    //     _grouped_hashes.push(hash);
-                    //     _grouped_length.push(_grouped[hash].length);
-                    // }                     // return _grouped[ where _grouped_hashes at index of (max of _grouped_length) ]
-                    // const _last_majority = _grouped[_grouped_hashes[_grouped_length.indexOf(Math.max(..._grouped_length))]];
-                    // console.log(_last_majority);
+                    if (_grouped[_trusted_last_hash].length > 0) {
+                        const _random_peer_firstlast = _grouped[_trusted_last_hash].length > 1
+                            ? _grouped[_trusted_last_hash][require('node:crypto').randomInt(0, _grouped[_trusted_last_hash].length-1)]
+                            : _grouped[_trusted_last_hash][0];
 
-                    // if (_last_majority.length > 0) {
-                    //     const _random_peer_firstlast = _last_majority[require('node:crypto').randomInt(0, _last_majority.length-1)];
-                    //     if (_last_block_hash != require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_random_peer_firstlast.response.last)).digest(CONST_HASH_ENCODING)) {
-                    //         if (callback_data.at) {
-                    //             const _index_server = require('../db/memory').db.get.peer.index_server(_random_peer_firstlast.server, _random_peer_firstlast.port);
-                    //             console.log(callback_data);
-                    //             // require('../db/memory').db.peers[_index_server].socket.emit('data', await require('../../common/network').serialize(
-                    //             //     require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, require('../db/memory').db.peers[_index_server].pub
-                    //             // ));
-                    //         } else {
-                    //             this.verify_chain(Object.assign(callback_data, { callback: 'sync_chain' }));
-                    //         }
-                    //     } else {
-                    //         console.log('\n\n SYNC: last block is the same. done.')
-                    //     }
+                        console.log(_random_peer_firstlast);
+                        if (_last_block_hash != require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_random_peer_firstlast.response.last)).digest(CONST_HASH_ENCODING)) {
+                            if (callback_data.at) {
+                                const _index_server = require('../db/memory').db.get.peer.index_server(_random_peer_firstlast.server, _random_peer_firstlast.port);
+                                
+                                console.log(callback_data);
 
-                    // }
+                                // start from block 0 or at ?
+                                // require('../db/memory').db.peers[_index_server].socket.emit('data', await require('../../common/network').serialize(
+                                //     require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, require('../db/memory').db.peers[_index_server].pub
+                                // ));
+                            } else {
+                                this.verify_chain(Object.assign(callback_data, { callback: 'sync_chain' }));
+                            }
+                        } else {
+                            console.log('\n\n SYNC: last block is the same. done.')
+                        }
 
-                    // trust the majority
+                    }
+
                     // end try to sync with a random peer
                 }
                 //
