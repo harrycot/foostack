@@ -103,6 +103,23 @@ exports.sync_chain = async (callback_data) => {
                     const _last_majority = _grouped[_grouped_hashes[_grouped_length.indexOf(Math.max(..._grouped_length))]];
                     console.log(_last_majority);
 
+                    if (_last_majority.length > 0) {
+                        const _random_peer_firstlast = _last_majority[require('node:crypto').randomInt(0, _last_majority.length-1)];
+                        if (_last_block_hash != require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_random_peer_firstlast.response.last)).digest(CONST_HASH_ENCODING)) {
+                            if (callback_data.at) {
+                                const _index_server = require('../db/memory').db.get.peer.index_server(_random_peer_firstlast.server, _random_peer_firstlast.port);
+                                console.log(callback_data);
+                                // require('../db/memory').db.peers[_index_server].socket.emit('data', await require('../../common/network').serialize(
+                                //     require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, require('../db/memory').db.peers[_index_server].pub
+                                // ));
+                            } else {
+                                this.verify_chain(Object.assign(callback_data, { callback: 'sync_chain' }));
+                            }
+                        } else {
+                            console.log('\n\n SYNC: last block is the same. done.')
+                        }
+
+                    }
 
                     // trust the majority
                     // end try to sync with a random peer
@@ -116,7 +133,7 @@ exports.sync_chain = async (callback_data) => {
     }
 }
 
-exports.verify_chain = () => {
+exports.verify_chain = (callback_data) => {
     const _last_block = this.blockchain.last().value();
     if (_last_block.block > 0) {
         for (let index = 1; index <= _last_block.block; index++) {
@@ -125,8 +142,25 @@ exports.verify_chain = () => {
             const _prev_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_prev_block)).digest('base64');
             if (_block.prev != _prev_hash) {
                 console.log(`\n!! block ${_block.block} DOESN'T contain the good hash of the block ${_prev_block.block}`);
-                this.sync_chain(index);
+                if (callback_data && callback_data.callback) {
+                    switch (callback_data.callback) {
+                        case 'sync_chain':
+                            this.sync_chain(Object.assign(callback_data, { at: index }));
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 break;
+            }
+        }
+        if (callback_data && callback_data.callback) {
+            switch (callback_data.callback) {
+                case 'sync_chain':
+                    this.sync_chain(Object.assign(callback_data, { at: _last_block.block }));
+                    break;
+                default:
+                    break;
             }
         }
     }
