@@ -61,7 +61,6 @@ exports.sync_chain = async (callback_data) => {
         }, 10*1000); // 10s
     } else {
         // { blockchain: 'get_firstlast', first_last: { first: x, last: x }, server: 'IP:PORT' };
-        console.log(callback_data);
         switch (callback_data.blockchain) {
             case 'get_firstlast':
                 for (let index = 0; index < require('../db/memory').db.blockchain_firstlast.length; index++) {
@@ -80,18 +79,31 @@ exports.sync_chain = async (callback_data) => {
                     const _last_block = this.blockchain.last().value();
                     const _last_block_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_last_block)).digest(CONST_HASH_ENCODING);
 
+                    const _grouped = {};
                     for (let index = 0; index < require('./memory').db.blockchain_firstlast.length; index++) {
                         const _this_first_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(require('./memory').db.blockchain_firstlast[index].response.first)).digest(CONST_HASH_ENCODING);
+                        const _this_last_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(require('./memory').db.blockchain_firstlast[index].response.last)).digest(CONST_HASH_ENCODING);
                         if (_this_first_hash !== _first_block_hash) { // for every peer where first block is different, blacklist(24h) and disconnect. not same chain.
-                            require('../db/memory').db.blacklist.push({ server: require('./memory').db.blockchain_firstlast.server, port: require('./memory').db.blockchain_firstlast.port, date: Date.now() });
-                            const _index_server = require('../db/memory').db.get.peer.index_server(require('./memory').db.blockchain_firstlast.server, require('./memory').db.blockchain_firstlast.port);
+                            require('../db/memory').db.blacklist.push({ server: require('./memory').db.blockchain_firstlast[index].server, port: require('./memory').db.blockchain_firstlast[index].port, date: Date.now() });
+                            const _index_server = require('../db/memory').db.get.peer.index_server(require('./memory').db.blockchain_firstlast[index].server, require('./memory').db.blockchain_firstlast[index].port);
                             require('../db/memory').db.peers[_index_server].socket.disconnect();
                             require('./memory').db.blockchain_firstlast.splice(index, 1);
                             index--;
+                        } else {
+                            if (!_grouped[_this_last_hash]) { _grouped[_this_last_hash] = [] }
+                            _grouped[_this_last_hash].push(require('./memory').db.blockchain_firstlast[index]);
                         }
-                        // group by response.last
-                        
                     }
+                    const _grouped_hashes = [];
+                    const _grouped_length = [];
+                    for (hash in _grouped) {
+                        _grouped_hashes.push(hash);
+                        _grouped_length.push(_grouped[hash].length);
+                    }                     // return _grouped[ where _grouped_hashes at index of (max of _grouped_length) ]
+                    const _last_majority = _grouped[_grouped_hashes[_grouped_length.indexOf(Math.max(..._grouped_length))]];
+                    console.log(_last_majority);
+
+
                     // trust the majority
                     // end try to sync with a random peer
                 }
