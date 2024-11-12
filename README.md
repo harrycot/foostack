@@ -21,7 +21,7 @@ Connected peers are discovered by asking a list of online nodes to everyone.
 #### Blockchain:
   - a block contain { block: _number_, data: _json_, prev: _hash-of-previous-block_ }.
   - on sync, first and last block is asked to every online nodes. _timeout 10seconds_.
-  - check TODO below
+  - the full sync ask for the next block to a trusted list of peers (random).
 
 #### View:
 - the login is simulated by generating a new openpgp key pair (you can see more details in logs).
@@ -48,10 +48,7 @@ and start multiple instances like that.
 
 #### TODO:
 - maybe removing the use of the obfuscator.
-- blockchain: trust the majority of first/last blocks.
-    - try to sync with a random from the majority.
-    - emit 'wrong' to the minority to let them resync.
-        - handle blacklist.
+- review sync (the last synchronized node is not used as 'get_block' trusted).
 
 #### memory.js file content looks like this when running
 ```

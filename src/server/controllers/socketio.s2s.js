@@ -139,9 +139,25 @@ const handle_data = async (deserialized, index, pub) => {
                 console.log(`\n  got new block ${deserialized.data.block.block}\n`);
                 require('../db/blockchain').new_block_from_node(deserialized.data);
                 break;
+            case 'get_block':
+                if (deserialized.data.response) { // got response
+                    if (deserialized.data.callback) {
+                        switch (deserialized.data.callback) {
+                            case 'sync_chain':
+                                require('../db/blockchain').sync_chain(deserialized.data);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                } else { // got ask
+                    const _block = require('../db/blockchain').blockchain.find({ block: deserialized.data.block }).value();
+                    const _data = Object.assign(deserialized.data, { response: _block });
+                    require('../db/memory').db.peers[index].socket.emit('data', await serialize(require('../db/memory').db.server.uuid, require('../db/memory').db.server.openpgp, _data, pub));
+                }
+                break;
             case 'get_firstlast':
                 if (deserialized.data.response) { // got response
-                    // think about something to handle events
                     if (deserialized.data.callback) {
                         switch (deserialized.data.callback) {
                             case 'sync_chain':
