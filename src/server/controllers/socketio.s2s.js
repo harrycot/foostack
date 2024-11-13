@@ -144,7 +144,8 @@ const handle_data = async (deserialized, index, pub) => {
                     if (deserialized.data.callback) {
                         switch (deserialized.data.callback) {
                             case 'sync_chain':
-                                require('../db/blockchain').sync_chain(deserialized.data);
+                                const _peer = { server: require('../db/memory').db.peers[index].server, port: require('../db/memory').db.peers[index].port };
+                                require('../db/blockchain').sync_chain(Object.assign(deserialized.data, _peer));
                                 break;
                             default:
                                 break;
@@ -161,7 +162,8 @@ const handle_data = async (deserialized, index, pub) => {
                     if (deserialized.data.callback) {
                         switch (deserialized.data.callback) {
                             case 'sync_chain':
-                                require('../db/blockchain').sync_chain(deserialized.data);
+                                const _peer = { server: require('../db/memory').db.peers[index].server, port: require('../db/memory').db.peers[index].port };
+                                require('../db/blockchain').sync_chain(Object.assign(deserialized.data, _peer));
                                 break;
                             default:
                                 break;

@@ -5,7 +5,7 @@ exports.is_production = process.pkg ? true : process.env.NODE_ENV == 'production
 
 const cwd = this.is_production ? process.cwd() : __dirname;
 
-exports.http = require('node:http').createServer(function(req, res){
+exports.http = require('node:http').createServer( (req, res) => {
     console.log(req.url);
     const _files = require('./server').is_production
         ? [] // use webpack
@@ -15,13 +15,13 @@ exports.http = require('node:http').createServer(function(req, res){
         ];
     for (file of _files) {
         if (req.url == file.req) {
-            fs.readFile(path.join(cwd, file.path), function(err, data) {
+            fs.readFile(path.join(cwd, file.path), (err, data) => {
                 if (err) { console.log(err) }
                 res.writeHead(200, require('./utils/network').get_http_headers(file.type)); res.write(data); res.end();
             }); return;
         }
     }
-    fs.readFile(path.join(cwd, '../view/index.html'), function(err, data) {
+    fs.readFile(path.join(cwd, '../view/index.html'), (err, data) => {
         if (err) { console.log(err) }
         res.writeHead(200, require('./utils/network').get_http_headers('text/html')); res.write(data); res.end();
     });
@@ -35,9 +35,6 @@ exports.io = require('socket.io')(this.http, {
 });
 
 if (!this.is_production) {
-    // for (let _port = require('./db/memory').config.port_range.start; _port <= require('./db/memory').config.port_range.end; _port++) {
-    //     require('./db/memory').db.peers.push({ server: `localhost:${_port}`});
-    // }
     require('./db/memory').db.peers = [
         { server: '::ffff:127.0.0.1', port: '8001' }
     ];
