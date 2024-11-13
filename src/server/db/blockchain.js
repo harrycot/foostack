@@ -8,17 +8,11 @@ const CONST_HASH_ENCODING = 'base64';
 const cwd = require('../server').is_production ? process.cwd() : __dirname;
 
 exports.blockchain = false;
-
 exports.init = (port) => {   
     if (!fs.existsSync(path.join(cwd, '_blockchain'))) { fs.mkdirSync(path.join(cwd, '_blockchain')) }
     if (!fs.existsSync(path.join(cwd, `_blockchain/${port}`))) { fs.mkdirSync(path.join(cwd, `_blockchain/${port}`)) }
     this.blockchain = require('lowdb')(new DBFileSync(path.join(cwd, `_blockchain/${port}/blockchain.json`), { defaultValue: [{ block: 0, data: '', prev: false }] }));
-    
-
-    this.verify_chain();
 }
-
-
 
 exports.new_block = (data) => {
     const _last_block = this.blockchain.last().value();
@@ -42,8 +36,8 @@ exports.sync_chain = async (callback_data) => {
         require('./memory').db.state.is_blockchain_sync = true;
         for (peer of require('./memory').db.peers) { // maybe dont ask every peer
             if (peer.socket.connected) {
-                const _data = { blockchain: 'get_firstlast', callback: 'sync_chain', server: peer.server, port: peer.port };
-                require('./memory').db.blockchain.firstlast.all.push(_data);
+                const _data = { blockchain: 'get_firstlast', callback: 'sync_chain' };
+                //require('./memory').db.blockchain.firstlast.all.push(_data);
                 peer.socket.emit('data', await require('../../common/network').serialize(
                     require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, peer.pub
                 ));
@@ -63,8 +57,6 @@ exports.sync_chain = async (callback_data) => {
         // { blockchain: 'get_firstlast', first_last: { first: x, last: x }, server: 'IP:PORT' };
         switch (callback_data.blockchain) {
             case 'get_block':
-                require('./memory').db.blockchain.saved_responses[callback_data.response.block] = callback_data;
-
                 const _last_block = this.blockchain.last().value();
                 const _last_block_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_last_block)).digest(CONST_HASH_ENCODING);
                 if (_last_block_hash === callback_data.response.prev) {
@@ -73,11 +65,13 @@ exports.sync_chain = async (callback_data) => {
                     this.blockchain.remove({ block: _last_block.block }).write();
                 }
 
-                // 
+                if (callback_data.response.prev !== '') { // false if 
+                    require('./memory').db.blockchain.saved_responses[callback_data.response.block] = callback_data;
+                }
+                
                 for (let index = 0; index < Object.keys(require('./memory').db.blockchain.saved_responses).length; index++) {
                     const _last_block_now = this.blockchain.last().value();
                     if (require('./memory').db.blockchain.saved_responses[_last_block_now.block+1] && !this.blockchain.find({ block: _last_block_now.block+1 }).value()) {
-                        console.log('\nSAVED');
                         this.blockchain.push(require('./memory').db.blockchain.saved_responses[_last_block_now.block+1].response).write(); // write saved block
                         // delete require('./memory').db.blockchain.saved_responses[_last_block.block+1];
                     }
@@ -102,17 +96,11 @@ exports.sync_chain = async (callback_data) => {
                     console.log('\n\n Full sync done !');
                     require('./memory').db.blockchain.firstlast = { all: [], trusted: [], grouped: {} }; // reset firstlast
                     require('./memory').db.blockchain.saved_responses = {}; // reset saved responses
-                    this.verify_chain({ blockchain: 'get_block', callback: 'sync_chain' });
+                    this.verify_chain();
                 }
                 break;
             case 'get_firstlast':
-                //require('./memory').db.blockchain.firstlast.all.push(callback_data);
-                for (let index = 0; index < require('../db/memory').db.blockchain.firstlast.all.length; index++) {
-                    if (require('./memory').db.blockchain.firstlast.all[index].server === callback_data.server
-                        && require('./memory').db.blockchain.firstlast.all[index].port === callback_data.port) {
-                            require('./memory').db.blockchain.firstlast.all[index].response = callback_data.response;
-                    }
-                }
+                if (!callback_data.timeout) { require('./memory').db.blockchain.firstlast.all.push(callback_data) }
 
                 if (callback_data.timeout) { // on timeout do
                     console.log('\n\n  => blockchain firstlast array done:');
@@ -154,6 +142,8 @@ exports.sync_chain = async (callback_data) => {
                     console.log('\n\n  => Trusted last hash nodes list:');
                     console.log(require('./memory').db.blockchain.firstlast.grouped[_trusted_last_hash]);
 
+                    //
+
                     if (require('./memory').db.blockchain.firstlast.grouped[_trusted_last_hash].length > 0) {
                         const _random_peer_firstlast = require('./memory').db.blockchain.firstlast.grouped[_trusted_last_hash].length > 1
                             ? require('./memory').db.blockchain.firstlast.grouped[_trusted_last_hash][require('node:crypto').randomInt(0, require('./memory').db.blockchain.firstlast.grouped[_trusted_last_hash].length-1)]
@@ -175,10 +165,15 @@ exports.sync_chain = async (callback_data) => {
                                 require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, require('./memory').db.peers[_peer_index].pub
                             ));
                         } else {
-                            this.verify_chain({ blockchain: 'get_block', callback: 'sync_chain' });
+                            this.verify_chain();
                         }
 
                     }
+
+
+                    //
+
+
                 }
                 break;
         
@@ -188,30 +183,27 @@ exports.sync_chain = async (callback_data) => {
     }
 }
 
-exports.verify_chain = (callback_data) => {
+//don't try to verify chain until firstlast array done inside sync_chain function
+exports.verify_chain = () => {
     const _last_block = this.blockchain.last().value();
     if (_last_block.block > 0) {
         for (let index = 1; index <= _last_block.block; index++) {
             const _block = this.blockchain.find({ block: index }).value();
             const _prev_block = this.blockchain.find({ block: index-1 }).value();
             const _prev_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(_prev_block)).digest('base64');
-            if (_block.prev != _prev_hash) {
-                console.log(`\n!! block ${_block.block} DOESN'T contain the good hash of the block ${_prev_block.block}`);
-                if (callback_data && callback_data.callback) {
-                    switch (callback_data.callback) {
-                        case 'sync_chain':
-                            for (let index = _block.block; index <= _last_block.block; index++) {
-                                this.blockchain.remove({ block: index }).write();
-                            }
-                            this.sync_chain(Object.assign(callback_data, { block: _prev_block.block, response: _prev_block } ));
-                            break;
-                        default:
-                            break;
-                    }
+            if (!_block || (_block.prev != _prev_hash)) {
+                for (let i = index; i <= _last_block.block; i++) {
+                    this.blockchain.remove({ block: i }).write();
+                }
+                if (require('./memory').db.blockchain.firstlast.all.length > 0) {
+                    this.sync_chain({ blockchain: 'get_block', callback: 'sync_chain', block: !_block ? index : index-1, response: { block: !_block ? index : index-1, prev: '' } });
+                } else {
+                    this.sync_chain();
                 }
                 break;
             }
         }
-        console.log('\n  => Chain is verified !')
+        console.log('\n  => Chain is verified !');
+        require('./memory').db.state.is_blockchain_sync = false;
     }
 }

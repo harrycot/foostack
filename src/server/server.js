@@ -73,7 +73,7 @@ require('./utils/network').get_port_to_use( async (port) => {
         const _data = { blockchain: 'new_block', block: _block }
         console.log(`\n\nSENDING New block: ${_block.block}`);
 
-        console.log(require('./db/memory').db.peers);
+        //console.log(require('./db/memory').db.peers);
 
         for (peer of require('./db/memory').db.peers) {
             if (peer.socket.connected) {

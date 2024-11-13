@@ -137,7 +137,7 @@ const handle_data = async (deserialized, index, pub) => {
         switch (deserialized.data.blockchain) {
             case 'new_block':
                 console.log(`\n  got new block ${deserialized.data.block.block}\n`);
-                require('../db/blockchain').new_block_from_node(deserialized.data);
+                require('../db/blockchain').new_block_from_node(deserialized.data.block);
                 break;
             case 'get_block':
                 if (deserialized.data.response) { // got response
