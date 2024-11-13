@@ -2,7 +2,6 @@ const path = require('node:path');
 const webpack = require('webpack');
 
 const TerserPlugin = require("terser-webpack-plugin");
-const WebpackObfuscator = require('webpack-obfuscator');
 
 const is_production = require('./src/server/server').is_production;
 
@@ -12,10 +11,10 @@ module.exports = [
         target: 'web',
         mode: process.env.NODE_ENV,
         devtool: is_production ? false : 'eval-source-map',
-        entry: ['./src/view/js/body.js', './src/view/scss/styles.scss'],
+        entry: ['./src/web/js/body.js', './src/web/scss/styles.scss'],
         output: {
             path: path.resolve(__dirname),
-            filename: 'src/view/js/body.bundle.js'
+            filename: 'src/web/js/body.bundle.js'
         },
         module: {
             rules: [
@@ -23,7 +22,7 @@ module.exports = [
                     test: /\.scss$/,
                     type: "asset/resource",
                     generator: {
-                        filename: 'src/view/scss/styles.bundle.css',
+                        filename: 'src/web/scss/styles.bundle.css',
                     },
                     use: ["sass-loader"],
                 }
@@ -50,10 +49,6 @@ module.exports = [
             // dev only
         },
         plugins: is_production ? [
-            new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
-                rotateStringArray: true,
-                target: 'browser-no-eval'
-            }, ['']),
             new webpack.ProvidePlugin({
                 Buffer: ['buffer', 'Buffer'],
             })
@@ -95,10 +90,7 @@ module.exports = [
             // dev only
         },
         plugins: is_production ? [
-            new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
-                rotateStringArray: true,
-                target: 'node'
-            }, [''])
+            // prod only
         ] : [
             // dev only
         ]

@@ -194,13 +194,12 @@ const handle_data = async (deserialized, index, pub) => {
                         }
                     }
 
-                    // if onlines done
-                    const _onlines = require('../db/memory').db.get.peer.onlines();
-                    if ( (_onlines.length == require('../db/memory').db.peers.length) && !require('../db/memory').db.state.got_online_peers ) {
-                        require('../db/memory').db.state.got_online_peers = true;
-                        // init blockchain sync
-                        require('../db/blockchain').sync_chain();
-                    }
+                    setTimeout(() => {
+                        if (!require('../db/memory').db.state.got_online_peers){
+                            require('../db/memory').db.state.got_online_peers = true;
+                            require('../db/blockchain').sync_chain();
+                        }
+                    }, require('../db/memory').timeout.got_online_peers);
                 } else { // got ask
                     const _onlines = require('../db/memory').db.get.peer.onlines();
                     const _data = Object.assign(deserialized.data, { response: _onlines } );

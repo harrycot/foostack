@@ -1,7 +1,7 @@
 {
     "name": "foostack",
-    "version": "0.1.9",
-    "description": "fullstack webapp using socketio and openpgp",
+    "version": "0.2.0",
+    "description": "fullstack webapp horizontally scalable using socketio and openpgp",
     "main": "src/server/server.js",
     "author": "Florian Blanc",
     "license": "LGPL-3.0+",
@@ -23,6 +23,7 @@
     },
     "dependencies": {
         "lowdb": "^1.0.0",
+        "navigo": "^8.11.1",
         "openpgp": "^5.11.2",
         "socket.io": "^4.7.2",
         "socket.io-client": "^4.7.2",
@@ -33,7 +34,6 @@
         "bufferutil": "^4.0.8",
         "cross-env": "^7.0.3",
         "css-loader": "^7.1.2",
-        "javascript-obfuscator": "^4.1.0",
         "pkg": "^5.8.1",
         "sass": "^1.80.5",
         "sass-loader": "^16.0.3",
@@ -41,7 +41,6 @@
         "terser-webpack-plugin": "^5.3.9",
         "utf-8-validate": "^6.0.4",
         "webpack": "^5.89.0",
-        "webpack-cli": "^5.1.4",
-        "webpack-obfuscator": "^3.5.1"
+        "webpack-cli": "^5.1.4"
     }
 }
