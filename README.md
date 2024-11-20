@@ -1,9 +1,5 @@
 <h3 align="center">foostack</h3>
 <p align="center">fullstack webapp horizontally scalable using socketio and openpgp</p>
-<p align="center">
-    <a href="https://github.com/harrycot/foostack/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-LGPLv3-green.svg" alt="LGPLv3 License"></a>
-    <img src="https://img.shields.io/badge/contributions-welcome-ff69b4.svg" alt="Contributions Welcome">
-</p>
 <p align="center"><i>(work in progress)</i></p>
 
 
@@ -49,6 +45,7 @@ and start multiple instances like that.
 
 #### TODO:
 - web view.
+- review imports (web)
 
 #### memory.js file content looks like this when running
 ```

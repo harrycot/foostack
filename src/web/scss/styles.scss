@@ -13,6 +13,10 @@ body {
     margin: 0;
     background: tomato;
 
+    &.login-connected {
+        background: greenyellow;
+    }
+
     & header {
         position: absolute;
         top: 0;

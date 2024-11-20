@@ -68,9 +68,11 @@ const handle_login = async (deserialized) => {
             break;
         case 'connected':
             console.log('  => Connected');
+            document.getElementsByTagName('body')[0].classList.add('login-connected');
             break;
         case 'disconnected':
             console.log('  => Disconnected');
+            document.getElementsByTagName('body')[0].classList.remove('login-connected');
             break;
     
         default:
