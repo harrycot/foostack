@@ -12,7 +12,7 @@ exports.config = {
 
 exports.db = {
     blacklist: [],
-    blockchain : { firstlast: { all: [], trusted: [], grouped: {} }, saved_responses: {} },
+    blockchain : { firstlast: { all: [], trusted: [], grouped: {} }, last_response_block: {} },
     default_peers: [],
     peers: [],
     server: { uuid: false, openpgp: false },
@@ -64,11 +64,11 @@ exports.db = {
                 return array.filter(function(peer) { return peer.sid === sid }).length == 0 ? false : true;
             },
             exist_server: (server, port) => {
-                return this.db.peers.filter((peer) => { return (peer.server === server) && (peer.port === port) }).length == 0 ? false : true;
+                return this.db.peers.filter((peer) => { return server.includes(peer.server) && (peer.port === port) }).length == 0 ? false : true;
             },
             index_server: (server, port) => {
                 for (index in this.db.peers) {
-                    if ( (this.db.peers[index].server === server) && (this.db.peers[index].port === port) ) { return index }
+                    if ( server.includes(this.db.peers[index].server) && (this.db.peers[index].port === port) ) { return index }
                 }
             },
             onlines: () => {

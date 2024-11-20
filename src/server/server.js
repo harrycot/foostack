@@ -36,7 +36,7 @@ exports.io = require('socket.io')(this.http, {
 
 if (!this.is_production) {
     require('./db/memory').db.peers = [
-        { server: '::ffff:127.0.0.1', port: '8001' }
+        { server: '127.0.0.1', port: '8001' }
     ];
 } else {
     require('./db/memory').db.peers = [

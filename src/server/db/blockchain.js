@@ -62,17 +62,23 @@ exports.sync_chain = async (callback_data) => {
                     this.blockchain.push(callback_data.response).write(); // write the new block
                 } else { // ask get -1
                     this.blockchain.remove({ block: _last_block.block }).write();
+                    if ( callback_data.response.prev !== '' && require('./memory').db.default_peers.filter((el) => { return callback_data.server.includes(el.server) && (callback_data.port == el.port) }).length != 0 ) {
+                        // this new block is from default peers (trusted)
+                        // blacklist last node response if last block response block number is == callback_data.response.block-1
+                        if ( require('./memory').db.blockchain.last_response_block.response && (require('./memory').db.blockchain.last_response_block.response.block == callback_data.response.block-1) ) {
+                            require('./memory').db.blacklist.push({
+                                server: require('./memory').db.blockchain.last_response_block.server,
+                                port: require('./memory').db.blockchain.last_response_block.port,
+                                reason: 'BAD_BLOCK'
+                            });
+                            console.log('\n\n BLACKLIST:');
+                            console.log(require('./memory').db.blacklist);
+                        }
+                    }
                 }
 
                 if (callback_data.response.prev !== '') { // call from verify_chain
-                    require('./memory').db.blockchain.saved_responses[callback_data.response.block] = callback_data;
-                }
-                for (let index = 0; index < Object.keys(require('./memory').db.blockchain.saved_responses).length; index++) {
-                    const _last_block_now = this.blockchain.last().value();
-                    if (require('./memory').db.blockchain.saved_responses[_last_block_now.block+1] && !this.blockchain.find({ block: _last_block_now.block+1 }).value()) {
-                        this.blockchain.push(require('./memory').db.blockchain.saved_responses[_last_block_now.block+1].response).write(); // write saved block
-                        // delete require('./memory').db.blockchain.saved_responses[_last_block.block+1];
-                    }
+                    require('./memory').db.blockchain.last_response_block = callback_data;
                 }
 
                 const _data = _last_block_hash === callback_data.response.prev
@@ -86,15 +92,20 @@ exports.sync_chain = async (callback_data) => {
                         : require('./memory').db.blockchain.firstlast.grouped[_trusted_last_hash][0];
 
                     const _peer_index = require('./memory').db.get.peer.index_server(_random_peer_firstlast.server, _random_peer_firstlast.port);
-                    require('./memory').db.peers[_peer_index].socket.emit('data', await require('../../common/network').serialize(
-                        require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, require('./memory').db.peers[_peer_index].pub
-                    ));
+                    if (_peer_index >= 0) {
+                        require('./memory').db.peers[_peer_index].socket.emit('data', await require('../../common/network').serialize(
+                            require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, require('./memory').db.peers[_peer_index].pub
+                        ));
+                    } else {
+                        this.sync_chain(callback_data); // redo random peer maybe offline
+                    }
+                    
                 } else {
-                    //console.log(require('./memory').db.blockchain.saved_responses);
+                    //console.log(require('./memory').db.blockchain.last_response_block);
                     //console.log(require('./memory').db.blockchain.firstlast.grouped[_trusted_last_hash].length);
                     console.log('\n\n Full sync done !');
                     require('./memory').db.blockchain.firstlast = { all: [], trusted: [], grouped: {} }; // reset firstlast
-                    require('./memory').db.blockchain.saved_responses = {}; // reset saved responses
+                    require('./memory').db.blockchain.last_response_block = {}; // reset saved responses
                     this.verify_chain();
                 }
                 break;
@@ -162,9 +173,13 @@ exports.sync_chain = async (callback_data) => {
                                 }
                             }
                             const _peer_index = require('./memory').db.get.peer.index_server(_random_peer_firstlast.server, _random_peer_firstlast.port);
-                            require('./memory').db.peers[_peer_index].socket.emit('data', await require('../../common/network').serialize(
-                                require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, require('./memory').db.peers[_peer_index].pub
-                            ));
+                            if (_peer_index >= 0) {
+                                require('./memory').db.peers[_peer_index].socket.emit('data', await require('../../common/network').serialize(
+                                    require('./memory').db.server.uuid, require('./memory').db.server.openpgp, _data, require('./memory').db.peers[_peer_index].pub
+                                ));
+                            } else {
+                                this.sync_chain(callback_data); // redo random peer maybe offline
+                            }
                         } else {
                             this.verify_chain();
                         }
@@ -197,7 +212,7 @@ exports.verify_chain = () => {
                     this.blockchain.remove({ block: i }).write();
                 }
                 if (require('./memory').db.blockchain.firstlast.all.length > 0) {
-                    this.sync_chain({ blockchain: 'get_block', callback: 'sync_chain', block: !_block ? index : index-1, response: { block: !_block ? index : index-1, prev: '' } });
+                    this.sync_chain({ blockchain: 'get_block', callback: 'sync_chain', block: !_block ? index : index-1, response: { block: !_block ? index : index-1, prev: "" } });
                 } else {
                     this.sync_chain();
                 }

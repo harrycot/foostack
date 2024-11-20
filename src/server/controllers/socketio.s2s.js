@@ -14,12 +14,13 @@ exports.init = () => {
             const _peer_index = require('../db/memory').db.get.peer.index_sid(socket.client.conn.id, require('../db/memory').db.peers);
             //dont remove default peers
             if (_peer_index >= 0) { // if this peer is not present in default_peers
-                if ( require('../db/memory').db.default_peers.filter((el) => { return require('../db/memory').db.peers[_peer_index].server.includes(el.server) }).length == 0 ) {
+                if ( require('../db/memory').db.default_peers.filter((el) => { return require('../db/memory').db.peers[_peer_index].server.includes(el.server) && (require('../db/memory').db.peers[_peer_index].port == el.port) }).length == 0 ) {
                     if (require('../db/memory').db.peers[index].socket.connected) {
                         require('../db/memory').db.peers[index].socket.disconnect();
                     }
                     require('../db/memory').db.del.peer(_peer_index);
                 }
+                //console.log(require('../db/memory').db.peers);
             }
         });
         // if it's a self connection
@@ -64,9 +65,9 @@ const init_ioclient = (index) => { // TODO if in require('../db/memory').db.blac
     require('../db/memory').db.peers[index].socket.on('indexing handshake', (serialized_data) => {
         on_data_common(index, serialized_data, send_ack = false);
     });
-    require('../db/memory').db.peers[index].socket.on('disconnect', () => {
-        console.log(`as ioclient id ${require('../db/memory').db.peers[index].socket.io.engine.id}: disconnected`);
-    });
+    // require('../db/memory').db.peers[index].socket.on('disconnect', () => {
+    //     console.log(`as ioclient id ${require('../db/memory').db.peers[index].socket.io.engine.id}: disconnected`);
+    // });
 }
 
 const on_data_common = async (index, serialized_data, send_ack, socket) => {
