@@ -3,7 +3,7 @@ const webpack = require('webpack');
 
 const TerserPlugin = require("terser-webpack-plugin");
 
-const is_production = require('./src/server/server').is_production;
+const is_production = process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false;
 
 module.exports = [
     {

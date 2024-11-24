@@ -44,13 +44,14 @@ and start multiple instances like that.
 <h3 align="right"><a href="https://buymeacoffee.com/foostack">[buymeacoffee.com/foostack]</a></h3>
 
 #### TODO:
+- **try to move peers array to json dict (maybe using socketid as key). (to improve performance)**
 - web view.
-- review imports (web)
+- review imports (web).
 
 #### memory.js file content looks like this when running
 ```
 {
-  blacklist: [],
+  blacklist: {},
   blockchain: {
     firstlast: { all: [], trusted: [], grouped: {} },
     saved_responses: {}
