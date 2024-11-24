@@ -11,7 +11,7 @@ exports.config = {
 }
 
 exports.db = {
-    blacklist: [],
+    blacklist: {},
     blockchain : { firstlast: { all: [], trusted: [], grouped: {} }, last_response_block: {} },
     default_peers: [],
     peers: [],

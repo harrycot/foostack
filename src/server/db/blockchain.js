@@ -66,11 +66,10 @@ exports.sync_chain = async (callback_data) => {
                         // this new block is from default peers (trusted)
                         // blacklist last node response if last block response block number is == callback_data.response.block-1
                         if ( require('./memory').db.blockchain.last_response_block.response && (require('./memory').db.blockchain.last_response_block.response.block == callback_data.response.block-1) ) {
-                            require('./memory').db.blacklist.push({
-                                server: require('./memory').db.blockchain.last_response_block.server,
-                                port: require('./memory').db.blockchain.last_response_block.port,
-                                reason: 'BAD_BLOCK'
-                            });
+                            const _server_port = `${require('./memory').db.blockchain.last_response_block.server}:${require('./memory').db.blockchain.last_response_block.port}`;
+                            require('./memory').db.blacklist[_server_port] = { reason: 'BAD_BLOCK', date: Date.now() };
+                            //const _port = _server_port.slice(_server_port.lastIndexOf(':') + 1);
+                            //const _server = _server_port.slice(0, _server_port.lastIndexOf(':'));
                             console.log('\n\n BLACKLIST:');
                             console.log(require('./memory').db.blacklist);
                         }
@@ -127,7 +126,8 @@ exports.sync_chain = async (callback_data) => {
                         const _this_first_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(require('./memory').db.blockchain.firstlast.all[index].response.first)).digest(CONST_HASH_ENCODING);
                         const _this_last_hash = require('node:crypto').createHash(CONST_HASH).update(JSON.stringify(require('./memory').db.blockchain.firstlast.all[index].response.last)).digest(CONST_HASH_ENCODING);
                         if (_this_first_hash !== _first_block_hash) { // for every peer where first block is different, blacklist(24h) and disconnect. not same chain.
-                            require('../db/memory').db.blacklist.push({ server: require('./memory').db.blockchain.firstlast.all[index].server, port: require('./memory').db.blockchain.firstlast.all[index].port, date: Date.now() });
+                            const _server_port = `${require('./memory').db.blockchain.firstlast.all[index].server}:${require('./memory').db.blockchain.firstlast.all[index].port}`;
+                            require('./memory').db.blacklist[_server_port] = { reason: 'BAD_CHAIN', date: Date.now() };
                             const _index_server = require('../db/memory').db.get.peer.index_server(require('./memory').db.blockchain.firstlast.all[index].server, require('./memory').db.blockchain.firstlast.all[index].port);
                             require('../db/memory').db.peers[_index_server].socket.disconnect();
                             require('./memory').db.blockchain.firstlast.all.splice(index, 1);
