@@ -48,7 +48,7 @@ exports.db = {
     get: {
         peer: {
             index_uuid: (uuid, array) => {
-                for (index in array) {
+                for (let index = 0; index < array.length; index++) {
                     if (array[index].uuid === uuid) { return index }
                 }
             },
@@ -56,7 +56,7 @@ exports.db = {
                 return array.filter(function(peer) { return peer.uuid === uuid }).length == 0 ? false : true;
             },
             index_sid: (sid, array) => {
-                for (index in array) {
+                for (let index = 0; index < array.length; index++) {
                     if (array[index].sid === sid) { return index }
                 }
             },
@@ -67,7 +67,7 @@ exports.db = {
                 return this.db.peers.filter((peer) => { return server.includes(peer.server) && (peer.port === port) }).length == 0 ? false : true;
             },
             index_server: (server, port) => {
-                for (index in this.db.peers) {
+                for (let index = 0; index < this.db.peers.length; index++) {
                     if ( server.includes(this.db.peers[index].server) && (this.db.peers[index].port === port) ) { return index }
                 }
             },
@@ -98,7 +98,7 @@ exports.db = {
 
 // this.db looks like this
 // {
-//     blacklist: [],
+//     blacklist: {},
 //     blockchain: {
 //       firstlast: { all: [], trusted: [], grouped: {} },
 //       saved_responses: {}

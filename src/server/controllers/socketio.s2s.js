@@ -15,8 +15,8 @@ exports.init = () => {
             //dont remove default peers
             if (_peer_index >= 0) { // if this peer is not present in default_peers
                 if ( require('../db/memory').db.default_peers.filter((el) => { return require('../db/memory').db.peers[_peer_index].server.includes(el.server) && (require('../db/memory').db.peers[_peer_index].port == el.port) }).length == 0 ) {
-                    if (require('../db/memory').db.peers[index].socket.connected) {
-                        require('../db/memory').db.peers[index].socket.disconnect();
+                    if (require('../db/memory').db.peers[_peer_index].socket.connected) {
+                        require('../db/memory').db.peers[_peer_index].socket.disconnect();
                     }
                     require('../db/memory').db.del.peer(_peer_index);
                 }
@@ -41,7 +41,7 @@ exports.init = () => {
             }
         }
     });
-    // init connections as client for each server in peers
+    // init connections as client for each server in peers (only default peers at init)
     for (index in require('../db/memory').db.peers) {
         init_ioclient(index);
     }
@@ -55,7 +55,7 @@ const init_ioclient = (index) => { // TODO if in require('../db/memory').db.blac
     const _server = _ip.v4 ? _ip.v4 : _ip.v6 ? `[${_ip.v6}]` : false; if (!_server) { return }
     const _port = require('../db/memory').db.peers[index].port;
 
-    require('../db/memory').db.peers[index].socket = require('socket.io-client')(`http://${_server}:${_port}/s2s`);
+    require('../db/memory').db.peers[index].socket = require('socket.io-client')(`http://${_server}:${_port}/s2s`, require('../../common/network').socketio_client_options);
     
     require('../db/memory').db.peers[index].socket.on('connect', async () => {
         console.log(`as ioclient id ${require('../db/memory').db.peers[index].socket.io.engine.id}: connected`);
@@ -185,10 +185,10 @@ const handle_data = async (deserialized, index, pub) => {
         switch (deserialized.data.node) {
             case 'get_onlines':
                 if (deserialized.data.response) { // got response
-                    for (online of deserialized.data.response ) { // onlines => [ { server: '', port: '' }, ... ]
-                        if (!require('../db/memory').db.get.peer.exist_server(online.server, online.port)) {                          // avoid reconnecting to himself
-                            if (!require('../db/memory').config.network.ip.includes(online.server) && (require('../db/memory').config.network.port != online.port)) {
-                                require('../db/memory').db.peers.push(online); // online => { server: '', port: '' }
+                    for (let index = 0; index < deserialized.data.response.length; index++) { // onlines => [ { server: '', port: '' }, ... ]
+                        if (!require('../db/memory').db.get.peer.exist_server(deserialized.data.response[index].server, deserialized.data.response[index].port)) {                          // avoid reconnecting to himself
+                            if (!require('../db/memory').config.network.ip.includes(deserialized.data.response[index].server) && (require('../db/memory').config.network.port != deserialized.data.response[index].port)) {
+                                require('../db/memory').db.peers.push(deserialized.data.response[index]); // deserialized.data.response[index] => { server: '', port: '' }
                                 // init ioc
                                 init_ioclient(require('../db/memory').db.peers.length-1);
                             }

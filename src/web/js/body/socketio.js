@@ -1,4 +1,4 @@
-const socket = require('socket.io-client')('/web');
+const socket = require('socket.io-client')('/web', require('../../../common/network').socketio_client_options);
 const openpgp = require('openpgp');
 
 const { serialize, deserialize } = require('../../../common/network');

@@ -27,7 +27,16 @@ exports.http = require('node:http').createServer( (req, res) => {
     });
 });
 
-exports.io = require('socket.io')(this.http, {
+
+
+
+exports.io = require('socket.io')(this.http, { // https://socket.io/docs/v4/server-options/
+    transporst: ["websocket"], // ["polling", "websocket", "webtransport"] default value
+    allowUpgrades: true, // true default value
+    upgradeTimeout: 10000, // 10000ms default value
+    maxHttpBufferSize: 1e6, // 1MB default value, (1e8 in case (100MB)) a single char(string) is 2 bytes
+    pingInterval: 25000, // 25000ms default value
+    pingTimeout: 20000, // 20000ms default value
     cookie: {
         name: require('./utils/crypto').misc.generate.seed_int(100,4096),
         path: "/", httpOnly: true, sameSite: "strict", secure: false
@@ -73,12 +82,12 @@ require('./utils/network').get_port_to_use( async (port) => {
         const _data = { blockchain: 'new_block', block: _block }
         console.log(`\n\nSENDING New block: ${_block.block}`);
 
-        console.log(require('./db/memory').db);
+        //console.log(require('./db/memory').db);
 
-        for (peer of require('./db/memory').db.peers) {
-            if (peer.socket.connected) {
-                peer.socket.emit('data', await require('../common/network').serialize(
-                    require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, _data, peer.pub
+        for (let index = 0; index < require('./db/memory').db.peers.length; index++) {
+            if (require('./db/memory').db.peers[index].socket.connected) {
+                require('./db/memory').db.peers[index].socket.emit('data', await require('../common/network').serialize(
+                    require('./db/memory').db.server.uuid, require('./db/memory').db.server.openpgp, _data, require('./db/memory').db.peers[index].pub
                 ));
             }
         }

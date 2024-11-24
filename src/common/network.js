@@ -67,3 +67,11 @@ exports.deserialize = async (openpgpcreds, serialized_data, openpgp_pub) => {
 
     return _json_data;
 }
+
+// https://socket.io/docs/v4/client-options
+exports.socketio_client_options = {
+    transporst: ["websocket"], // ["polling", "websocket", "webtransport"] default value
+    upgrade: true, // true default value, (upgrade transport)
+    randomizationFactor: 0.5, // 0.5 default value // https://socket.io/docs/v4/client-options/#randomizationfactor,
+    reconnectionAttempts: Infinity // Infinity default value
+}
