@@ -4,3 +4,4 @@ node_modules
 package-lock.json
 src/server/db/_blockchain
 src/web/**/*.bundle.*
+devcontainer.json
