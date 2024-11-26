@@ -22,7 +22,9 @@
         "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/server.bundle.js --out-path ./dist --no-bytecode --public-packages \"*\" --public",
         "exec:pkg": "cd dist && cross-env NODE_ENV=development ./server-linux",
         "exec:bundle": "cd dist && cross-env NODE_ENV=development node server.bundle.js",
-        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development ./server.bundle-linux"
+        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development ./server.bundle-linux",
+        "copy:pkg:bin": "mkdir pkg-bin && gh release download v3.4 -D pkg-bin/ -R vercel/pkg-fetch",
+        "copy:pkg:bin:tocache": "node ./scripts/copy-pkg-to-cache.js"
     },
     "dependencies": {
         "lowdb": "^1.0.0",
