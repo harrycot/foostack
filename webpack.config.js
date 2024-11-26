@@ -2,6 +2,7 @@ const path = require('node:path');
 const webpack = require('webpack');
 
 const TerserPlugin = require("terser-webpack-plugin");
+const WebpackObfuscator = require('webpack-obfuscator');
 
 const is_production = process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false;
 
@@ -49,6 +50,10 @@ module.exports = [
             // dev only
         },
         plugins: is_production ? [
+            new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
+                rotateStringArray: true,
+                target: 'browser-no-eval'
+            }, ['']),
             new webpack.ProvidePlugin({
                 Buffer: ['buffer', 'Buffer'],
             })
@@ -91,6 +96,10 @@ module.exports = [
         },
         plugins: is_production ? [
             // prod only
+            new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
+                rotateStringArray: true,
+                target: 'node'
+            }, [''])
         ] : [
             // dev only
         ]

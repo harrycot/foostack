@@ -9,6 +9,9 @@ Currently, when you type a string in the stdin of an instance, a block is create
 
 Connected peers are discovered by asking a list of online nodes to everyone.
 
+#### Pkg/Obfuscator _Locking Nodejs version to 18.5.0_
+  - Pkg failed to make bytecode for openpgp. Pkg is done using --no-bytecode flag.
+    - Keeping obfuscator.
 
 #### Serialization:
   - **on handshake**: uuid, pub and port  is signed and sent in clear. _The receiver returns his uuid and pub as an acknowledgement._

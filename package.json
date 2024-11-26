@@ -1,6 +1,6 @@
 {
     "name": "foostack",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "fullstack webapp horizontally scalable using socketio and openpgp",
     "main": "src/server/server.js",
     "author": "Florian Blanc",
@@ -12,14 +12,17 @@
         "blockchain",
         "fullstack"
     ],
+    "engines": {
+        "node": "18.5.0"
+    },
     "scripts": {
         "dev": "cross-env NODE_ENV=development webpack --config-name web && node ./src/server/server.js",
-        "pkg": "cross-env NODE_ENV=production pkg ./src/server/server.js --out-path ./dist",
+        "pkg": "cross-env NODE_ENV=production pkg ./src/server/server.js --out-path ./dist --no-bytecode --public-packages \"*\" --public",
         "bundle": "cross-env NODE_ENV=production webpack",
-        "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/server.bundle.js --out-path ./dist",
-        "exec:pkg": "cd dist && cross-env NODE_ENV=development server-win.exe",
+        "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/server.bundle.js --out-path ./dist --no-bytecode --public-packages \"*\" --public",
+        "exec:pkg": "cd dist && cross-env NODE_ENV=development ./server-linux",
         "exec:bundle": "cd dist && cross-env NODE_ENV=development node server.bundle.js",
-        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development bundle-win.exe"
+        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development ./server.bundle-linux"
     },
     "dependencies": {
         "lowdb": "^1.0.0",
@@ -31,16 +34,19 @@
     },
     "devDependencies": {
         "buffer": "^6.0.3",
-        "bufferutil": "^4.0.8",
+        "bufferutil": "^4.0.2",
         "cross-env": "^7.0.3",
-        "css-loader": "^7.1.2",
-        "pkg": "^5.8.1",
+        "css-loader": "^6.11.0",
+        "javascript-obfuscator": "^4.1.0",
+        "pkg": "^5.8.0",
         "sass": "^1.80.5",
-        "sass-loader": "^16.0.3",
-        "style-loader": "^4.0.0",
+        "sass-loader": "^13.3.3",
+        "style-loader": "^3.3.4",
         "terser-webpack-plugin": "^5.3.9",
-        "utf-8-validate": "^6.0.4",
+        "utf-8-validate": "^5.0.3",
         "webpack": "^5.89.0",
-        "webpack-cli": "^5.1.4"
+        "webpack-cli": "^5.1.4",
+        "webpack-obfuscator": "^3.5.1",
+        "ws": "^7.4.1"
     }
 }
