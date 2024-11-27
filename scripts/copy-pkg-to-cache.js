@@ -30,7 +30,6 @@ require('./walk').walk(path.join(__dirname, '../pkg-bin'), function(err, results
                     }
                 }
             });
-            
         }
     });
 });

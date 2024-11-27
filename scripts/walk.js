@@ -11,7 +11,7 @@ exports.walk = (dir, done) => { // https://gist.github.com/h2non/5214201
         file = dir + '/' + file;
         fs.stat(file, function(err, stat) {
           if (stat && stat.isDirectory()) {
-            walk(file, function(err, res) {
+            require('./walk').walk(file, function(err, res) {
               results = results.concat(res);
               next();
             });
@@ -22,4 +22,21 @@ exports.walk = (dir, done) => { // https://gist.github.com/h2non/5214201
         });
       })();
     });
+}
+
+exports.walk_sync = (dir) => { // https://stackoverflow.com/a/16684530
+  var results = [];
+  var list = fs.readdirSync(dir);
+  list.forEach((file) => {
+      file = dir + '/' + file;
+      var stat = fs.statSync(file);
+      if (stat && stat.isDirectory()) { 
+          /* Recurse into a subdirectory */
+          results = results.concat(require('./walk').walk_sync(file));
+      } else { 
+          /* Is a file */
+          results.push(file);
+      }
+  });
+  return results;
 }
