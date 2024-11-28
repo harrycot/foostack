@@ -1,7 +1,7 @@
-const socket = require('socket.io-client')('/web', require('../../../common/network').socketio_client_options);
+const socket = require('socket.io-client')('/web', require('../../../../common/network').socketio_client_options);
 const openpgp = require('openpgp');
 
-const { serialize, deserialize } = require('../../../common/network');
+const { serialize, deserialize } = require('../../../../common/network');
 
 
 const client = { uuid: false, openpgpcreds: false, serverpub: false }
@@ -10,7 +10,7 @@ exports.init = () => {
     socket.on('connect', async () => {
         console.log(socket.io.engine.id);
         client.uuid = require('uuid').v5('web', require('uuid').v4());
-        client.openpgpcreds = await require('../../../common/crypto').openpgp.generate(client.uuid, `${client.uuid}@test.local`);
+        client.openpgpcreds = await require('../../../../common/crypto').openpgp.generate(client.uuid, `${client.uuid}@test.local`);
         client.serverpub = false;
         console.log(client.openpgpcreds);
         socket.emit('data', await serialize(client.uuid, client.openpgpcreds)); // handshake init
@@ -56,7 +56,7 @@ const handle_login = async (deserialized) => {
         case 'ask_login_data':
             // { login: 'ask_login_data', seed: _seed.seed }
             console.log('generating user keys as test:');
-            _user_openpgpcreds = await require('../../../common/crypto').openpgp.generate('user', 'user@test.local');
+            _user_openpgpcreds = await require('../../../../common/crypto').openpgp.generate('user', 'user@test.local');
             console.log(_user_openpgpcreds);
             const _openpgp_local_priv_obj = await openpgp.readKey({ armoredKey: Buffer.from(_user_openpgpcreds.priv, 'base64').toString() });
             const _message = { text: `{ "seed": "${_json_data.seed}", "pub": "${_user_openpgpcreds.pub}" }` };

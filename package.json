@@ -1,6 +1,6 @@
 {
     "name": "foostack",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "description": "fullstack webapp horizontally scalable using socketio and openpgp",
     "main": "src/server/server.js",
     "author": "Florian Blanc",
@@ -17,20 +17,23 @@
     },
     "scripts": {
         "dev": "cross-env NODE_ENV=development webpack --config-name web && node ./src/server/server.js",
+
         "pkg": "cross-env NODE_ENV=production pkg ./src/server/server.js --out-path ./dist --no-bytecode --public-packages \"*\" --public",
-        "bundle": "cross-env NODE_ENV=production webpack",
-        "pkg:bundle": "cross-env NODE_ENV=production pkg ./dist/server.bundle.js --out-path ./dist --no-bytecode --public-packages \"*\" --public",
         "exec:pkg": "cd dist && cross-env NODE_ENV=development ./server-linux",
-        "exec:bundle": "cd dist && cross-env NODE_ENV=development node server.bundle.js",
-        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development ./server.bundle-linux",
+
+        "bundle": "cross-env NODE_ENV=production webpack",
+        "pkg:bundle": "cross-env NODE_ENV=production pkg ./src/server/server.bundle.js --out-path ./dist --no-bytecode --public-packages \"*\" --public --config package.json",
+        "exec:bundle": "cross-env NODE_ENV=development node ./src/server/server.bundle.js",
+        "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development ./foostack-linux",
+
         "copy:pkg:bin": "mkdir pkg-bin && gh release download v3.4 -D pkg-bin/ -R vercel/pkg-fetch",
         "copy:pkg:bin:tocache": "node ./scripts/copy-pkg-to-cache.js"
     },
     "pkg": {
         "assets": [
-            "src/web/index.html",
-            "src/web/js/body.bundle.js",
-            "src/web/scss/styles.bundle.js"
+            "src/server/web/index.html",
+            "src/server/web/js/body.bundle.js",
+            "src/server/web/css/styles.bundle.css"
         ]
     },
     "dependencies": {

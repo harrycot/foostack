@@ -5,23 +5,33 @@ exports.is_production = process.pkg ? true : process.env.NODE_ENV == 'production
 
 const cwd = this.is_production ? process.cwd() : __dirname;
 
+const { exec } = require('node:child_process');
+console.log('\n exec:')
+
+require('../../scripts/walk').walk(path.join(__dirname, '../../'), function(err, results) {
+    if (err) throw err;
+    console.log(results);
+});
+
+
+_path_css = path.join(__dirname, 'web/css/styles.bundle.css');
+_path_js_body = path.join(__dirname, 'web/js/body.bundle.js');
+_path_html = path.join(__dirname, 'web/index.html');
 exports.http = require('node:http').createServer( (req, res) => {
     console.log(req.url);
-    const _files = require('./server').is_production
-        ? [] // use webpack
-        : [
-            { req: '/styles.css', path: '../web/scss/styles.bundle.css', type: 'text/css' },
-            { req: '/body.js', path: '../web/js/body.bundle.js', type: 'text/javascript' },
-        ];
+    const _files = [
+        { req: '/styles.css', path: _path_css, type: 'text/css' },
+        { req: '/body.js', path: _path_js_body, type: 'text/javascript' },
+    ];
     for (file of _files) {
         if (req.url == file.req) {
-            fs.readFile(path.join(cwd, file.path), (err, data) => {
+            fs.readFile(file.path, (err, data) => {
                 if (err) { console.log(err) }
                 res.writeHead(200, require('./utils/network').get_http_headers(file.type)); res.write(data); res.end();
             }); return;
         }
     }
-    fs.readFile(path.join(cwd, '../web/index.html'), (err, data) => {
+    fs.readFile(_path_html, (err, data) => {
         if (err) { console.log(err) }
         res.writeHead(200, require('./utils/network').get_http_headers('text/html')); res.write(data); res.end();
     });

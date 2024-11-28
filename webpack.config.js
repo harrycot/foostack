@@ -12,10 +12,10 @@ module.exports = [
         target: 'web',
         mode: process.env.NODE_ENV,
         devtool: is_production ? false : 'eval-source-map',
-        entry: ['./src/web/js/body.js', './src/web/scss/styles.scss'],
+        entry: ['./src/server/web/js/body.js', './src/server/web/css/styles.scss'],
         output: {
             path: path.resolve(__dirname),
-            filename: 'src/web/js/body.bundle.js'
+            filename: 'src/server/web/js/body.bundle.js'
         },
         module: {
             rules: [
@@ -23,7 +23,7 @@ module.exports = [
                     test: /\.scss$/,
                     type: "asset/resource",
                     generator: {
-                        filename: 'src/web/scss/styles.bundle.css',
+                        filename: 'src/server/web/css/styles.bundle.css',
                     },
                     use: ["sass-loader"],
                 }
@@ -71,7 +71,7 @@ module.exports = [
         devtool: is_production ? false : 'eval-source-map',
         entry: './src/server/server.js',
         output: {
-            path: path.resolve(path.join(__dirname, 'dist')),
+            path: path.resolve(path.join(__dirname, 'src/server')),
             filename: "server.bundle.js"
         },
         node: {

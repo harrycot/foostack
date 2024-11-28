@@ -48,6 +48,7 @@ and start multiple instances like that.
 <h3 align="right"><a href="https://buymeacoffee.com/foostack">[buymeacoffee.com/foostack]</a></h3>
 
 #### TODO:
+- **pkg: exclude node_modules folder from /snapshot/foostack/ when webpack bundle is given**.
 - web view.
 - review imports (web).
 

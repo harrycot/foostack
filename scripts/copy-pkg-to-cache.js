@@ -4,16 +4,13 @@ const crypto = require('node:crypto');
 
 const CONST_DEST_FOLDER = path.join(process.env.HOME, '/.pkg-cache/v3.4');
 
-
 if (!fs.existsSync(path.join(process.env.HOME, '/.pkg-cache'))) { fs.mkdirSync(path.join(process.env.HOME, '/.pkg-cache')) }
 if (!fs.existsSync(path.join(process.env.HOME, '/.pkg-cache/v3.4'))) { fs.mkdirSync(path.join(process.env.HOME, '/.pkg-cache/v3.4')) }
-
 require('./walk').walk(path.join(__dirname, '../pkg-bin'), function(err, results) {
     if (err) throw err;
     console.log('\n\n  => Reading files\n');
-
     results.forEach((file, i) => {
-        if (!file.includes('.sha256sum') && file.includes(process.version)) {
+        if (!file.includes('.sha256sum') && file.includes(process.version)) { //  && file.includes(process.version) //
             const _file_sum = fs.readFileSync(`${file}.sha256sum`, 'utf8').split('  ')[0];
             const _hash = crypto.createHash('sha256');
             const _input = fs.createReadStream(file);

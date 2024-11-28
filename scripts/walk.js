@@ -10,7 +10,7 @@ exports.walk = (dir, done) => { // https://gist.github.com/h2non/5214201
         if (!file) return done(null, results);
         file = dir + '/' + file;
         fs.stat(file, function(err, stat) {
-          if (stat && stat.isDirectory()) {
+          if (stat && stat.isDirectory()) { //  && !file.includes('node_modules')
             require('./walk').walk(file, function(err, res) {
               results = results.concat(res);
               next();
