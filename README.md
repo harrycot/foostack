@@ -10,6 +10,7 @@ Currently, when you type a string in the stdin of an instance, a block is create
 Connected peers are discovered by asking a list of online nodes to everyone.
 
 #### Pkg/Obfuscator _Locking Nodejs version to 18.5.0_
+  - "To be able to generate executables for all supported architectures and platforms, run pkg on a Linux host with binfmt (QEMU emulation) configured and ldid installed". https://wiki.debian.org/QemuUserEmulation https://git.saurik.com/ldid.git
   - Pkg failed to make bytecode for openpgp. Pkg is done using --no-bytecode flag.
     - Keeping obfuscator.
 

@@ -26,6 +26,13 @@
         "copy:pkg:bin": "mkdir pkg-bin && gh release download v3.4 -D pkg-bin/ -R vercel/pkg-fetch",
         "copy:pkg:bin:tocache": "node ./scripts/copy-pkg-to-cache.js"
     },
+    "pkg": {
+        "assets": [
+            "src/web/index.html",
+            "src/web/js/body.bundle.js",
+            "src/web/scss/styles.bundle.js"
+        ]
+    },
     "dependencies": {
         "lowdb": "^1.0.0",
         "navigo": "^8.11.1",

@@ -13,7 +13,7 @@ require('./walk').walk(path.join(__dirname, '../pkg-bin'), function(err, results
     console.log('\n\n  => Reading files\n');
 
     results.forEach((file, i) => {
-        if (!file.includes('.sha256sum')) {
+        if (!file.includes('.sha256sum') && file.includes(process.version)) {
             const _file_sum = fs.readFileSync(`${file}.sha256sum`, 'utf8').split('  ')[0];
             const _hash = crypto.createHash('sha256');
             const _input = fs.createReadStream(file);
