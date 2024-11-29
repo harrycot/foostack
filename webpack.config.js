@@ -6,6 +6,35 @@ const WebpackObfuscator = require('webpack-obfuscator');
 
 const _is_production = process.env.NODE_ENV == 'production' ? true : false;
 
+// 
+const _obfuscate_node = false;
+const _obfuscate_web = false;
+const _plugins_node = [];
+const _plugins_web = [];
+
+_plugins_web.push(
+    new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+    })
+);
+if (_obfuscate_web) {
+    _plugins_web.push(
+        new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
+            rotateStringArray: true,
+            target: 'browser-no-eval'
+        }, [''])
+    );
+}
+if (_obfuscate_node) {
+    _plugins_node.push(
+        new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
+            rotateStringArray: true,
+            target: 'node'
+        }, [''])
+    );
+}
+
+
 module.exports = [
     {
         name: 'web',
@@ -34,35 +63,22 @@ module.exports = [
                 buffer: require.resolve('buffer/'),
             },
         },
-        optimization: _is_production ? {
-            minimize: false,
+        optimization: {
+            minimize: true,
             minimizer: [
                 new TerserPlugin({
-                    terserOptions: {
-                        format: {
-                            comments: false,
-                        }
-                    },
+                    minify: TerserPlugin.uglifyJsMinify,
+                    terserOptions: {}, // terserOptions is passed to uglifyjs // https://github.com/mishoo/UglifyJS#minify-options
+                    // terserOptions: {
+                    //     format: {
+                    //         comments: false,
+                    //     }
+                    // },
                     extractComments: false,
                 })
             ]
-        } : {
-            // dev only
         },
-        plugins: _is_production ? [
-            new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
-                rotateStringArray: true,
-                target: 'browser-no-eval'
-            }, ['']),
-            new webpack.ProvidePlugin({
-                Buffer: ['buffer', 'Buffer'],
-            })
-        ] : [
-            // dev only
-            new webpack.ProvidePlugin({
-                Buffer: ['buffer', 'Buffer'],
-            })
-        ]
+        plugins: _plugins_web
     },
     {
         name: 'server',
@@ -79,29 +95,21 @@ module.exports = [
             __dirname: false,   // if you don't put this, __dirname
             __filename: false,  // and __filename return blank or /
         },
-        optimization: _is_production ? {
-            minimize: false,
+        optimization: {
+            minimize: true,
             minimizer: [
                 new TerserPlugin({
-                    terserOptions: {
-                        format: {
-                            comments: false,
-                        }
-                    },
+                    minify: TerserPlugin.uglifyJsMinify,
+                    terserOptions: {}, // terserOptions is passed to uglifyjs // https://github.com/mishoo/UglifyJS#minify-options
+                    // terserOptions: {
+                    //     format: {
+                    //         comments: false,
+                    //     }
+                    // },
                     extractComments: false,
                 })
             ]
-        } : {
-            // dev only
         },
-        plugins: _is_production ? [
-            // prod only
-            new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
-                rotateStringArray: true,
-                target: 'node'
-            }, [''])
-        ] : [
-            // dev only
-        ]
+        plugins: _plugins_node
     }
 ];
