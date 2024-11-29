@@ -52,7 +52,9 @@ and start multiple instances like that.
 #### TODO:
 - web view.
 - review imports (web).
-- V8: /snapshot/foostack/src/server/server.bundle.js:26 Invalid asm.js: Can only use immutable variables in global definition
+- review this warnings about openpgp:
+-    node pkg (bundled only): V8: /snapshot/foostack/src/server/server.bundle.js:26 Invalid asm.js: Can only use immutable variables in global definition
+-    web pkg: Invalid asm.js: Can only use immutable variables in global definition
 
 #### memory.js file content looks like this when running
 ```

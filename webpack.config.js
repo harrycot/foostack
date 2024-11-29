@@ -11,11 +11,11 @@ module.exports = [
         name: 'web',
         target: 'web',
         mode: process.env.NODE_ENV,
-        devtool: _is_production ? false : 'eval-source-map',
-        entry: ['./src/server/web/js/body.js', './src/server/web/css/styles.scss'],
+        devtool: _is_production ? false : process.env.DEV == 'yes' ? 'eval-source-map' : false,
+        entry: ['./src/web/js/body.js', './src/web/css/styles.scss'],
         output: {
             path: path.resolve(__dirname),
-            filename: 'src/server/web/js/body.bundle.js'
+            filename: 'src/web/js/body.bundle.js'
         },
         module: {
             rules: [
@@ -23,7 +23,7 @@ module.exports = [
                     test: /\.scss$/,
                     type: "asset/resource",
                     generator: {
-                        filename: 'src/server/web/css/styles.bundle.css',
+                        filename: 'src/web/css/styles.bundle.css',
                     },
                     use: ["sass-loader"],
                 }
@@ -68,10 +68,10 @@ module.exports = [
         name: 'server',
         target: 'node',
         mode: process.env.NODE_ENV,
-        devtool: _is_production ? false : 'eval-source-map',
-        entry: './src/server/server.js',
+        devtool: _is_production ? false : process.env.DEV == 'yes' ? 'eval-source-map' : false,
+        entry: './src/server.js',
         output: {
-            path: path.resolve(path.join(__dirname, 'src/server')),
+            path: path.resolve(path.join(__dirname, 'src')),
             filename: "server.bundle.js"
         },
         node: {

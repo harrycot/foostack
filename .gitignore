@@ -3,5 +3,5 @@ dist
 node_modules
 package-lock.json
 
-src/server/server.bundle.js
-src/server/web/**/*.bundle.*
+src/server.bundle.js
+src/web/**/*.bundle.*

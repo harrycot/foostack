@@ -1,4 +1,4 @@
-const { serialize, deserialize } = require('../../common/network');
+const { serialize, deserialize } = require('../common/network');
 
 exports.init = () => {
     // think about a channel to update web clients

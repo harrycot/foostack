@@ -49,13 +49,13 @@ exports.init = () => {
 
 const init_ioclient = (index) => { // TODO if in require('../db/memory').db.blacklist => return;
     console.log(`\n  IOC INIT ${require('../db/memory').db.peers[index].server} :${require('../db/memory').db.peers[index].port}\n`)
-    const { serialize } = require('../../common/network');
+    const { serialize } = require('../common/network');
 
     const _ip = require('../utils/socketio').parse_client_ip(require('../db/memory').db.peers[index].server);
     const _server = _ip.v4 ? _ip.v4 : _ip.v6 ? `[${_ip.v6}]` : false; if (!_server) { return }
     const _port = require('../db/memory').db.peers[index].port;
 
-    require('../db/memory').db.peers[index].socket = require('socket.io-client')(`http://${_server}:${_port}/s2s`, require('../../common/network').socketio_client_options);
+    require('../db/memory').db.peers[index].socket = require('socket.io-client')(`http://${_server}:${_port}/s2s`, require('../common/network').socketio_client_options);
     
     require('../db/memory').db.peers[index].socket.on('connect', async () => {
         console.log(`as ioclient id ${require('../db/memory').db.peers[index].socket.io.engine.id}: connected`);
@@ -72,7 +72,7 @@ const init_ioclient = (index) => { // TODO if in require('../db/memory').db.blac
 
 const on_data_common = async (index, serialized_data, send_ack, socket) => {
     // index value: false on 'data' handled by server socket
-    const { serialize, deserialize } = require('../../common/network');
+    const { serialize, deserialize } = require('../common/network');
     const _deserialized = await deserialize(require('../db/memory').db.server.openpgp, serialized_data);
     if (!_deserialized) { console.log('\n  => data received without handshake done: ignore\n'); return; }
 
@@ -132,7 +132,7 @@ const on_data_common = async (index, serialized_data, send_ack, socket) => {
 
 
 const handle_data = async (deserialized, index, pub) => {
-    const { serialize } = require('../../common/network');
+    const { serialize } = require('../common/network');
 
     if (deserialized.data.blockchain) {
         switch (deserialized.data.blockchain) {
