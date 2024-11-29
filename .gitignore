@@ -2,6 +2,6 @@
 dist
 node_modules
 package-lock.json
-src/server/db/_blockchain
+
 src/server/server.bundle.js
 src/server/web/**/*.bundle.*

@@ -4,14 +4,14 @@ const webpack = require('webpack');
 const TerserPlugin = require("terser-webpack-plugin");
 const WebpackObfuscator = require('webpack-obfuscator');
 
-const is_production = process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false;
+const _is_production = process.env.NODE_ENV == 'production' ? true : false;
 
 module.exports = [
     {
         name: 'web',
         target: 'web',
         mode: process.env.NODE_ENV,
-        devtool: is_production ? false : 'eval-source-map',
+        devtool: _is_production ? false : 'eval-source-map',
         entry: ['./src/server/web/js/body.js', './src/server/web/css/styles.scss'],
         output: {
             path: path.resolve(__dirname),
@@ -34,7 +34,7 @@ module.exports = [
                 buffer: require.resolve('buffer/'),
             },
         },
-        optimization: is_production ? {
+        optimization: _is_production ? {
             minimize: false,
             minimizer: [
                 new TerserPlugin({
@@ -49,7 +49,7 @@ module.exports = [
         } : {
             // dev only
         },
-        plugins: is_production ? [
+        plugins: _is_production ? [
             new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
                 rotateStringArray: true,
                 target: 'browser-no-eval'
@@ -68,7 +68,7 @@ module.exports = [
         name: 'server',
         target: 'node',
         mode: process.env.NODE_ENV,
-        devtool: is_production ? false : 'eval-source-map',
+        devtool: _is_production ? false : 'eval-source-map',
         entry: './src/server/server.js',
         output: {
             path: path.resolve(path.join(__dirname, 'src/server')),
@@ -79,7 +79,7 @@ module.exports = [
             __dirname: false,   // if you don't put this, __dirname
             __filename: false,  // and __filename return blank or /
         },
-        optimization: is_production ? {
+        optimization: _is_production ? {
             minimize: false,
             minimizer: [
                 new TerserPlugin({
@@ -94,7 +94,7 @@ module.exports = [
         } : {
             // dev only
         },
-        plugins: is_production ? [
+        plugins: _is_production ? [
             // prod only
             new WebpackObfuscator({ // https://github.com/javascript-obfuscator/javascript-obfuscator?tab=readme-ov-file#javascript-obfuscator-options
                 rotateStringArray: true,

@@ -2,16 +2,14 @@ const path = require('node:path');
 const fs = require('node:fs');
 
 exports.is_production = process.pkg ? true : process.env.NODE_ENV == 'production' ? true : false;
+//const cwd = this.is_production ? process.cwd() : __dirname;
 
-const cwd = this.is_production ? process.cwd() : __dirname;
 
-const { exec } = require('node:child_process');
-console.log('\n exec:')
-
-require('../../scripts/walk').walk(path.join(__dirname, '../../'), function(err, results) {
-    if (err) throw err;
-    console.log(results);
-});
+//used to display pkg snapshot content
+// require('../../scripts/walk').walk(path.join(__dirname, '../../../'), function(err, results) {
+//     if (err) throw err;
+//     console.log(results);
+// });
 
 
 _path_css = path.join(__dirname, 'web/css/styles.bundle.css');
@@ -39,7 +37,6 @@ exports.http = require('node:http').createServer( (req, res) => {
 
 
 
-
 exports.io = require('socket.io')(this.http, { // https://socket.io/docs/v4/server-options/
     transporst: ["websocket"], // ["polling", "websocket", "webtransport"] default value
     allowUpgrades: true, // true default value
@@ -53,17 +50,20 @@ exports.io = require('socket.io')(this.http, { // https://socket.io/docs/v4/serv
     }
 });
 
+
+
 if (!this.is_production) {
     require('./db/memory').db.peers = [
         { server: '127.0.0.1', port: '8001' }
     ];
 } else {
     require('./db/memory').db.peers = [
-        { server: 'IP:PORT' },
-        { server: 'IP:PORT' }
+        { server: '127.0.0.1', port: '8001' } // here PRODUCTION servers
     ];
 }
 require('./db/memory').db.default_peers = [...require('./db/memory').db.peers];
+
+
 
 require('./utils/network').get_port_to_use( async (port) => {
     require('./db/memory').config.network.port = port;
@@ -85,6 +85,7 @@ require('./utils/network').get_port_to_use( async (port) => {
     require('./db/blockchain').init(port);
 
 
+    // stdin as test
     process.stdin.setEncoding('utf8');
     process.stdin.on("data", async (data) => {
         data = data.toString();

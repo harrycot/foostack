@@ -13,6 +13,7 @@ Connected peers are discovered by asking a list of online nodes to everyone.
   - "To be able to generate executables for all supported architectures and platforms, run pkg on a Linux host with binfmt (QEMU emulation) configured and ldid installed". https://wiki.debian.org/QemuUserEmulation https://git.saurik.com/ldid.git
   - Pkg failed to make bytecode for openpgp. Pkg is done using --no-bytecode flag.
     - Keeping obfuscator.
+  - /snapshot/foostack/node_modules folder is empty(ok) when running: npm run bundle && npm run pkg:bundle
 
 #### Serialization:
   - **on handshake**: uuid, pub and port  is signed and sent in clear. _The receiver returns his uuid and pub as an acknowledgement._
@@ -22,6 +23,7 @@ Connected peers are discovered by asking a list of online nodes to everyone.
   - a block contain { block: _number_, data: _json_, prev: _hash-of-previous-block_ }.
   - ask for a list of onlines nodes. _timeout 10seconds_.
   - on sync, first and last block is asked to every online nodes. _timeout 10seconds_.
+  - blockchain file can be found at: $HOME/.foostack/blockchain
 
 #### Web:
 - the login is simulated by generating a new openpgp key pair (you can see more details in logs).
@@ -48,7 +50,6 @@ and start multiple instances like that.
 <h3 align="right"><a href="https://buymeacoffee.com/foostack">[buymeacoffee.com/foostack]</a></h3>
 
 #### TODO:
-- **pkg: exclude node_modules folder from /snapshot/foostack/ when webpack bundle is given**.
 - web view.
 - review imports (web).
 

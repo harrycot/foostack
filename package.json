@@ -7,7 +7,7 @@
     "license": "LGPL-3.0+",
     "homepage": "https://foostack.io",
     "keywords": [
-        "socket",
+        "socketio",
         "openpgp",
         "blockchain",
         "fullstack"
@@ -18,15 +18,15 @@
     "scripts": {
         "dev": "cross-env NODE_ENV=development webpack --config-name web && node ./src/server/server.js",
 
-        "pkg": "cross-env NODE_ENV=production pkg ./src/server/server.js --out-path ./dist --no-bytecode --public-packages \"*\" --public",
+        "pkg": "cross-env NODE_ENV=development pkg ./src/server/server.js --out-path ./dist --no-bytecode --public-packages \"*\" --public",
         "exec:pkg": "cd dist && cross-env NODE_ENV=development ./server-linux",
 
         "bundle": "cross-env NODE_ENV=production webpack",
-        "pkg:bundle": "cross-env NODE_ENV=production pkg ./src/server/server.bundle.js --out-path ./dist --no-bytecode --public-packages \"*\" --public --config package.json",
+        "pkg:bundle": "node ./scripts/pkg-patch.js && cross-env NODE_ENV=production pkg ./src/server/server.bundle.js --out-path ./dist --no-bytecode --public-packages \"*\" --public --config package.json",
         "exec:bundle": "cross-env NODE_ENV=development node ./src/server/server.bundle.js",
         "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development ./foostack-linux",
 
-        "copy:pkg:bin": "mkdir pkg-bin && gh release download v3.4 -D pkg-bin/ -R vercel/pkg-fetch",
+        "copy:pkg:bin": "mkdir -p pkg-bin && gh release download v3.4 -D pkg-bin/ -R vercel/pkg-fetch",
         "copy:pkg:bin:tocache": "node ./scripts/copy-pkg-to-cache.js"
     },
     "pkg": {

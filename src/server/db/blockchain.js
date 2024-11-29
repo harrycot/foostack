@@ -5,13 +5,13 @@ const DBFileSync = require('lowdb/adapters/FileSync');
 const CONST_HASH = 'sha512';
 const CONST_HASH_ENCODING = 'base64';
 
-const cwd = require('../server').is_production ? process.cwd() : __dirname;
-
 exports.blockchain = false;
+
 exports.init = (port) => {   
-    if (!fs.existsSync(path.join(cwd, '_blockchain'))) { fs.mkdirSync(path.join(cwd, '_blockchain')) }
-    if (!fs.existsSync(path.join(cwd, `_blockchain/${port}`))) { fs.mkdirSync(path.join(cwd, `_blockchain/${port}`)) }
-    this.blockchain = require('lowdb')(new DBFileSync(path.join(cwd, `_blockchain/${port}/blockchain.json`), { defaultValue: [{ block: 0, data: "", prev: "false" }] }));
+    if (!fs.existsSync(path.join(process.env.HOME, '.foostack'))) { fs.mkdirSync(path.join(process.env.HOME, '.foostack')) }
+    if (!fs.existsSync(path.join(process.env.HOME, '.foostack/blockchain'))) { fs.mkdirSync(path.join(process.env.HOME, '.foostack/blockchain')) }
+    if (!fs.existsSync(path.join(process.env.HOME, `.foostack/blockchain/${port}`))) { fs.mkdirSync(path.join(process.env.HOME, `.foostack/blockchain/${port}`)) }
+    this.blockchain = require('lowdb')(new DBFileSync(path.join(process.env.HOME, `.foostack/blockchain/${port}/blockchain.json`), { defaultValue: [{ block: 0, data: "", prev: "false" }] }));
 }
 
 exports.new_block = (data) => {
