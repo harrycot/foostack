@@ -35,6 +35,15 @@ if (_obfuscate_node) {
 }
 
 
+const _terser_options = { // https://github.com/terser/terser/tree/v5.3.8?tab=readme-ov-file#minify-options
+    compress: {
+        drop_console: true,
+        keep_infinity: true
+    },
+    format: {
+        comments: false,
+    }
+}
 module.exports = [
     {
         name: 'web',
@@ -64,17 +73,11 @@ module.exports = [
             },
         },
         optimization: {
-            minimize: true,
+            minimize: _is_production ? true : false,
             minimizer: [
                 new TerserPlugin({
-                    minify: TerserPlugin.uglifyJsMinify,
-                    terserOptions: {}, // terserOptions is passed to uglifyjs // https://github.com/mishoo/UglifyJS#minify-options
-                    // terserOptions: {
-                    //     format: {
-                    //         comments: false,
-                    //     }
-                    // },
-                    extractComments: false,
+                    terserOptions: _terser_options,
+                    extractComments: false
                 })
             ]
         },
@@ -91,22 +94,15 @@ module.exports = [
             filename: "server.bundle.js"
         },
         node: {
-            // Need this when working with express, otherwise the build fails
             __dirname: false,   // if you don't put this, __dirname
-            __filename: false,  // and __filename return blank or /
+            __filename: false,  // and __filename return blank or /   (don't remember, maybe related to pkg)
         },
         optimization: {
-            minimize: true,
+            minimize: _is_production ? true : false,
             minimizer: [
                 new TerserPlugin({
-                    minify: TerserPlugin.uglifyJsMinify,
-                    terserOptions: {}, // terserOptions is passed to uglifyjs // https://github.com/mishoo/UglifyJS#minify-options
-                    // terserOptions: {
-                    //     format: {
-                    //         comments: false,
-                    //     }
-                    // },
-                    extractComments: false,
+                    terserOptions: _terser_options,
+                    extractComments: false
                 })
             ]
         },
