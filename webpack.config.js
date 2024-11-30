@@ -63,7 +63,16 @@ module.exports = [
                     generator: {
                         filename: 'src/web/css/styles.bundle.css',
                     },
-                    use: ["sass-loader"],
+                    use: [
+                        {
+                            loader: 'sass-loader',
+                            options: {
+                                sassOptions: {
+                                    outputStyle: 'compressed'
+                                }
+                            }
+                        }
+                    ],
                 }
             ]
         },
