@@ -1,2 +1,4 @@
-require('./body/socketio').init();
-require('./body/navigo').init();
+document.addEventListener("DOMContentLoaded", (event) => {
+    require('./body/socketio').init();
+    require('./body/navigo').init();
+});

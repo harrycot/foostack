@@ -50,10 +50,14 @@ module.exports = [
         target: 'web',
         mode: process.env.NODE_ENV,
         devtool: _is_production ? false : process.env.DEV == 'yes' ? 'eval-source-map' : false,
-        entry: ['./src/web/js/body.js', './src/web/css/styles.scss'],
+        entry: {
+            header: './src/web/js/header.js',
+            body: './src/web/js/body.js',
+            styles: './src/web/css/styles.scss'
+        },
         output: {
             path: path.resolve(__dirname),
-            filename: 'src/web/js/body.bundle.js'
+            filename: 'src/web/js/[name].bundle.js'
         },
         module: {
             rules: [

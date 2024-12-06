@@ -69,6 +69,8 @@ const handle_login = async (deserialized) => {
             const _signed = await openpgp.sign({ message: _unsigned, signingKeys: _openpgp_local_priv_obj });
             console.log(_signed);
             // { login: 'login_data_signed', data: Buffer.from(_signed).toString('base64') } --- data: { seed: '', pub: '' }
+
+            // !!! pgpconnect: add __pub__ to text to sign (is replaced by the pgpconnect public key(base64))
             socket.emit('data', await serialize(client.uuid, client.openpgpcreds, { login: 'login_data_signed', data: Buffer.from(_signed).toString('base64') }, client.serverpub));
             break;
         case 'connected':

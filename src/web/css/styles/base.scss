@@ -1,0 +1,88 @@
+// name: base.scss
+// for: body > header, main, footer > aside, section
+// modifier: body.left-panel-open body.right-panel-open
+
+//do not remove body.noscript class from html file
+body {
+    --header-height: 40px;
+    --footer-height: 24px;
+    --asides-width: 200px;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    background: tomato;
+
+    &.noscript > *:not(noscript) {
+        display: none;
+    }
+    &.login-connected {
+        background: greenyellow;
+    }
+    
+    > * {
+        &:not(main) {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        position: absolute;
+        left: 0;
+        right: 0;
+        > aside {
+            display: none;
+            position: absolute;
+            width: var(--asides-width);
+            background: rgba(0, 0, 0, 0.1);
+            &.left { left: 0; }
+            &.right { right: 0; }
+        }
+        > section {
+            position: absolute;
+            left: 0;
+            right: 0;
+        }
+    }
+    > header { 
+        top: 0;
+        height: var(--header-height);
+        > * {
+            height: var(--header-height);
+        }
+    }
+    > footer {
+        bottom: 0;
+        height: var(--footer-height);
+        > * {
+            height: var(--footer-height);
+        }
+    }
+    > main {
+        top: var(--header-height);
+        bottom: var(--footer-height);
+        > * {
+            top: 0;
+            bottom: 0;
+        }
+    }
+
+    /* DYNAMIC SPECIFICS */
+    &.left-panel-open > * {
+        > aside.left {
+            display: block;
+        }
+        > section {
+            left: var(--asides-width);
+        }
+    }
+    &.right-panel-open > * {
+        > aside.right {
+            display: block;
+        }
+        > section {
+            right: var(--asides-width);
+        }
+    }
+}

@@ -13,12 +13,14 @@ exports.is_production = process.pkg ? true : process.env.NODE_ENV == 'production
 
 
 _path_css = path.join(__dirname, 'web/css/styles.bundle.css');
+_path_js_header = path.join(__dirname, 'web/js/header.bundle.js');
 _path_js_body = path.join(__dirname, 'web/js/body.bundle.js');
 _path_html = path.join(__dirname, 'web/index.html');
 exports.http = require('node:http').createServer( (req, res) => {
     console.log(req.url);
     const _files = [
         { req: '/styles.css', path: _path_css, type: 'text/css' },
+        { req: '/header.js', path: _path_js_header, type: 'text/javascript' },
         { req: '/body.js', path: _path_js_body, type: 'text/javascript' },
     ];
     for (file of _files) {

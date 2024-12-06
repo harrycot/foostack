@@ -32,6 +32,7 @@
     "pkg": {
         "assets": [
             "src/web/index.html",
+            "src/web/js/header.bundle.js",
             "src/web/js/body.bundle.js",
             "src/web/css/styles.bundle.css"
         ]
