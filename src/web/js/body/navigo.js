@@ -1,5 +1,6 @@
 // here navigo as client web router
 import navigo from 'navigo'; // Common JS to module ES ? not important
+
 export const router = new navigo("/");
 
 export function init() {
@@ -16,3 +17,4 @@ const renderHomePage = (params) => {
 const renderSomethingPage = (params) => {
     console.log('call from navigo: renderSomethingPage');
 }
+
