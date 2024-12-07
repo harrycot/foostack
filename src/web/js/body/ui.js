@@ -4,7 +4,7 @@ exports.init = () => {
     _asides_panels_toggle();
 }
 
-const _asides_panels_toggle_last_class = { left: "left-panel-open", right: "right-panel-open" };
+const _asides_panels_toggle_last_class = { left: "", right: "" };
 const _asides_panels_toggle = () => {
     for (const pos of ["left", "right"]) {
         document.querySelector(`body > header > aside.${pos} > button.${pos}-panel-open-toggle`).addEventListener("click", () => {

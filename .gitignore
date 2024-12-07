@@ -2,6 +2,7 @@
 dist
 node_modules
 package-lock.json
+undefined
 
 src/server.bundle.js
 src/web/**/*.bundle.*

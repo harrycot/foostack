@@ -20,6 +20,7 @@ body {
     --asides-left-width: var(--default-asides-keep-width);
     --asides-right-width: var(--default-asides-keep-width);
 
+    overflow: hidden;
     background: tomato;
 
     &.login-connected {
@@ -34,7 +35,42 @@ body {
     
     > * {
         &:not(main) { // header and footer
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            > * {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+
+                //justify-content: flex-start; adjust direction
+                
+                align-items: center;
+
+                overflow-x: scroll;
+                overflow-y: hidden;
+                white-space: nowrap; // https://developer.mozilla.org/en-US/docs/Web/CSS/white-space
+                &.left > * {
+                    &:first-child {
+                        width: var(--asides-keep-width);
+                        min-width: var(--asides-keep-width);
+                    }
+                    &:not(:first-child) {
+                        display: none;
+                    }
+                }
+                &.right > * {
+                    &:last-child {
+                        width: var(--asides-keep-width);
+                        min-width: var(--asides-keep-width);
+                    }
+                    &:not(:last-child) {
+                        display: none;
+                    }
+                }
+                > * {
+                    position: relative;
+                    height: 100%;
+                }
+            }
         }
         position: absolute;
         left: 0;
@@ -77,12 +113,77 @@ body {
         > * {
             top: 0;
             bottom: 0;
+            > * {
+                &:not(main) {
+                    background: rgba(0, 0, 0, 0.1);
+
+                    // DUPLICATE // DUPLICATE // DUPLICATE
+                    display: flex;
+                    flex-direction: row;
+                    flex-wrap: nowrap;
+
+                    //justify-content: flex-start; adjust direction
+                    
+                    align-items: center;
+
+                    overflow-x: scroll;
+                    overflow-y: hidden;
+                    white-space: nowrap; // https://developer.mozilla.org/en-US/docs/Web/CSS/white-space
+
+                    > * {
+                        position: relative;
+                        height: 100%;
+                    }
+                    // DUPLICATE // DUPLICATE // DUPLICATE
+                }
+                position: absolute;
+            }
+            &.left > * {
+                    width: var(--asides-left-width);
+            }
+            &.right > * {
+                    width: var(--asides-right-width);
+            }
+            > header {
+                top: 0;
+                height: var(--sub-header-height);
+            }
+            > footer {
+                bottom: 0;
+                height: var(--sub-footer-height);
+            }
+            > main {
+                top: var(--sub-header-height);
+                bottom: var(--sub-footer-height);
+            }
         }
-        > main { // modifier
+        > main {
             left: 0;
             right: 0;
+            > * {
+                left: 0;
+                right: 0;
+            }
         }
         > aside {
+            &.left > *:not(main) > * {
+                &:first-child {
+                    width: var(--asides-keep-width);
+                    min-width: var(--asides-keep-width);
+                }
+                &:not(:first-child) {
+                    display: none;
+                }
+            }
+            &.right > *:not(main) > * {
+                &:last-child {
+                    width: var(--asides-keep-width);
+                    min-width: var(--asides-keep-width);
+                }
+                &:not(:last-child) {
+                    display: none;
+                }
+            }
             &.left {
                 left: calc(var(--asides-keep-width) * -1);
             }
@@ -97,6 +198,11 @@ body {
     &.left-panel-open {
         --asides-left-width: var(--default-asides-left-width);
         > * {
+            &:not(main) > aside {
+                &.left > *:not(:first-child) {
+                    display: inline-block;
+                }
+            }
             > aside.left {
                 left: 0;
             }
@@ -104,15 +210,30 @@ body {
                 left: var(--asides-left-width);
             }
         }
+        > main {
+            > aside.left > *:not(main) > *:not(:first-child) {
+                display: inline-block;
+            }
+        }
     }
     &.right-panel-open {
         --asides-right-width: var(--default-asides-right-width);
         > * {
+            &:not(main) > aside {
+                &.right > *:not(:last-child) {
+                    display: inline-block;
+                }
+            }
             > aside.right {
                 right: 0;
             }
             > main {
                 right: var(--asides-right-width);
+            }
+        }
+        > main {
+            > aside.right > *:not(main) > *:not(:first-child) {
+                display: inline-block;
             }
         }
     }
