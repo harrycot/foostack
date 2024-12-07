@@ -1,3 +1,3 @@
 document.addEventListener("DOMContentLoaded", (event) => {
-    document.getElementsByTagName("body")[0].classList.remove("noscript");
+    document.body.classList.remove("noscript");
 });

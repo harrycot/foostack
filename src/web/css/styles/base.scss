@@ -11,14 +11,17 @@ html, body {
     margin: 0;
     padding: 0;
 }
+html > head {
+    display: none;
+}
 
 //do not remove body.noscript class from html file
 body {
-    --header-height: 40px;
-    --footer-height: 24px;
-    --asides-width: 200px;
+    --asides-left-width: var(--default-asides-keep-width);
+    --asides-right-width: var(--default-asides-keep-width);
 
     background: tomato;
+
     &.login-connected {
         background: greenyellow;
     }
@@ -30,44 +33,103 @@ body {
     }
     
     > * {
+        &:not(main) { // header and footer
+            background: rgba(0, 0, 0, 0.1);
+        }
         position: absolute;
-        top: 0;
-        bottom: 0;
-        > header {
-            top: 0;
-            height: var(--header-height);
-        }
-        > main {
-            top: var(--header-height);
-            bottom: var(--footer-height);
-        }
-        > footer {
-            bottom: 0;
-            height: var(--footer-height);
-        }
-        > * { position: absolute; }
-    }
-    > aside {
-        display: none;                 // modifier
-        width: var(--asides-width);
-        &.left { left: 0; }
-        &.right { right: 0; }
-        > * { width: var(--asides-width); }
-    }
-    > main {
         left: 0;
         right: 0;
-        > * { left: 0; right: 0; }
+        > aside {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.1);
+            &.left {
+                left: 0;
+                width: var(--asides-left-width);
+            }
+            &.right {
+                right: 0;
+                width: var(--asides-right-width);
+            }
+        }
+        > main {
+            position: absolute;
+            left: var(--asides-left-width);
+            right: var(--asides-right-width);
+        }
+    }
+    > header { 
+        top: 0;
+        height: var(--header-height);
+        > * {
+            height: var(--header-height);
+        }
+    }
+    > footer {
+        bottom: 0;
+        height: var(--footer-height);
+        > * {
+            height: var(--footer-height);
+        }
+    }
+    > main {
+        top: var(--header-height);
+        bottom: var(--footer-height);
+        > * {
+            top: 0;
+            bottom: 0;
+        }
+        > main { // modifier
+            left: 0;
+            right: 0;
+        }
+        > aside {
+            &.left {
+                left: calc(var(--asides-keep-width) * -1);
+            }
+            &.right {
+                right: calc(var(--asides-keep-width) * -1);
+            }
+        }
     }
 
-    // modifier
+
+    /* DYNAMIC SPECIFICS */
     &.left-panel-open {
-        > aside.left { display: block; }
-        > main { left: var(--asides-width); }
+        --asides-left-width: var(--default-asides-left-width);
+        > * {
+            > aside.left {
+                left: 0;
+            }
+            > main {
+                left: var(--asides-left-width);
+            }
+        }
     }
     &.right-panel-open {
-        > aside.right { display: block; }
-        > main { right: var(--asides-width); }
+        --asides-right-width: var(--default-asides-right-width);
+        > * {
+            > aside.right {
+                right: 0;
+            }
+            > main {
+                right: var(--asides-right-width);
+            }
+        }
     }
-
+    &.left-panel-mini-open > main {
+        > aside.left {
+            left: 0;
+        }
+        > main {
+            left: var(--asides-left-width);
+        }
+    }
+    &.right-panel-mini-open > main {
+        > aside.right {
+            right: 0;
+        }
+        > main {
+            right: var(--asides-right-width);
+        }
+    }
 }

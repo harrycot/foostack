@@ -6,23 +6,27 @@
         <script src="/header.js"></script>
         <title>TITLE</title>
     </head>
-    <body class="noscript left-panel-open right-panel-open">
+    <body class="noscript left-panel-mini-open right-panel-mini-open">
         <noscript>Your browser does not support JavaScript</noscript>
-        <aside class="left">
-            <header></header>
+        <header>
+            <aside class="left">
+                <button class="left-panel-open-toggle">Left</button>
+            </aside>
+            <aside class="right">
+                <button class="right-panel-open-toggle">Right</button>
+            </aside>
             <main></main>
-            <footer></footer>
-        </aside>
-        <aside class="right">
-            <header></header>
-            <main></main>
-            <footer></footer>
-        </aside>
+        </header>
         <main>
-            <header></header>
+            <aside class="left"></aside>
+            <aside class="right"></aside>
             <main></main>
-            <footer></footer>
         </main>
+        <footer>
+            <aside class="left"></aside>
+            <aside class="right"></aside>
+            <main></main>
+        </footer>
         <script src="/body.js"></script>
     </body>
 </html>

@@ -1,0 +1,14 @@
+
+:root {
+    --default-header-height: 40px;
+    --default-footer-height: 24px;
+    --default-asides-left-width: 200px;
+    --default-asides-right-width: 200px;
+    --default-asides-keep-width: 40px;
+
+    --header-height: var(--default-header-height);
+    --footer-height: var(--default-footer-height);
+    --asides-left-width: var(--default-asides-left-width);
+    --asides-right-width: var(--default-asides-right-width);
+    --asides-keep-width: var(--default-asides-keep-width);
+}
