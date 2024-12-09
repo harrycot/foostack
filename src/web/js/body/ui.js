@@ -33,10 +33,16 @@ const _document_asides_panels_toggle = () => {
                 document.body.classList.remove(`${pos}-panel-open`);
                 _document_asides_panels_toggle_last_class[pos] = `${pos}-panel-open`;
             } else if (document.body.classList.contains(`${pos}-panel-mini-open`)) {
-                if (_document_asides_panels_toggle_last_class[pos] == `${pos}-panel-open`) {
+                if (_document_asides_panels_toggle_last_class[pos] == `${pos}-panel-open`) { // from full to none direction
                     document.body.classList.remove(`${pos}-panel-mini-open`);
-                } else {
+                    const _icon_toggler = document.querySelector(`body > header > aside.${pos} > .${pos}-panel-open-toggle > i`);
+                    _icon_toggler.classList.remove(`push-chevron-${pos == "left" ? "left" : "right"}-square`);
+                    _icon_toggler.classList.add(`push-chevron-${pos == "left" ? "right" : "left"}-square`);
+                } else { // from none to full direction
                     document.body.classList.add(`${pos}-panel-open`);
+                    const _icon_toggler = document.querySelector(`body > header > aside.${pos} > .${pos}-panel-open-toggle > i`);
+                    _icon_toggler.classList.remove(`push-chevron-${pos == "left" ? "right" : "right"}-square`);
+                    _icon_toggler.classList.add(`push-chevron-${pos == "left" ? "left" : "right"}-square`);
                 }
             } else {
                 document.body.classList.add(`${pos}-panel-mini-open`);
