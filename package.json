@@ -25,7 +25,7 @@
         "pkg:bundle": "node ./scripts/pkg-patch.js && cross-env NODE_ENV=production pkg ./src/server.bundle.js --out-path ./dist --no-bytecode --public-packages \"*\" --public --config package.json",
         "exec:bundle": "cross-env NODE_ENV=development node ./src/server.bundle.js",
         "exec:pkg:bundle": "cd dist && cross-env NODE_ENV=development ./foostack-linux",
-        
+
         "copy:pkg:bin": "mkdir -p pkg-bin && gh release download v3.4 -D pkg-bin/ -R vercel/pkg-fetch",
         "copy:pkg:bin:tocache": "node ./scripts/copy-pkg-to-cache.js"
     },

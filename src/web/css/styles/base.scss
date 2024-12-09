@@ -16,6 +16,16 @@ html > head {
     display: none;
 }
 
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+.flex-1-2 { flex: 1 2; }
+.flex-2-1 { flex: 2 1; }
+.flex-0-min { flex: 0 0 min-content; } // https://developer.mozilla.org/fr/docs/Web/CSS/flex-basis
+.flex-1-min { flex: 1 0 min-content; }
+.flex-2-min { flex: 2 0 min-content; }
+.flex-1-2-min { flex: 1 2 min-content; }
+.flex-2-1-min { flex: 2 1 min-content; }
+
 //do not remove body.noscript class from html file
 body {
     --asides-left-width: var(--default-asides-keep-width);
@@ -71,6 +81,10 @@ body {
                         }
                     }
                     > nav {
+                        &::before {
+                            content: '';
+                            width: 100%;
+                        }
                         left: var(--asides-keep-width);
                         right: 0;
                     }
@@ -87,6 +101,10 @@ body {
                         }
                     }
                     > nav {
+                        &::after {
+                            content: '';
+                            width: 100%;
+                        }
                         left: 0;
                         right: var(--asides-keep-width);
                     }
@@ -110,6 +128,10 @@ body {
             &.left > * {
                 &:not(main) {
                     > nav {
+                        &::before {
+                            content: '';
+                            width: 100%;
+                        }
                         left: var(--asides-keep-width);
                         right: 0;
                     }
@@ -119,6 +141,10 @@ body {
             &.right > * {
                 &:not(main) {
                     > nav {
+                        &::after {
+                            content: '';
+                            width: 100%;
+                        }
                         left: 0;
                         right: var(--asides-keep-width);
                     }
@@ -209,10 +235,13 @@ body {
     }
 
     // NAV
+    > *:not(main) > * > nav > section,
+    > main > * > *:not(main) > nav > section,
     > *:not(main) > * > nav,
     > main > * > *:not(main) > nav {
-        position: absolute;
-
+        &:not(section) {
+            position: absolute;
+        }
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -229,38 +258,34 @@ body {
         left: 0;
         right: 0;
         > section {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            overflow-x: scroll;
-            overflow-y: hidden;
-            white-space: nowrap;
-            flex: 1;
-            &:first-child {
-                &::after { // https://stackoverflow.com/a/62288570
-                    content: '';
-                    width: 100%;
-                }
-                text-align: left;
-            }
             &:not(:first-child):not(:last-child) {
-                &::before,
-                &::after {
-                    content: '';
+                > * {
                     width: 100%;
                 }
-                text-align: center;
             }
             &:last-child {
                 &::before {
                     content: '';
                     width: 100%;
                 }
-                text-align: right;
             }
-            > * {
-                position: relative;
-                height: 100%;
+        }
+        &.flex-section-equals {
+            > section {
+                //flex: 1;
+                &:first-child {
+                    &::after { // https://stackoverflow.com/a/62288570
+                        content: '';
+                        width: 100%;
+                    }
+                }
+                &:not(:first-child):not(:last-child) {
+                    &::before,
+                    &::after {
+                        content: '';
+                        width: 100%;
+                    }
+                }
             }
         }
     }
