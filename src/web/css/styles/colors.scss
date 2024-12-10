@@ -1,0 +1,142 @@
+// name: base.scss
+// for: global colors
+// modifier: html.theme-light .color-
+
+html {
+    &.theme-light {
+        // from #000 to #FFF
+        .color-0 { color: #000; }
+        .color-1 { color: #111; }
+        .color-2 { color: #222; }
+        .color-3 { color: #333; }
+        .color-4 { color: #444; }
+        .color-5 { color: #555; }
+        .color-6 { color: #666; }
+        .color-7 { color: #777; }
+        .color-8 { color: #888; }
+        .color-9 { color: #999; }
+        .color-10 { color: #AAA; }
+        .color-11 { color: #BBB; }
+        .color-12 { color: #CCC; }
+        .color-13 { color: #DDD; }
+        .color-14 { color: #EEE; }
+        .color-15 { color: #FFF; }
+
+        .icon-color-0 { // from #000 to #FFF
+            filter: brightness(0) saturate(100%) invert(0%) sepia(8%) saturate(7469%) hue-rotate(355deg) brightness(90%) contrast(110%);
+        }
+        .icon-color-1 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(19%) saturate(2650%) hue-rotate(322deg) brightness(65%) contrast(87%);
+        }
+        .icon-color-2 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(10%) saturate(5%) hue-rotate(321deg) brightness(92%) contrast(73%);
+        }
+        .icon-color-3 {
+            filter: brightness(0) saturate(100%) invert(13%) sepia(0%) saturate(5329%) hue-rotate(65deg) brightness(91%) contrast(79%);
+        }
+        .icon-color-4 {
+            filter: brightness(0) saturate(100%) invert(26%) sepia(1%) saturate(0%) hue-rotate(141deg) brightness(92%) contrast(90%);
+        }
+        .icon-color-5 {
+            filter: brightness(0) saturate(100%) invert(31%) sepia(1%) saturate(3847%) hue-rotate(21deg) brightness(86%) contrast(71%);
+        }
+        .icon-color-6 {
+            filter: brightness(0) saturate(100%) invert(54%) sepia(0%) saturate(5405%) hue-rotate(350deg) brightness(78%) contrast(98%);
+        }
+        .icon-color-7 {
+            filter: brightness(0) saturate(100%) invert(46%) sepia(0%) saturate(16%) hue-rotate(164deg) brightness(100%) contrast(85%);
+        }
+        .icon-color-8 {
+            filter: brightness(0) saturate(100%) invert(57%) sepia(1%) saturate(1053%) hue-rotate(92deg) brightness(94%) contrast(90%);
+        }
+        .icon-color-9 {
+            filter: brightness(0) saturate(100%) invert(75%) sepia(0%) saturate(46%) hue-rotate(150deg) brightness(80%) contrast(97%);
+        }
+        .icon-color-10 {
+            filter: brightness(0) saturate(100%) invert(66%) sepia(26%) saturate(15%) hue-rotate(314deg) brightness(98%) contrast(89%);
+        }
+        .icon-color-11 {
+            filter: brightness(0) saturate(100%) invert(84%) sepia(2%) saturate(15%) hue-rotate(338deg) brightness(87%) contrast(96%);
+        }
+        .icon-color-12 {
+            filter: brightness(0) saturate(100%) invert(73%) sepia(44%) saturate(0%) hue-rotate(187deg) brightness(97%) contrast(110%);
+        }
+        .icon-color-13 {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(6959%) hue-rotate(308deg) brightness(122%) contrast(73%);
+        }
+        .icon-color-14 {
+            filter: brightness(0) saturate(100%) invert(99%) sepia(3%) saturate(103%) hue-rotate(229deg) brightness(113%) contrast(87%);
+        }
+        .icon-color-15 {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7499%) hue-rotate(207deg) brightness(103%) contrast(101%);
+        }
+    }
+    &:not(.theme-light) {
+        // from #FFF to #000
+        .color-0 { color: #FFF; }
+        .color-1 { color: #EEE; }
+        .color-2 { color: #DDD; }
+        .color-3 { color: #CCC; }
+        .color-4 { color: #BBB; }
+        .color-5 { color: #AAA; }
+        .color-6 { color: #999; }
+        .color-7 { color: #888; }
+        .color-8 { color: #777; }
+        .color-9 { color: #666; }
+        .color-10 { color: #555; }
+        .color-11 { color: #444; }
+        .color-12 { color: #333; }
+        .color-13 { color: #222; }
+        .color-14 { color: #111; }
+        .color-15 { color: #000; }
+
+        .icon-color-0 { // from #FFF to #000
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7499%) hue-rotate(207deg) brightness(103%) contrast(101%);
+        }
+        .icon-color-1 {
+            filter: brightness(0) saturate(100%) invert(99%) sepia(3%) saturate(103%) hue-rotate(229deg) brightness(113%) contrast(87%);
+        }
+        .icon-color-2 {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(6959%) hue-rotate(308deg) brightness(122%) contrast(73%);
+        }
+        .icon-color-3 {
+            filter: brightness(0) saturate(100%) invert(73%) sepia(44%) saturate(0%) hue-rotate(187deg) brightness(97%) contrast(110%);
+        }
+        .icon-color-4 {
+            filter: brightness(0) saturate(100%) invert(84%) sepia(2%) saturate(15%) hue-rotate(338deg) brightness(87%) contrast(96%);
+        }
+        .icon-color-5 {
+            filter: brightness(0) saturate(100%) invert(66%) sepia(26%) saturate(15%) hue-rotate(314deg) brightness(98%) contrast(89%);
+        }
+        .icon-color-6 {
+            filter: brightness(0) saturate(100%) invert(75%) sepia(0%) saturate(46%) hue-rotate(150deg) brightness(80%) contrast(97%);
+        }
+        .icon-color-7 {
+            filter: brightness(0) saturate(100%) invert(57%) sepia(1%) saturate(1053%) hue-rotate(92deg) brightness(94%) contrast(90%);
+        }
+        .icon-color-8 {
+            filter: brightness(0) saturate(100%) invert(46%) sepia(0%) saturate(16%) hue-rotate(164deg) brightness(100%) contrast(85%);
+        }
+        .icon-color-9 {
+            filter: brightness(0) saturate(100%) invert(54%) sepia(0%) saturate(5405%) hue-rotate(350deg) brightness(78%) contrast(98%);
+        }
+        .icon-color-10 {
+            filter: brightness(0) saturate(100%) invert(31%) sepia(1%) saturate(3847%) hue-rotate(21deg) brightness(86%) contrast(71%);
+        }
+        .icon-color-11 {
+            filter: brightness(0) saturate(100%) invert(26%) sepia(1%) saturate(0%) hue-rotate(141deg) brightness(92%) contrast(90%);
+        }
+        .icon-color-12 {
+            filter: brightness(0) saturate(100%) invert(13%) sepia(0%) saturate(5329%) hue-rotate(65deg) brightness(91%) contrast(79%);
+        }
+        .icon-color-13 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(10%) saturate(5%) hue-rotate(321deg) brightness(92%) contrast(73%);
+        }
+        .icon-color-14 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(19%) saturate(2650%) hue-rotate(322deg) brightness(65%) contrast(87%);
+        }
+        .icon-color-15 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(8%) saturate(7469%) hue-rotate(355deg) brightness(90%) contrast(110%);
+        }
+    }
+}
