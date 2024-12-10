@@ -9,7 +9,11 @@
     --default-asides-left-width: 200px;
     --default-asides-right-width: 200px;
     --default-asides-keep-width: 40px;
+    --default-rgb-light: 255, 255, 255;
+    --default-rgb-dark: 0, 0, 0;
 
+    --color-rgb: var(--default-rgb-light);
+    --background-rgb: var(--default-rgb-dark);
     --header-height: var(--default-header-height);
     --footer-height: var(--default-footer-height);
     --sub-header-height: var(--default-sub-header-height);

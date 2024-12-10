@@ -1,19 +1,43 @@
 // name: base.scss
-// for: body > header, main, footer > aside, section
+// for: html > body > header, main, footer > aside, section
 // modifier: body.left-panel-open body.right-panel-open
 //           body.left-panel-mini-open body.right-panel-mini-open
+//           html.theme-light
 
+* { // reset
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    background-repeat: no-repeat;
+    text-decoration: none;
+    display: block; // https://meyerweb.com/eric/tools/css/reset/reset.css
+    font-size: 100%;
+    line-height: 1;
+    list-style: none;
+    quotes: none;
+    border-collapse: collapse;
+	border-spacing: 0;
+}
 html, body {
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    margin: 0;
-    padding: 0;
 }
-html > head {
-    display: none;
+html {
+    &.theme-light {
+        --color-rgb: var(--default-rgb-dark);
+        --background-rgb: var(--default-rgb-light);
+    }
+    * {
+        color: rgba(var(--color-rgb), 0.8);
+    }
+    background: tomato;
+    > head {
+        display: none;
+    }
 }
 
 .flex-1 { flex: 1; }
@@ -32,7 +56,7 @@ body {
     --asides-right-width: var(--default-asides-keep-width);
 
     overflow: hidden;
-    background: tomato;
+    background: rgba(var(--background-rgb), 0.5);
     &.login-connected {
         background: greenyellow;
     }
@@ -50,7 +74,7 @@ body {
         right: 0;
         > aside {
             position: absolute;
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(var(--background-rgb), 0.1);
             &.left {
                 left: 0;
                 width: var(--asides-left-width);
@@ -67,7 +91,7 @@ body {
         }
 
         &:not(main) { // header and footer
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(var(--background-rgb), 0.2);
             > * {
                 &.left {
                     > * {
@@ -121,7 +145,7 @@ body {
             bottom: 0;
             > * {
                 &:not(main) {
-                    background: rgba(0, 0, 0, 0.1);
+                    background: rgba(var(--background-rgb), 0.1);
                 }
                 position: absolute;
             }
