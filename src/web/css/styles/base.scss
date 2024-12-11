@@ -68,7 +68,6 @@ html {
 .flex-1-2-min { flex: 1 2 min-content; }
 .flex-2-1-min { flex: 2 1 min-content; }
 
-//do not remove body.noscript class from html file
 body {
     --asides-left-width: var(--default-asides-keep-width);
     --asides-right-width: var(--default-asides-keep-width);
@@ -400,6 +399,63 @@ body {
         }
         > main {
             right: var(--asides-right-width);
+        }
+    }
+}
+
+
+// noscript only media queries, else it's handled by js // https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia
+@media only screen and (max-width: 1024px) {
+    html {
+        &.noscript {
+            body {
+                > *:not(main) { // header and footer
+                    > aside {
+                        --asides-left-width: var(--default-asides-keep-width);
+                        --asides-right-width: var(--default-asides-keep-width);
+                    }
+                }
+                > main {
+                    aside {
+                        --asides-left-width: var(--default-asides-keep-width);
+                        --asides-right-width: var(--default-asides-keep-width);
+                    }
+                    > main {
+                        left: 0;
+                        right: 0;
+                    }
+                }
+            }
+        }
+    }
+}
+@media only screen and (max-width: 720px) {
+    html {
+        &.noscript {
+            body {
+                > *:not(main) { // header and footer
+                    > aside {
+                        --asides-left-width: var(--default-asides-keep-width);
+                        --asides-right-width: var(--default-asides-keep-width);
+                    }
+                }
+                > main {
+                    aside {
+                        --asides-left-width: var(--default-asides-keep-width);
+                        --asides-right-width: var(--default-asides-keep-width);
+                        &.left {
+                            left: calc(var(--asides-keep-width)* -1);
+                        }
+                        &.right {
+                            right: calc(var(--asides-keep-width)* -1);
+                        }
+                    }
+                    > main {
+                        left: 0;
+                        right: 0;
+                    }
+                }
+            }
         }
     }
 }
