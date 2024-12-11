@@ -5,6 +5,17 @@ exports.init = () => {
     _document_asides_panels_toggle();
     _document_bind_vertical_as_horizontal();
     _document_init_scroll_right();
+    _document_theme_toggle();
+}
+
+const _document_theme_toggle = () => {
+    document.querySelector("body > footer > aside.left > button > i").addEventListener("click", (event) => {
+        if (document.documentElement.classList.contains("theme-light")) {
+            document.documentElement.classList.remove("theme-light");
+        } else {
+            document.documentElement.classList.add("theme-light");
+        }
+    });
 }
 
 const _document_init_scroll_right = (elements_array) => {
@@ -28,21 +39,17 @@ const _document_asides_panels_toggle_last_class = {};
 const _document_asides_panels_toggle = () => {
     for (const pos of ["left", "right"]) {
         _document_asides_panels_toggle_last_class[pos] = "";
-        document.querySelector(`body > header > aside.${pos} .${pos}-panel-open-toggle`).addEventListener("click", () => {
+        document.querySelector(`body > header > aside.${pos} > .${pos}-panel-open-toggle > i`).addEventListener("click", (event) => {
             if (document.body.classList.contains(`${pos}-panel-mini-open`) && document.body.classList.contains(`${pos}-panel-open`)) {
                 document.body.classList.remove(`${pos}-panel-open`);
                 _document_asides_panels_toggle_last_class[pos] = `${pos}-panel-open`;
             } else if (document.body.classList.contains(`${pos}-panel-mini-open`)) {
                 if (_document_asides_panels_toggle_last_class[pos] == `${pos}-panel-open`) { // from full to none direction
                     document.body.classList.remove(`${pos}-panel-mini-open`);
-                    const _icon_toggler = document.querySelector(`body > header > aside.${pos} > .${pos}-panel-open-toggle > i`);
-                    _icon_toggler.classList.remove(`push-chevron-${pos == "left" ? "left" : "right"}-square`);
-                    _icon_toggler.classList.add(`push-chevron-${pos == "left" ? "right" : "left"}-square`);
+                    event.target.classList.replace(`icon-push-chevron-${pos == "left" ? "left" : "right"}-square`, `icon-push-chevron-${pos == "left" ? "right" : "left"}-square`);
                 } else { // from none to full direction
                     document.body.classList.add(`${pos}-panel-open`);
-                    const _icon_toggler = document.querySelector(`body > header > aside.${pos} > .${pos}-panel-open-toggle > i`);
-                    _icon_toggler.classList.remove(`push-chevron-${pos == "left" ? "right" : "right"}-square`);
-                    _icon_toggler.classList.add(`push-chevron-${pos == "left" ? "left" : "right"}-square`);
+                    event.target.classList.replace(`icon-push-chevron-${pos == "left" ? "right" : "right"}-square`, `icon-push-chevron-${pos == "left" ? "left" : "right"}-square`);
                 }
             } else {
                 document.body.classList.add(`${pos}-panel-mini-open`);

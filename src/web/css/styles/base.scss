@@ -30,13 +30,31 @@ html {
     &.theme-light {
         --color-rgb: var(--default-rgb-dark);
         --background-rgb: var(--default-rgb-light);
+        
+        background: rgba(127.5, 127.5, 127.5, 1); // let user change this
     }
-    background: tomato;
+    &:not(.theme-light) {
+        background: rgba(127.5, 127.5, 127.5, 1); // let user change this
+    }
     * {
         color: rgba(var(--color-rgb), 0.9);
     }
-    > head {
+    > head,
+    &:not(.noscript) noscript {
         display: none;
+    }
+    &.noscript > body > main > main > main {
+        > *:not(noscript) {
+            display: none;
+        }
+        > noscript {
+            position: absolute;
+            left: 0;
+            right: 0;
+            text-align: center;
+            top: 50%;
+            transform: translateY(-50%);
+        }
     }
 }
 
@@ -56,16 +74,9 @@ body {
     --asides-right-width: var(--default-asides-keep-width);
 
     overflow: hidden;
-    background: rgba(var(--background-rgb), 0.5);
+    background: rgba(var(--background-rgb), 0.6);
     &.login-connected {
         background: greenyellow;
-    }
-
-    &.noscript > *:not(noscript) {
-        display: none;
-    }
-    &:not(.noscript) > noscript {
-        display: none;
     }
     
     > * {

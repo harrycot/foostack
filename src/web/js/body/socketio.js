@@ -8,6 +8,7 @@ const client = { uuid: false, openpgpcreds: false, serverpub: false }
 
 exports.init = () => {
     socket.on('connect', async () => {
+        document.querySelector("body > footer > aside.right > button > i").classList.replace("icon-color-red", "icon-color-green");
         console.log(socket.io.engine.id);
         client.uuid = require('uuid').v5('web', require('uuid').v4());
         client.openpgpcreds = await require('../../../common/crypto').openpgp.generate(client.uuid, `${client.uuid}@test.local`);
@@ -49,7 +50,8 @@ exports.init = () => {
 
     socket.on('disconnect', () => {
         console.log('  => Disconnected');
-        document.getElementsByTagName('body')[0].classList.remove('login-connected');
+        document.querySelector("body > footer > aside.right > button > i").classList.replace("icon-color-green", "icon-color-red");
+        document.querySelector("body > footer > aside.right > button > i").classList.replace("icon-color-blue", "icon-color-red");
     });
 }
 
@@ -75,11 +77,11 @@ const handle_login = async (deserialized) => {
             break;
         case 'connected':
             console.log('  => Connected');
-            document.getElementsByTagName('body')[0].classList.add('login-connected');
+            document.querySelector("body > footer > aside.right > button > i").classList.replace("icon-color-green", "icon-color-blue");
             break;
         case 'disconnected':
             console.log('  => Disconnected');
-            document.getElementsByTagName('body')[0].classList.remove('login-connected');
+            document.querySelector("body > footer > aside.right > button > i").classList.replace("icon-color-blue", "icon-color-green");
             break;
     
         default:
