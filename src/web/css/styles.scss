@@ -1,9 +1,20 @@
 @import "styles/vars.scss";
+// for: global css variables
+
+@import "styles/colors.scss";
+// for: global colors
+// modifier: html.theme-light .color-
 
 @import "styles/base.scss";
-// for: body > header, main, footer > aside, section
-// modifier: body.left-panel-open body.right-panel-open
+// for: html > body > header, main, footer > aside, section
+// modifier: html.theme-light
+//           body.left-panel-open body.right-panel-open
+//           body.left-panel-mini-open body.right-panel-mini-open
 
+@import "styles/buttons.scss";
+// for: global buttons
+// modifier: 
 
-
-
+@import "styles/icons.scss";
+// for: global icons
+// modifier: html.theme-light .icon-color-

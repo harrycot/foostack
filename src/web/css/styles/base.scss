@@ -1,47 +1,145 @@
 // name: base.scss
-// for: body > header, main, footer > aside, section
+// for: html > body > header, main, footer > aside, section
 // modifier: body.left-panel-open body.right-panel-open
+//           body.left-panel-mini-open body.right-panel-mini-open
+//           html.theme-light
 
+* { // reset
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    background-repeat: no-repeat;
+    text-decoration: none;
+    display: block; // https://meyerweb.com/eric/tools/css/reset/reset.css
+    font-size: 100%;
+    line-height: 1;
+    list-style: none;
+    quotes: none;
+    border-collapse: collapse;
+	border-spacing: 0;
+}
 html, body {
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    margin: 0;
-    padding: 0;
 }
-html > head {
-    display: none;
+html {
+    &.theme-light {
+        --color-rgb: var(--default-rgb-dark);
+        --background-rgb: var(--default-rgb-light);
+        
+        background: rgba(127.5, 127.5, 127.5, 1); // let user change this
+    }
+    &:not(.theme-light) {
+        background: rgba(127.5, 127.5, 127.5, 1); // let user change this
+    }
+    * {
+        color: rgba(var(--color-rgb), 0.9);
+    }
+    > head,
+    &:not(.noscript) noscript {
+        display: none;
+    }
+    &.noscript > body > main > main > main {
+        > *:not(noscript) {
+            display: none;
+        }
+        > noscript {
+            position: absolute;
+            left: 0;
+            right: 0;
+            text-align: center;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
 }
+
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+.flex-1-2 { flex: 1 2; }
+.flex-2-1 { flex: 2 1; }
+.flex-0-min { flex: 0 0 min-content; } // https://developer.mozilla.org/fr/docs/Web/CSS/flex-basis
+.flex-1-min { flex: 1 0 min-content; }
+.flex-2-min { flex: 2 0 min-content; }
+.flex-1-2-min { flex: 1 2 min-content; }
+.flex-2-1-min { flex: 2 1 min-content; }
 
 //do not remove body.noscript class from html file
 body {
     --asides-left-width: var(--default-asides-keep-width);
     --asides-right-width: var(--default-asides-keep-width);
 
-    background: tomato;
-
+    overflow: hidden;
+    background: rgba(var(--background-rgb), 0.6);
     &.login-connected {
         background: greenyellow;
     }
-    &.noscript > *:not(noscript) { // hide body > *(except noscript) if body contains noscript class
-        display: none;
-    }
-    &:not(.noscript) > noscript { // hide body > noscript if body doesn't contains noscript class
-        display: none;
-    }
     
     > * {
-        &:not(main) { // header and footer
-            background: rgba(0, 0, 0, 0.1);
-        }
+        &:not(main) { // body > header , footer
+            background: rgba(var(--background-rgb), 0.2);
+            > * {
+                &:not(main) { // body > header , footer > aside
+                    > * {
+                        &:first-child {
+                            position: absolute;
+                            width: var(--asides-keep-width);
+                            background: rgba(var(--background-rgb), 0.1);
+                        }
+                        &:not(:first-child) {
+                            display: none;
+                        }
+                    }
+                }
+                &.left { // body > header , footer > aside.left
+                    border-right: 1px solid rgba(var(--background-rgb), 0.1);
+                    > * {
+                        &:first-child {
+                            left: 0;
+                            border-right: 1px solid rgba(var(--background-rgb), 0.1);
+                        }
+                    }
+                    > nav {
+                        &::before {
+                            content: '';
+                            width: 100%;
+                        }
+                        left: var(--asides-keep-width);
+                        right: 0;
+                    }
+                }
+                &.right { // body > header , footer > aside.right
+                    border-left: 1px solid rgba(var(--background-rgb), 0.1);
+                    > * {
+                        &:first-child {
+                            right: 0;
+                            border-left: 1px solid rgba(var(--background-rgb), 0.1);
+                        }
+                    }
+                    > nav {
+                        &::after {
+                            content: '';
+                            width: 100%;
+                        }
+                        left: 0;
+                        right: var(--asides-keep-width);
+                    }
+                }
+                
+            }
+        } // END body > *:not(main)
+
+        // body > *
         position: absolute;
         left: 0;
         right: 0;
         > aside {
             position: absolute;
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(var(--background-rgb), 0.1);
             &.left {
                 left: 0;
                 width: var(--asides-left-width);
@@ -56,38 +154,190 @@ body {
             left: var(--asides-left-width);
             right: var(--asides-right-width);
         }
+    } // END body > *
+    > main { // body > main
+        top: var(--header-height);
+        bottom: var(--footer-height);
+        > * {
+            &:not(main) { // body > main > aside
+                &.left { // body > main > aside.left
+                    left: calc(var(--asides-keep-width) * -1);
+                    > * {
+                        &:not(main) { // body > main > aside.left > header , footer
+                            > * {
+                                &:first-child {
+                                    left: 0;
+                                    border-right: 1px solid rgba(var(--background-rgb), 0.1);
+                                }
+                            }
+                            > nav {
+                                &::before {
+                                    content: '';
+                                    width: 100%;
+                                }
+                                left: var(--asides-keep-width);
+                                right: 0;
+                            }
+                        }
+                        border-right: 1px solid rgba(var(--background-rgb), 0.1);
+                        width: var(--asides-left-width);
+                    }
+                }
+                &.right { // body > main > aside.right
+                    right: calc(var(--asides-keep-width) * -1);
+                    > * {
+                        &:not(main) {  // body > main > aside.right > header , footer
+                            > * {
+                                &:first-child {
+                                    right: 0;
+                                    border-left: 1px solid rgba(var(--background-rgb), 0.1);
+                                }
+                            }
+                            > nav {
+                                &::after {
+                                    content: '';
+                                    width: 100%;
+                                }
+                                left: 0;
+                                right: var(--asides-keep-width);
+                            }
+                        }
+                        border-left: 1px solid rgba(var(--background-rgb), 0.1);
+                        width: var(--asides-right-width);
+                    }
+                }
+                > *:not(main) > * { // body > main > aside > header , footer > *
+                    &:first-child {
+                        position: absolute;
+                        width: var(--asides-keep-width);
+                        background: rgba(var(--background-rgb), 0.1);
+                    }
+                    &:not(:first-child) {
+                        display: none;
+                    }
+                }
+            } // END body > main > aside
+
+            // body > main > *
+            top: 0;
+            bottom: 0;
+            > * { // body > main > * > *
+                &:not(main) { // body > main > * > header , footer
+                    background: rgba(var(--background-rgb), 0.1);
+                }
+                position: absolute;
+            }
+            
+            > header { // body > main > * > header
+                top: 0;
+                height: var(--sub-header-height);
+                > * {
+                    height: var(--sub-header-height);
+                }
+            }
+            > footer { // body > main > * > footer
+                bottom: 0;
+                height: var(--sub-footer-height);
+                > * {
+                    height: var(--sub-footer-height);
+                }
+            }
+            > main { // body > main > * > main      // LAST MAIN == vertical center
+                top: var(--sub-header-height);
+                bottom: var(--sub-footer-height);
+                overflow-x: hidden;
+                overflow-y: scroll;
+                // > * {
+                //     display: block;
+                // }
+            }
+        } // END body > main > *
+        > main { // body > main > main
+            left: 0;
+            right: 0;
+            > * {
+                left: 0;
+                right: 0;
+            }
+        }
     }
-    > header { 
+
+    > header { // body > header
         top: 0;
         height: var(--header-height);
         > * {
             height: var(--header-height);
+            > * {
+                height: var(--header-height);
+            }
         }
     }
-    > footer {
+    > footer { // body > footer
         bottom: 0;
         height: var(--footer-height);
         > * {
             height: var(--footer-height);
+            > * {
+                height: var(--footer-height);
+            }
         }
     }
-    > main {
-        top: var(--header-height);
-        bottom: var(--footer-height);
+
+    // NAV
+    > *:not(main) > * > nav > section,
+    > main > * > *:not(main) > nav > section,
+    > *:not(main) > * > nav,
+    > main > * > *:not(main) > nav {
+        &:not(section) {
+            position: absolute;
+        }
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: scroll;
+        overflow-y: hidden;
+        white-space: nowrap; // https://developer.mozilla.org/en-US/docs/Web/CSS/white-space
         > * {
-            top: 0;
-            bottom: 0;
+            position: relative;
+            height: 100%;
         }
-        > main { // modifier
-            left: 0;
-            right: 0;
-        }
-        > aside {
-            &.left {
-                left: calc(var(--asides-keep-width) * -1);
+    }
+    > *:not(main) > main > nav,
+    > main > main > *:not(main) > nav { // center nav only
+        left: 0;
+        right: 0;
+        > section {
+            // * {
+            //     background: rgba(var(--background-rgb), 0.1);
+            // }
+            &:not(:first-child):not(:last-child) {
+                > * {
+                    width: 100%;
+                }
             }
-            &.right {
-                right: calc(var(--asides-keep-width) * -1);
+            &:last-child {
+                &::before {
+                    content: '';
+                    width: 100%;
+                }
+            }
+        }
+        &.flex-section-equals {
+            > section {
+                //flex: 1;
+                &:first-child {
+                    &::after { // https://stackoverflow.com/a/62288570
+                        content: '';
+                        width: 100%;
+                    }
+                }
+                &:not(:first-child):not(:last-child) {
+                    &::before,
+                    &::after {
+                        content: '';
+                        width: 100%;
+                    }
+                }
             }
         }
     }
@@ -97,6 +347,11 @@ body {
     &.left-panel-open {
         --asides-left-width: var(--default-asides-left-width);
         > * {
+            &:not(main) > aside {
+                &.left > *:not(:first-child) {
+                    display: flex;
+                }
+            }
             > aside.left {
                 left: 0;
             }
@@ -104,15 +359,30 @@ body {
                 left: var(--asides-left-width);
             }
         }
+        > main {
+            > aside.left > *:not(main) > *:not(:first-child) {
+                display: flex;
+            }
+        }
     }
     &.right-panel-open {
         --asides-right-width: var(--default-asides-right-width);
         > * {
+            &:not(main) > aside {
+                &.right > *:not(:first-child) {
+                    display: flex;
+                }
+            }
             > aside.right {
                 right: 0;
             }
             > main {
                 right: var(--asides-right-width);
+            }
+        }
+        > main {
+            > aside.right > *:not(main) > *:not(:first-child) {
+                display: flex;
             }
         }
     }

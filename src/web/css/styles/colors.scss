@@ -1,0 +1,216 @@
+// name: base.scss
+// for: global colors
+// modifier: html.theme-light .color-
+
+
+.color-purple { color: rgb(var(--default-rgb-purple)); }
+.color-blue { color: rgb(var(--default-rgb-blue)); }
+.color-green { color: rgb(var(--default-rgb-green)); }
+.color-yellow { color: rgb(var(--default-rgb-yellow)); }
+.color-orange { color: rgb(var(--default-rgb-orange)); }
+.color-red { color: rgb(var(--default-rgb-red)); }
+.background-color-purple { background-color: rgb(var(--default-rgb-purple)); }
+.background-color-blue { background-color: rgb(var(--default-rgb-blue)); }
+.background-color-green { background-color: rgb(var(--default-rgb-green)); }
+.background-color-yellow { background-color: rgb(var(--default-rgb-yellow)); }
+.background-color-orange { background-color: rgb(var(--default-rgb-orange)); }
+.background-color-red { background-color: rgb(var(--default-rgb-red)); }
+.icon-color-purple {
+    filter: brightness(0) saturate(100%) invert(13%) sepia(59%) saturate(4581%) hue-rotate(257deg) brightness(96%) contrast(111%);
+}
+.icon-color-blue {
+    filter: brightness(0) saturate(100%) invert(56%) sepia(73%) saturate(4522%) hue-rotate(202deg) brightness(98%) contrast(109%);
+}
+.icon-color-green {
+    filter: brightness(0) saturate(100%) invert(90%) sepia(66%) saturate(4293%) hue-rotate(49deg) brightness(106%) contrast(83%);
+}
+.icon-color-yellow {
+    filter: brightness(0) saturate(100%) invert(74%) sepia(90%) saturate(568%) hue-rotate(0deg) brightness(108%) contrast(107%);
+}
+.icon-color-orange {
+    filter: brightness(0) saturate(100%) invert(57%) sepia(15%) saturate(5915%) hue-rotate(1deg) brightness(103%) contrast(105%);
+}
+.icon-color-red {
+    filter: brightness(0) saturate(100%) invert(10%) sepia(72%) saturate(7476%) hue-rotate(357deg) brightness(106%) contrast(124%);
+}
+
+.color-purple-pastel { color: rgb(var(--default-rgb-purple-pastel)); }
+.color-blue-pastel { color: rgb(var(--default-rgb-blue-pastel)); }
+.color-green-pastel { color: rgb(var(--default-rgb-green-pastel)); }
+.color-yellow-pastel { color: rgb(var(--default-rgb-yellow-pastel)); }
+.color-orange-pastel { color: rgb(var(--default-rgb-orange-pastel)); }
+.color-red-pastel { color: rgb(var(--default-rgb-red-pastel)); }
+.background-color-purple-pastel { background-color: rgb(var(--default-rgb-purple-pastel)); }
+.background-color-blue-pastel { background-color: rgb(var(--default-rgb-blue-pastel)); }
+.background-color-green-pastel { background-color: rgb(var(--default-rgb-green-pastel)); }
+.background-color-yellow-pastel { background-color: rgb(var(--default-rgb-yellow-pastel)); }
+.background-color-orange-pastel { background-color: rgb(var(--default-rgb-orange-pastel)); }
+.background-color-red-pastel { background-color: rgb(var(--default-rgb-red-pastel)); }
+.icon-color-purple-pastel {
+    filter: brightness(0) saturate(100%) invert(49%) sepia(13%) saturate(3548%) hue-rotate(220deg) brightness(92%) contrast(98%);
+}
+.icon-color-blue-pastel {
+    filter: brightness(0) saturate(100%) invert(69%) sepia(38%) saturate(854%) hue-rotate(178deg) brightness(97%) contrast(103%);
+}
+.icon-color-green-pastel {
+    filter: brightness(0) saturate(100%) invert(74%) sepia(66%) saturate(376%) hue-rotate(82deg) brightness(100%) contrast(89%);
+}
+.icon-color-yellow-pastel {
+    filter: brightness(0) saturate(100%) invert(94%) sepia(33%) saturate(2071%) hue-rotate(315deg) brightness(120%) contrast(105%);
+}
+.icon-color-orange-pastel {
+    filter: brightness(0) saturate(100%) invert(89%) sepia(15%) saturate(7037%) hue-rotate(319deg) brightness(105%) contrast(101%);
+}
+.icon-color-red-pastel {
+    filter: brightness(0) saturate(100%) invert(35%) sepia(62%) saturate(2479%) hue-rotate(334deg) brightness(126%) contrast(108%);
+}
+
+html {
+    &.theme-light {
+        // from #000 to #FFF
+        .color-0 { color: #000; }
+        .color-1 { color: #111; }
+        .color-2 { color: #222; }
+        .color-3 { color: #333; }
+        .color-4 { color: #444; }
+        .color-5 { color: #555; }
+        .color-6 { color: #666; }
+        .color-7 { color: #777; }
+        .color-8 { color: #888; }
+        .color-9 { color: #999; }
+        .color-10 { color: #AAA; }
+        .color-11 { color: #BBB; }
+        .color-12 { color: #CCC; }
+        .color-13 { color: #DDD; }
+        .color-14 { color: #EEE; }
+        .color-15 { color: #FFF; }
+        .icon-color-0 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(8%) saturate(7469%) hue-rotate(355deg) brightness(90%) contrast(110%);
+        }
+        .icon-color-1 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(19%) saturate(2650%) hue-rotate(322deg) brightness(65%) contrast(87%);
+        }
+        .icon-color-2 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(10%) saturate(5%) hue-rotate(321deg) brightness(92%) contrast(73%);
+        }
+        .icon-color-3 {
+            filter: brightness(0) saturate(100%) invert(13%) sepia(0%) saturate(5329%) hue-rotate(65deg) brightness(91%) contrast(79%);
+        }
+        .icon-color-4 {
+            filter: brightness(0) saturate(100%) invert(26%) sepia(1%) saturate(0%) hue-rotate(141deg) brightness(92%) contrast(90%);
+        }
+        .icon-color-5 {
+            filter: brightness(0) saturate(100%) invert(31%) sepia(1%) saturate(3847%) hue-rotate(21deg) brightness(86%) contrast(71%);
+        }
+        .icon-color-6 {
+            filter: brightness(0) saturate(100%) invert(54%) sepia(0%) saturate(5405%) hue-rotate(350deg) brightness(78%) contrast(98%);
+        }
+        .icon-color-7 {
+            filter: brightness(0) saturate(100%) invert(46%) sepia(0%) saturate(16%) hue-rotate(164deg) brightness(100%) contrast(85%);
+        }
+        .icon-color-8 {
+            filter: brightness(0) saturate(100%) invert(57%) sepia(1%) saturate(1053%) hue-rotate(92deg) brightness(94%) contrast(90%);
+        }
+        .icon-color-9 {
+            filter: brightness(0) saturate(100%) invert(75%) sepia(0%) saturate(46%) hue-rotate(150deg) brightness(80%) contrast(97%);
+        }
+        .icon-color-10 {
+            filter: brightness(0) saturate(100%) invert(66%) sepia(26%) saturate(15%) hue-rotate(314deg) brightness(98%) contrast(89%);
+        }
+        .icon-color-11 {
+            filter: brightness(0) saturate(100%) invert(84%) sepia(2%) saturate(15%) hue-rotate(338deg) brightness(87%) contrast(96%);
+        }
+        .icon-color-12 {
+            filter: brightness(0) saturate(100%) invert(73%) sepia(44%) saturate(0%) hue-rotate(187deg) brightness(97%) contrast(110%);
+        }
+        .icon-color-13 {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(6959%) hue-rotate(308deg) brightness(122%) contrast(73%);
+        }
+        .icon-color-14 {
+            filter: brightness(0) saturate(100%) invert(99%) sepia(3%) saturate(103%) hue-rotate(229deg) brightness(113%) contrast(87%);
+        }
+        .icon-color-15 {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7499%) hue-rotate(207deg) brightness(103%) contrast(101%);
+        }
+    }
+    &:not(.theme-light) {
+        // from #FFF to #000
+        .color-0 { color: #FFF; }
+        .color-1 { color: #EEE; }
+        .color-2 { color: #DDD; }
+        .color-3 { color: #CCC; }
+        .color-4 { color: #BBB; }
+        .color-5 { color: #AAA; }
+        .color-6 { color: #999; }
+        .color-7 { color: #888; }
+        .color-8 { color: #777; }
+        .color-9 { color: #666; }
+        .color-10 { color: #555; }
+        .color-11 { color: #444; }
+        .color-12 { color: #333; }
+        .color-13 { color: #222; }
+        .color-14 { color: #111; }
+        .color-15 { color: #000; }
+        .icon-color-0 {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7499%) hue-rotate(207deg) brightness(103%) contrast(101%);
+        }
+        .icon-color-1 {
+            filter: brightness(0) saturate(100%) invert(99%) sepia(3%) saturate(103%) hue-rotate(229deg) brightness(113%) contrast(87%);
+        }
+        .icon-color-2 {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(6959%) hue-rotate(308deg) brightness(122%) contrast(73%);
+        }
+        .icon-color-3 {
+            filter: brightness(0) saturate(100%) invert(73%) sepia(44%) saturate(0%) hue-rotate(187deg) brightness(97%) contrast(110%);
+        }
+        .icon-color-4 {
+            filter: brightness(0) saturate(100%) invert(84%) sepia(2%) saturate(15%) hue-rotate(338deg) brightness(87%) contrast(96%);
+        }
+        .icon-color-5 {
+            filter: brightness(0) saturate(100%) invert(66%) sepia(26%) saturate(15%) hue-rotate(314deg) brightness(98%) contrast(89%);
+        }
+        .icon-color-6 {
+            filter: brightness(0) saturate(100%) invert(75%) sepia(0%) saturate(46%) hue-rotate(150deg) brightness(80%) contrast(97%);
+        }
+        .icon-color-7 {
+            filter: brightness(0) saturate(100%) invert(57%) sepia(1%) saturate(1053%) hue-rotate(92deg) brightness(94%) contrast(90%);
+        }
+        .icon-color-8 {
+            filter: brightness(0) saturate(100%) invert(46%) sepia(0%) saturate(16%) hue-rotate(164deg) brightness(100%) contrast(85%);
+        }
+        .icon-color-9 {
+            filter: brightness(0) saturate(100%) invert(54%) sepia(0%) saturate(5405%) hue-rotate(350deg) brightness(78%) contrast(98%);
+        }
+        .icon-color-10 {
+            filter: brightness(0) saturate(100%) invert(31%) sepia(1%) saturate(3847%) hue-rotate(21deg) brightness(86%) contrast(71%);
+        }
+        .icon-color-11 {
+            filter: brightness(0) saturate(100%) invert(26%) sepia(1%) saturate(0%) hue-rotate(141deg) brightness(92%) contrast(90%);
+        }
+        .icon-color-12 {
+            filter: brightness(0) saturate(100%) invert(13%) sepia(0%) saturate(5329%) hue-rotate(65deg) brightness(91%) contrast(79%);
+        }
+        .icon-color-13 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(10%) saturate(5%) hue-rotate(321deg) brightness(92%) contrast(73%);
+        }
+        .icon-color-14 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(19%) saturate(2650%) hue-rotate(322deg) brightness(65%) contrast(87%);
+        }
+        .icon-color-15 {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(8%) saturate(7469%) hue-rotate(355deg) brightness(90%) contrast(110%);
+        }
+    }
+}
+
+// .color-purple { color: #4815AA; } // 72 21 170
+// .color-blue { color: #3783FF; } // 55 131 255
+// .color-green { color: #4DE94C; } // 77 233 76
+// .color-yellow { color: #FFEE00; } // 255 238 0
+// .color-orange { color: #FF8C00; } // 255 140 0
+// .color-red { color: #F60000; } // 246 0 0
+// .color-purple-pastel { color: #9063E9; } // 144 99  233
+// .color-blue-pastel { color: #6FBEFB; } // 111 190 251
+// .color-green-pastel { color: #61EF94; } // 97 239 148
+// .color-yellow-pastel { color: #FFF661; } // 255 246 97
+// .color-orange-pastel { color: #FFA959; } // 255 169 89
+// .color-red-pastel { color: #FD5051; } // 253 80 81
