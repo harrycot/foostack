@@ -5,6 +5,26 @@
 // https://css.gg
 // https://yoksel.github.io/url-encoder/
 // https://angel-rs.github.io/css-color-filter-generator/
+
+body {
+    > header .icon {
+        background-size: calc(var(--header-height) * 0.6);
+    }
+    > main .icon {
+        > * {
+            > header .icon {
+                background-size: calc(var(--sub-header-height) * 0.6);
+            }
+            > footer .icon {
+                background-size: calc(var(--sub-footer-height) * 0.6);
+            }
+        }
+    }
+    > footer .icon {
+        background-size: calc(var(--footer-height) * 0.6);
+    }
+}
+
 .icon {
     height: 100%;
     background-position: center;
