@@ -4,8 +4,8 @@
 :root {
     --default-header-height: 40px;
     --default-footer-height: 24px;
-    --default-sub-header-height: 40px;
-    --default-sub-footer-height: 24px;
+    --default-sub-header-height: 24px;
+    --default-sub-footer-height: 40px;
     --default-asides-left-width: 200px;
     --default-asides-right-width: 200px;
     --default-asides-keep-width: 40px;
@@ -22,9 +22,9 @@
     --asides-right-width: var(--default-asides-right-width);
     --asides-keep-width: var(--default-asides-keep-width);
 
-
-
     
+
+    // add a dark variant for better contrast using html.theme-light
     --default-rgb-purple: 72, 21, 170;
     --default-rgb-blue: 55, 131, 255;
     --default-rgb-green: 77, 233, 76;
